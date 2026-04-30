@@ -41,6 +41,23 @@
 - 로컬 SDK 경로를 설정한 뒤 `test`, `lint`, `assembleDebug`를 순차 검증
 - `Create Record` 화면에 Photo Picker/CameraX 실제 연결
 
+## 2026-04-30 (Iteration 1.2 - MVP 세로 슬라이스 확장)
+
+작업 내용:
+- `PhotoRecord`, `PhotoTag`, `TagSource`, `AnalysisStatus` 모델을 추가했습니다.
+- `LocalImageTagger` 인터페이스와 `MockLocalImageTagger`를 추가했습니다.
+- 인메모리 저장소(`InMemoryRecordRepository`)를 추가했습니다.
+- `Create Record` 화면에 Photo Picker import, mock local tag 생성, 태그 삭제/추가, 메모 입력, 저장 기능을 반영했습니다.
+- `Record List / Search` 화면을 추가하고 태그/제목/메모 검색을 연결했습니다.
+- 저장 완료 시 목록/검색 화면으로 이동하도록 내비게이션을 연결했습니다.
+
+검증:
+- `./gradlew :app:assembleDebug` 재실행 시도 예정 (로컬 SDK 경로 미설정 상태 동일)
+
+다음 작업:
+- CameraX 기반 실제 캡처 연결
+- Room 영속 저장소로 교체
+
 ## 2026-04-30
 
 Initial planning documents created.

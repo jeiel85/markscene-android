@@ -1,14 +1,22 @@
 package com.markscene.app.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.markscene.app.ai.provider.MockLocalImageTagger
+import com.markscene.app.data.record.InMemoryRecordRepository
 import com.markscene.app.ui.screen.CreateRecordScreen
 import com.markscene.app.ui.screen.HomeScreen
 import com.markscene.app.ui.screen.PlaceholderScreen
+import com.markscene.app.ui.screen.RecordListScreen
 
 private const val HOME_ROUTE = "home"
 private const val CREATE_RECORD_ROUTE = "create_record"
@@ -22,6 +30,10 @@ private const val SOURCE_IMPORT = "import"
 @Composable
 fun MarkSceneApp() {
     val navController = rememberNavController()
+    val localTagger = remember { MockLocalImageTagger() }
+    val repository = remember { InMemoryRecordRepository() }
+    val records by repository.observeRecords().collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
 
     NavHost(
         navController = navController,
@@ -46,11 +58,21 @@ fun MarkSceneApp() {
             val source = backStackEntry.arguments?.getString(CREATE_RECORD_SOURCE_ARG).orEmpty()
             CreateRecordScreen(
                 source = source,
+                localImageTagger = localTagger,
+                onSave = { record ->
+                    repository.saveRecord(record)
+                    navController.navigate(SEARCH_ROUTE)
+                },
                 onBack = { navController.popBackStack() }
             )
         }
         composable(SEARCH_ROUTE) {
-            PlaceholderScreen(title = "Record List / Search")
+            val visibleRecords = repository.search(searchQuery)
+            RecordListScreen(
+                records = visibleRecords,
+                onSearch = { searchQuery = it },
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(SETTINGS_ROUTE) {
             PlaceholderScreen(title = "Settings")

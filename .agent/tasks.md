@@ -16,32 +16,32 @@ Build the smallest useful MVP vertical slice.
 
 ### Core Records
 
-- [ ] Define domain models for `PhotoRecord` and `PhotoTag`.
+- [x] Define domain models for `PhotoRecord` and `PhotoTag`.
 - [ ] Add Room database entities and DAO.
-- [ ] Add repository for records.
-- [ ] Add fake in-memory repository for previews/tests if useful.
+- [x] Add repository for records.
+- [x] Add fake in-memory repository for previews/tests if useful.
 
 ### Photo Input
 
-- [ ] Add Photo Picker import flow.
+- [x] Add Photo Picker import flow.
 - [ ] Add CameraX capture flow.
 - [ ] Store selected/captured image reference safely.
 - [ ] Show image preview immediately.
 
 ### Local Tagging
 
-- [ ] Add `LocalImageTagger` interface.
-- [ ] Add mock local tagger.
-- [ ] Generate mock tags after image selection.
-- [ ] Add editable tag chips.
-- [ ] Save edited tags with record.
+- [x] Add `LocalImageTagger` interface.
+- [x] Add mock local tagger.
+- [x] Generate mock tags after image selection.
+- [x] Add editable tag chips.
+- [x] Save edited tags with record.
 - [ ] Replace mock with real on-device tagger later.
 
 ### Search
 
-- [ ] Add record list screen.
-- [ ] Add search screen.
-- [ ] Search by tag/title/memo.
+- [x] Add record list screen.
+- [x] Add search screen.
+- [x] Search by tag/title/memo.
 
 ### Settings and BYOK
 

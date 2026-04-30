@@ -33,6 +33,27 @@
 - 로컬 결과: Android SDK 경로 미설정으로 실패 (`ANDROID_HOME` 또는 `local.properties` 필요)
 - CI: 워크플로 파일 추가 완료 (실행 결과는 다음 푸시 후 확인)
 
+## v0.2.0 - 2026-04-30
+
+### Added
+- `PhotoRecord`, `PhotoTag` 중심의 기본 도메인 모델을 추가했습니다.
+- `LocalImageTagger` 인터페이스와 `MockLocalImageTagger`를 추가했습니다.
+- 인메모리 저장소를 통해 기록 저장/조회 기본 흐름을 추가했습니다.
+- `Record List / Search` 화면과 태그/제목/메모 검색 기능을 추가했습니다.
+
+### Changed
+- `Create Record` 화면을 import 중심 실제 입력 흐름으로 확장했습니다.
+- Photo Picker로 선택한 이미지에 대해 mock 로컬 태그 초안을 생성하고, 사용자가 태그를 삭제/추가 후 저장할 수 있도록 변경했습니다.
+- 저장 완료 후 검색 화면으로 이동하도록 내비게이션을 연결했습니다.
+
+### Privacy
+- 광범위 미디어 권한 없이 Photo Picker만 사용하도록 유지했습니다.
+- 외부 AI 호출 없이 로컬/mock 기반으로만 동작하도록 유지했습니다.
+
+### Verification
+- 로컬: Android SDK 경로 미설정으로 빌드 검증 제한
+- CI: GitHub Actions 워크플로는 구성됨, 실행 결과는 저장소 Actions 상태 확인 필요
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

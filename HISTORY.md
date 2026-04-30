@@ -2,6 +2,26 @@
 
 ## 2026-04-30
 
+- 작업: MVP 세로 슬라이스 확장 (Import → mock 태그 → 수정 → 저장 → 검색)
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/core/model/*`
+  - `app/src/main/java/com/markscene/app/ai/provider/*`
+  - `app/src/main/java/com/markscene/app/domain/tag/TagSuggestion.kt`
+  - `app/src/main/java/com/markscene/app/data/record/InMemoryRecordRepository.kt`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/CreateRecordScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - 로컬: `./gradlew :app:assembleDebug` 실행 시도 예정
+  - 환경 제약: Android SDK 경로 미설정 상태
+- 결과: 기능 확장 완료 (로컬 컴파일 검증은 SDK 환경 설정 필요)
+- 후속 작업:
+  - CameraX 캡처 및 실제 이미지 미리보기 연결
+  - Room 기반 영속 저장소 적용
+
+## 2026-04-30
+
 - 작업: 빌드 체인 복구(Wrapper) 및 Compose 다음 페이즈 최소 확장
 - 변경 파일:
   - `gradle/wrapper/gradle-wrapper.jar`
