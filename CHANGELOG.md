@@ -70,6 +70,14 @@
 ### Verification
 - CI 실패 로그 확인 후 의존성 보강으로 수정
 
+## v0.2.3 - 2026-04-30
+
+### Fixed
+- CI 빌드를 깨뜨리던 `roundIcon` 리소스 참조 오류를 수정했습니다.
+
+### Verification
+- CI 실패 로그 확인: `sym_def_app_icon_round` 리소스 없음
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

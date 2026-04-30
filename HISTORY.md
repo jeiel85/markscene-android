@@ -2,6 +2,19 @@
 
 ## 2026-04-30
 
+- 작업: CI 매니페스트 아이콘 링크 오류 수정
+- 변경 파일:
+  - `app/src/main/AndroidManifest.xml`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI 실패 로그 확인: `sym_def_app_icon_round` not found
+  - 조치: `roundIcon` 참조 제거
+- 결과: 수정 커밋 준비 완료
+- 후속 작업:
+  - 푸시 후 CI 재확인
+
+## 2026-04-30
+
 - 작업: CI Android 리소스 링크 오류 수정
 - 변경 파일:
   - `gradle/libs.versions.toml`
