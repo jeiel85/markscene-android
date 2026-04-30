@@ -33,6 +33,18 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
+      - name: Check Secrets
+        run: |
+          if [ -z "${{ secrets.RELEASE_KEYSTORE }}" ]; then
+            echo "Error: RELEASE_KEYSTORE is not set."
+            exit 1
+          fi
+          if [ -z "${{ secrets.RELEASE_STORE_PASSWORD }}" ]; then
+            echo "Error: RELEASE_STORE_PASSWORD is not set."
+            exit 1
+          fi
+        shell: bash
+
       - name: Prepare Signing Key
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 --decode > app/release.jks

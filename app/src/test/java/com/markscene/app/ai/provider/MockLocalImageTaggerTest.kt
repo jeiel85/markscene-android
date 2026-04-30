@@ -1,38 +1,47 @@
 package com.markscene.app.ai.provider
 
+import android.net.Uri
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.Assert.*
 
 class MockLocalImageTaggerTest {
 
     @Test
-    fun `mock tagger returns non-empty tags`() {
+    fun `mock tagger returns non-empty tags`() = runBlocking {
         val tagger = MockLocalImageTagger()
-        val tags = tagger.generateTags("content://test/image.jpg")
+        val mockUri = mockk<Uri>()
+        val tags = tagger.generateTags(mockUri)
         
         assertNotNull(tags)
         assertTrue(tags.isNotEmpty())
     }
 
     @Test
-    fun `mock tagger returns tags with confidence`() {
+    fun `mock tagger returns tags with confidence`() = runBlocking {
         val tagger = MockLocalImageTagger()
-        val tags = tagger.generateTags("content://test/image.jpg")
+        val mockUri = mockk<Uri>()
+        val tags = tagger.generateTags(mockUri)
         
         tags.forEach { tag ->
-            assertTrue(tag.confidence > 0f)
-            assertTrue(tag.confidence <= 1f)
+            val confidence = tag.confidence
+            if (confidence != null) {
+                assertTrue(confidence > 0f)
+                assertTrue(confidence <= 1f)
+            }
         }
     }
 
     @Test
-    fun `mock tagger tags have valid labels`() {
+    fun `mock tagger tags have valid names`() = runBlocking {
         val tagger = MockLocalImageTagger()
-        val tags = tagger.generateTags("content://test/image.jpg")
+        val mockUri = mockk<Uri>()
+        val tags = tagger.generateTags(mockUri)
         
         tags.forEach { tag ->
-            assertNotNull(tag.label)
-            assertTrue(tag.label.isNotEmpty())
+            assertNotNull(tag.name)
+            assertTrue(tag.name.isNotEmpty())
         }
     }
 }

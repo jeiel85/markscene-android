@@ -14,7 +14,8 @@ class PhotoRecordTest {
             memo = "My workspace setup",
             tags = emptyList(),
             createdAt = 1234567890L,
-            updatedAt = 1234567890L()
+            updatedAt = 1234567890L,
+            analysisStatus = AnalysisStatus.None
         )
         
         assertEquals("test-id-123", record.id)
@@ -29,10 +30,12 @@ class PhotoRecordTest {
         val tag = PhotoTag(
             id = "tag-1",
             recordId = "test-id-123",
-            label = "laptop",
+            name = "laptop",
+            rawName = "laptop",
             confidence = 0.85f,
-            source = TagSource.LOCAL,
-            isConfirmed = false
+            source = TagSource.LocalImageLabel,
+            userConfirmed = false,
+            createdAt = 1234567890L
         )
         
         val record = PhotoRecord(
@@ -42,11 +45,12 @@ class PhotoRecordTest {
             memo = null,
             tags = listOf(tag),
             createdAt = 1234567890L,
-            updatedAt = 1234567890L()
+            updatedAt = 1234567890L,
+            analysisStatus = AnalysisStatus.None
         )
         
         assertEquals(1, record.tags.size)
-        assertEquals("laptop", record.tags.first().label)
-        assertEquals(TagSource.LOCAL, record.tags.first().source)
+        assertEquals("laptop", record.tags.first().name)
+        assertEquals(TagSource.LocalImageLabel, record.tags.first().source)
     }
 }

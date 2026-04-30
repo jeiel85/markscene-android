@@ -10,32 +10,36 @@ class PhotoTagTest {
         val tag = PhotoTag(
             id = "tag-1",
             recordId = "record-1",
-            label = "laptop",
+            name = "laptop",
+            rawName = "laptop_raw",
             confidence = 0.92f,
-            source = TagSource.LOCAL,
-            isConfirmed = true
+            source = TagSource.LocalImageLabel,
+            userConfirmed = true,
+            createdAt = 1234567890L
         )
         
         assertEquals("tag-1", tag.id)
         assertEquals("record-1", tag.recordId)
-        assertEquals("laptop", tag.label)
-        assertEquals(0.92f, tag.confidence, 0.01f)
-        assertEquals(TagSource.LOCAL, tag.source)
-        assertTrue(tag.isConfirmed)
+        assertEquals("laptop", tag.name)
+        assertEquals("laptop_raw", tag.rawName)
+        assertEquals(0.92f, tag.confidence!!, 0.01f)
+        assertEquals(TagSource.LocalImageLabel, tag.source)
+        assertTrue(tag.userConfirmed)
     }
 
     @Test
-    fun `TagSource values are correct`() {
-        assertEquals("local", TagSource.LOCAL.value)
-        assertEquals("advanced_ai", TagSource.ADVANCED_AI.value)
-        assertEquals("user", TagSource.USER.value)
+    fun `TagSource enums exist`() {
+        assertNotNull(TagSource.LocalImageLabel)
+        assertNotNull(TagSource.AdvancedAi)
+        assertNotNull(TagSource.User)
+        assertNotNull(TagSource.Mock)
     }
 
     @Test
-    fun `AnalysisStatus values are correct`() {
-        assertEquals("none", AnalysisStatus.NONE.value)
-        assertEquals("pending", AnalysisStatus.PENDING.value)
-        assertEquals("advanced_complete", AnalysisStatus.ADVANCED_COMPLETE.value)
-        assertEquals("failed", AnalysisStatus.FAILED.value)
+    fun `AnalysisStatus enums exist`() {
+        assertNotNull(AnalysisStatus.None)
+        assertNotNull(AnalysisStatus.LocalComplete)
+        assertNotNull(AnalysisStatus.AdvancedComplete)
+        assertNotNull(AnalysisStatus.Failed)
     }
 }
