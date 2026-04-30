@@ -58,6 +58,15 @@
 - CameraX 기반 실제 캡처 연결
 - Room 영속 저장소로 교체
 
+## 2026-04-30 (Iteration 1.3 - CI 실패 대응)
+
+작업 내용:
+- GitHub Actions 실패 로그(`Permission denied: ./gradlew`)를 확인했습니다.
+- `.github/workflows/android-ci.yml`에 `chmod +x gradlew` 단계를 추가했습니다.
+
+검증:
+- CI 재실행은 새 푸시로 트리거하여 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

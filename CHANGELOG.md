@@ -54,6 +54,14 @@
 - 로컬: Android SDK 경로 미설정으로 빌드 검증 제한
 - CI: GitHub Actions 워크플로는 구성됨, 실행 결과는 저장소 Actions 상태 확인 필요
 
+## v0.2.1 - 2026-04-30
+
+### Build / CI
+- GitHub Actions에서 `./gradlew` 실행 권한 문제를 해결하기 위해 `chmod +x gradlew` 단계를 추가했습니다.
+
+### Verification
+- CI 실패 로그 확인: `Permission denied` 재현 확인 후 워크플로 수정
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

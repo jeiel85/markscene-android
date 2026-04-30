@@ -2,6 +2,19 @@
 
 ## 2026-04-30
 
+- 작업: GitHub Actions 실행 권한 이슈 수정
+- 변경 파일:
+  - `.github/workflows/android-ci.yml`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI 실패 로그 확인: `./gradlew: Permission denied`
+  - 조치: `chmod +x gradlew` 단계 추가
+- 결과: 수정 커밋 준비 완료
+- 후속 작업:
+  - 푸시 후 최신 CI run 성공 여부 확인
+
+## 2026-04-30
+
 - 작업: MVP 세로 슬라이스 확장 (Import → mock 태그 → 수정 → 저장 → 검색)
 - 변경 파일:
   - `app/src/main/java/com/markscene/app/core/model/*`
