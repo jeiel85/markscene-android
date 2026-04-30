@@ -62,6 +62,14 @@
 ### Verification
 - CI 실패 로그 확인: `Permission denied` 재현 확인 후 워크플로 수정
 
+## v0.2.2 - 2026-04-30
+
+### Build / CI
+- `Theme.Material3.DayNight.NoActionBar` 리소스 링크 오류 해결을 위해 Material Components 의존성을 추가했습니다.
+
+### Verification
+- CI 실패 로그 확인 후 의존성 보강으로 수정
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

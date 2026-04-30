@@ -2,6 +2,20 @@
 
 ## 2026-04-30
 
+- 작업: CI Android 리소스 링크 오류 수정
+- 변경 파일:
+  - `gradle/libs.versions.toml`
+  - `app/build.gradle.kts`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI 실패 로그 확인: `Theme.Material3.DayNight.NoActionBar` not found
+  - 조치: Material Components 의존성 추가
+- 결과: 수정 커밋 준비 완료
+- 후속 작업:
+  - 푸시 후 CI 재확인
+
+## 2026-04-30
+
 - 작업: GitHub Actions 실행 권한 이슈 수정
 - 변경 파일:
   - `.github/workflows/android-ci.yml`

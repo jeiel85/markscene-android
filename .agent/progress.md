@@ -67,6 +67,12 @@
 검증:
 - CI 재실행은 새 푸시로 트리거하여 확인 예정
 
+## 2026-04-30 (Iteration 1.4 - CI 리소스 링크 실패 대응)
+
+작업 내용:
+- CI 실패 원인을 `Theme.Material3.DayNight.NoActionBar` 리소스 누락으로 확인했습니다.
+- `com.google.android.material:material` 의존성을 추가해 XML 테마 링크 오류를 수정했습니다.
+
 ## 2026-04-30
 
 Initial planning documents created.
