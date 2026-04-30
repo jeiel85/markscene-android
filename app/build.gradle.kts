@@ -22,6 +22,21 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            // local.properties에서 키스토어 정보 읽기
+            val propertiesFile = rootProject.file("local.properties")
+            if (propertiesFile.exists()) {
+                val properties = java.util.Properties()
+                properties.load(propertiesFile.inputStream())
+                storeFile = file(properties.getProperty("RELEASE_STORE_FILE", ""))
+                storePassword = properties.getProperty("RELEASE_STORE_PASSWORD", "")
+                keyAlias = properties.getProperty("RELEASE_KEY_ALIAS", "")
+                keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD", "")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -29,6 +44,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -69,4 +85,9 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    // Test dependencies
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation(kotlin("test"))
 }

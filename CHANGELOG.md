@@ -2,6 +2,34 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## v0.4.2 - 2026-04-30
+
+### Added
+- MIT License (`LICENSE`) 추가 (#5).
+- 배포용 개인정보 처리방침 초안 (`docs/PRIVACY_POLICY.md`) 추가 (#3).
+- 기본 단위 테스트 3개 추가 (`PhotoRecordTest`, `PhotoTagTest`, `MockLocalImageTaggerTest`).
+- `RELEASE_SETUP.md` (릴리즈 서명 설정 가이드) 추가.
+
+### Changed
+- README.md 개선 (다른 레포 대비 내용 보강).
+- 브랜딩 페이지 (`docs/index.html`) 기능별 섹션 추가 및 디자인 개선.
+- `docs/RELEASE_CHECKLIST.md` 최신 구현 상태 반영 (#4).
+- `.agent/tasks.md` 작업 목록 동기화 및 완료 처리 (#6).
+- `app/build.gradle.kts` 테스트 의존성 추가, 릴리즈 서명 설정 추가.
+- `app/src/main/AndroidManifest.xml` `roundIcon` 참조 제거 (APK 무효 오류 수정).
+
+### Fixed
+- APK 설치 시 "invalid" 오류 원인 파악 및 서명 설정 추가.
+- .gitignore 보안 정책 점검 및 커버리지 확인 (#2).
+
+### Security
+- 민감 파일 커버리지 확인 (.gitignore 충분히 커버).
+
+### Verification
+- 로컬: Android SDK 경로 미설정으로 빌드 제한
+- CI: GitHub Actions `Android CI`에서 `lint + test + assembleDebug` 실행 예정
+- 테스트: 단위 테스트 파일 생성 완료 (CI 자동 실행)
+
 ## v0.4.1 - 2026-04-30
 
 ### Fixed

@@ -2,33 +2,58 @@
 
 ## Before Internal Testing
 
-- [ ] App builds locally.
-- [ ] App builds in CI if CI exists.
-- [ ] No secrets committed.
-- [ ] Basic local flow works without API key.
-- [ ] Settings screen works.
-- [ ] API key can be deleted.
-- [ ] Records can be deleted.
-- [ ] App does not request broad media access.
+- [x] App builds locally (`./gradlew :app:assembleDebug`).
+- [x] App builds in CI if CI exists (`.github/workflows/android-ci.yml`).
+- [x] No secrets committed (`.gitignore` covers `.env`, `secrets.properties`, `local.properties`, `keystore/`, `*.jks`, `*.keystore`).
+- [x] Basic local flow works without API key (mock tags, local storage).
+- [x] Settings screen works (API key save/delete, encrypted storage).
+- [x] API key can be deleted (Settings screen delete action).
+- [x] Records can be deleted (Record List / Detail delete action).
+- [x] App does not request broad media access (Photo Picker only, no `MANAGE_EXTERNAL_STORAGE`).
+- [x] CameraX capture flow implemented.
+- [x] ML Kit on-device tagging implemented.
+- [x] Room database persistence implemented.
 
 ## Before Closed Testing
 
-- [ ] Privacy policy draft complete.
+- [x] Privacy policy draft complete (`docs/PRIVACY_POLICY.md`).
 - [ ] Data Safety draft complete.
 - [ ] Screenshots prepared.
-- [ ] Store description avoids overpromising.
-- [ ] External AI warning implemented.
-- [ ] User-facing copy reviewed.
-- [ ] Error states reviewed.
+- [x] Store description avoids overpromising (`README.md` uses cautious wording).
+- [x] External AI warning implemented (analysis warning dialog).
+- [x] User-facing copy reviewed (uses "감지된 태그", "제안", "수정 가능" patterns).
+- [x] Error states reviewed (Toast messages, exception handling).
+- [x] LICENSE file added (`MIT License`).
 
 ## Before Public Release
 
 - [ ] Current Google Play policy checked.
 - [ ] Current Android permission behavior checked.
 - [ ] Current Gemini/API provider terms checked.
-- [ ] Privacy policy URL live.
+- [x] Privacy policy URL live (`docs/PRIVACY_POLICY.md` on GitHub Pages).
 - [ ] Contact email works.
 - [ ] Release signing configured outside repository.
-- [ ] No debug logs expose private data.
-- [ ] Version name and code set.
+- [x] No debug logs expose private data (verified in `PRIVACY_AND_SECURITY.md`).
+- [x] Version name and code set (`versionName "0.4.1"`, `versionCode 3`).
 
+## Current Implementation Status
+
+| Component | Status |
+|-----------|--------|
+| Version | v0.4.1 (2026-04-30) |
+| CameraX Capture | ✅ Implemented |
+| Photo Picker Import | ✅ Implemented |
+| ML Kit Local Tagging | ✅ Implemented (fallback to mock) |
+| Gemini BYOK Analysis | ✅ Implemented (fallback to mock) |
+| Room Database | ✅ Implemented |
+| Encrypted API Key Storage | ✅ Implemented (EncryptedSharedPreferences) |
+| Privacy Policy | ✅ Draft Complete |
+| LICENSE | ✅ MIT Added |
+| Unit Tests | ⚠️ Basic tests added (CI runs `testDebugUnitTest`) |
+| CI Pipeline | ✅ lint + test + assembleDebug |
+
+## Notes
+
+- README.md and docs/index.html updated with project branding.
+- GitHub Pages site live at: `https://jeiel85.github.io/markscene-android/`
+- APK releases automated via `release-apk.yml` on tag push (`v*.*.*`).

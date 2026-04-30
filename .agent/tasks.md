@@ -2,7 +2,7 @@
 
 ## Current Priority
 
-Build the smallest useful MVP vertical slice.
+Complete remaining issues #2~#6, add test automation, and improve documentation.
 
 ## Task Backlog
 
@@ -56,19 +56,27 @@ Build the smallest useful MVP vertical slice.
 ### Privacy and Release
 
 - [x] Add in-app privacy notice.
-- [ ] Add no-secrets `.gitignore` entries. (#2)
-- [ ] Add release checklist. (#4)
-- [ ] Add privacy policy draft before store release. (#3)
+- [x] Add no-secrets `.gitignore` entries. (#2) - verified coverage sufficient
+- [x] Add release checklist. (#4) - updated with current status
+- [x] Add privacy policy draft before store release. (#3) - created docs/PRIVACY_POLICY.md
 
 ### Branding and Web
 
 - [x] Replace default launcher icon with product identity icon.
 - [x] Add GitHub Pages branding site (`docs/branding`) and deploy workflow.
+- [x] Improve README.md with comprehensive content.
+- [x] Improve docs/index.html branding page.
 
 ### Repository / Agent Workflow
 
 - [x] Replace `<TO_BE_FILLED>` in `AGENTS.md` with the real GitHub repository URL.
-- [ ] Decide initial license and add `LICENSE` if the repository will be public. (#5)
+- [x] Decide initial license and add `LICENSE` if the repository will be public. (#5) - MIT License added
 - [x] Add GitHub Actions workflow for fast Android validation.
-- [ ] Confirm `HISTORY.md` and `CHANGELOG.md` are updated after each meaningful change. (#6)
-- [ ] Add `CLAUDE.md`, `GEMINI.md`, or other agent entry files only as thin references to `AGENTS.md` if needed. (#6)
+- [x] Confirm `HISTORY.md` and `CHANGELOG.md` are updated after each meaningful change. (#6)
+- [x] Add `CLAUDE.md`, `GEMINI.md`, or other agent entry files only as thin references to `AGENTS.md` if needed. (#6)
+- [x] Add basic unit tests for CI automation.
+
+### Security
+
+- [x] Verify `.gitignore` covers all sensitive patterns. (#2)
+- [x] Add LICENSE file (MIT). (#5)
