@@ -30,6 +30,7 @@ fun RecordListScreen(
     records: List<PhotoRecord>,
     onSearch: (String) -> Unit,
     onDeleteRecord: (String) -> Unit,
+    onOpenDetail: (String) -> Unit,
     onBack: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
@@ -60,7 +61,11 @@ fun RecordListScreen(
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(records, key = { it.id }) { record ->
-                    RecordItem(record = record, onDeleteRecord = onDeleteRecord)
+                    RecordItem(
+                        record = record,
+                        onDeleteRecord = onDeleteRecord,
+                        onOpenDetail = onOpenDetail
+                    )
                 }
             }
         }
@@ -74,7 +79,8 @@ fun RecordListScreen(
 @Composable
 private fun RecordItem(
     record: PhotoRecord,
-    onDeleteRecord: (String) -> Unit
+    onDeleteRecord: (String) -> Unit,
+    onOpenDetail: (String) -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -92,6 +98,9 @@ private fun RecordItem(
                 record.tags.take(4).forEach { tag ->
                     AssistChip(onClick = {}, label = { Text(tag.name) })
                 }
+            }
+            Button(onClick = { onOpenDetail(record.id) }, modifier = Modifier.fillMaxWidth()) {
+                Text("Open Detail")
             }
             Button(onClick = { onDeleteRecord(record.id) }, modifier = Modifier.fillMaxWidth()) {
                 Text("Delete Record")

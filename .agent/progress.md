@@ -97,6 +97,18 @@
 - CameraX 캡처 및 이미지 미리보기 실제 구현
 - Room 기반 Record Detail/삭제 연계 정리
 
+## 2026-04-30 (Iteration 2.1 - 캡처/상세 화면 확장)
+
+작업 내용:
+- `CAMERA` 권한과 `FileProvider`를 추가해 캡처 파일 URI 저장 경로를 구성했습니다.
+- `Create Record`에 실제 촬영(`TakePicture`) 플로우를 추가했습니다.
+- 선택/촬영 이미지를 화면에서 즉시 미리보기하도록 변경했습니다.
+- `Record Detail` 화면을 추가하고 목록에서 상세 진입을 연결했습니다.
+
+검증:
+- 로컬 SDK 경로 미설정으로 로컬 빌드는 제한
+- CI에서 `assembleDebug` 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

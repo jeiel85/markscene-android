@@ -1,5 +1,8 @@
 package com.markscene.app.ui.screen
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -23,12 +26,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.AsyncImage
 import com.markscene.app.ai.provider.LocalImageTagger
 import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
+import java.io.File
 import java.util.UUID
 
 @Composable
@@ -38,7 +46,9 @@ fun CreateRecordScreen(
     onSave: (PhotoRecord) -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCaptureUri by remember { mutableStateOf<Uri?>(null) }
     var title by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
     var customTag by remember { mutableStateOf("") }
@@ -51,10 +61,34 @@ fun CreateRecordScreen(
         imageUri = uri
     }
 
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            imageUri = pendingCaptureUri
+            statusText = "사진 촬영이 완료되었습니다."
+        } else {
+            statusText = "사진 촬영이 취소되었거나 실패했습니다."
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val targetUri = createCaptureUri(context)
+            pendingCaptureUri = targetUri
+            takePictureLauncher.launch(targetUri)
+        } else {
+            statusText = "카메라 권한이 필요합니다."
+        }
+    }
+
     LaunchedEffect(source) {
-        if (source == "capture" && imageUri == null) {
-            imageUri = Uri.parse("capture://mock/${System.currentTimeMillis()}")
-            statusText = "캡처 흐름은 임시 mock URI로 연결되었습니다."
+        if (source == "import") {
+            statusText = "가져올 사진을 선택하세요."
+        } else {
+            statusText = "촬영 버튼으로 사진을 찍으세요."
         }
     }
 
@@ -84,9 +118,34 @@ fun CreateRecordScreen(
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Import Photo")
-            }
+            ) { Text("Import Photo") }
+        }
+
+        if (source == "capture") {
+            Button(
+                onClick = {
+                    val granted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                    if (granted) {
+                        val targetUri = createCaptureUri(context)
+                        pendingCaptureUri = targetUri
+                        takePictureLauncher.launch(targetUri)
+                    } else {
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Capture Photo") }
+        }
+
+        if (imageUri != null) {
+            AsyncImage(
+                model = imageUri,
+                contentDescription = "selected image",
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         Text(
@@ -94,35 +153,16 @@ fun CreateRecordScreen(
             style = MaterialTheme.typography.bodySmall
         )
 
-        OutlinedTextField(
-            value = title,
-            onValueChange = { title = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("제목 (선택)") }
-        )
-
-        OutlinedTextField(
-            value = memo,
-            onValueChange = { memo = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("메모 (선택)") }
-        )
+        OutlinedTextField(value = title, onValueChange = { title = it }, modifier = Modifier.fillMaxWidth(), label = { Text("제목 (선택)") })
+        OutlinedTextField(value = memo, onValueChange = { memo = it }, modifier = Modifier.fillMaxWidth(), label = { Text("메모 (선택)") })
 
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             editableTags.forEach { tag ->
-                AssistChip(
-                    onClick = { editableTags.remove(tag) },
-                    label = { Text(tag) }
-                )
+                AssistChip(onClick = { editableTags.remove(tag) }, label = { Text(tag) })
             }
         }
 
-        OutlinedTextField(
-            value = customTag,
-            onValueChange = { customTag = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("태그 추가") }
-        )
+        OutlinedTextField(value = customTag, onValueChange = { customTag = it }, modifier = Modifier.fillMaxWidth(), label = { Text("태그 추가") })
 
         Button(
             onClick = {
@@ -133,9 +173,7 @@ fun CreateRecordScreen(
                 }
             },
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Add Tag")
-        }
+        ) { Text("Add Tag") }
 
         Button(
             onClick = {
@@ -169,12 +207,18 @@ fun CreateRecordScreen(
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = imageUri != null
-        ) {
-            Text("Save Record")
-        }
+        ) { Text("Save Record") }
 
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text("Back")
-        }
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Back") }
     }
+}
+
+private fun createCaptureUri(context: Context): Uri {
+    val directory = File(context.cacheDir, "camera").apply { mkdirs() }
+    val file = File(directory, "capture_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
 }

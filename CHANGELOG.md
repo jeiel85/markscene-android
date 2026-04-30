@@ -96,6 +96,19 @@
 ### Verification
 - CI 기준 `assembleDebug` 검증 진행
 
+## v0.3.1 - 2026-04-30
+
+### Added
+- 카메라 권한 및 `FileProvider` 기반 촬영 URI 저장 경로를 추가했습니다.
+- `Create Record`에서 촬영/가져오기 이미지 미리보기를 추가했습니다.
+- `Record Detail` 화면 및 목록에서 상세 진입을 추가했습니다.
+
+### Changed
+- 기록 생성 화면을 실제 촬영 플로우(`TakePicture`)와 연결했습니다.
+
+### Verification
+- CI 기준 `assembleDebug` 검증 진행
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

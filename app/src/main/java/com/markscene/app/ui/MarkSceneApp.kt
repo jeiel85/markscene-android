@@ -20,6 +20,7 @@ import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.ui.screen.CreateRecordScreen
 import com.markscene.app.ui.screen.HomeScreen
+import com.markscene.app.ui.screen.RecordDetailScreen
 import com.markscene.app.ui.screen.RecordListScreen
 import com.markscene.app.ui.screen.SettingsScreen
 import kotlinx.coroutines.launch
@@ -29,6 +30,8 @@ private const val CREATE_RECORD_ROUTE = "create_record"
 private const val CREATE_RECORD_SOURCE_ARG = "source"
 private const val SEARCH_ROUTE = "search"
 private const val SETTINGS_ROUTE = "settings"
+private const val DETAIL_ROUTE = "detail"
+private const val DETAIL_ID_ARG = "recordId"
 
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
@@ -55,18 +58,11 @@ fun MarkSceneApp() {
 
     val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
 
-    NavHost(
-        navController = navController,
-        startDestination = HOME_ROUTE
-    ) {
+    NavHost(navController = navController, startDestination = HOME_ROUTE) {
         composable(HOME_ROUTE) {
             HomeScreen(
-                onCapturePhoto = {
-                    navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_CAPTURE")
-                },
-                onImportPhoto = {
-                    navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT")
-                },
+                onCapturePhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_CAPTURE") },
+                onImportPhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT") },
                 onOpenSettings = { navController.navigate(SETTINGS_ROUTE) },
                 onOpenSearch = { navController.navigate(SEARCH_ROUTE) }
             )
@@ -92,11 +88,20 @@ fun MarkSceneApp() {
             RecordListScreen(
                 records = visibleRecords,
                 onSearch = { searchQuery = it },
-                onDeleteRecord = { recordId ->
-                    scope.launch { repository.deleteRecord(recordId) }
-                },
+                onDeleteRecord = { recordId -> scope.launch { repository.deleteRecord(recordId) } },
+                onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(
+            route = "$DETAIL_ROUTE/{$DETAIL_ID_ARG}",
+            arguments = listOf(navArgument(DETAIL_ID_ARG) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val recordId = backStackEntry.arguments?.getString(DETAIL_ID_ARG)
+            val record = visibleRecords.firstOrNull { it.id == recordId }
+            if (record != null) {
+                RecordDetailScreen(record = record, onBack = { navController.popBackStack() })
+            }
         }
         composable(SETTINGS_ROUTE) {
             SettingsScreen(

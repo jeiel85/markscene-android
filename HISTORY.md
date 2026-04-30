@@ -2,6 +2,25 @@
 
 ## 2026-04-30
 
+- 작업: 캡처 권한/촬영 플로우 및 상세 화면 추가
+- 변경 파일:
+  - `app/src/main/AndroidManifest.xml`, `app/src/main/res/xml/file_paths.xml`
+  - `gradle/libs.versions.toml`, `app/build.gradle.kts`
+  - `app/src/main/java/com/markscene/app/ui/screen/CreateRecordScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordDetailScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - 로컬: SDK 경로 미설정으로 빌드 제한
+  - CI: GitHub Actions `Android CI`로 검증
+- 결과: 촬영/미리보기/상세 흐름 추가 완료
+- 후속 작업:
+  - CameraX 기반 캡처로 대체
+  - Record Detail 편집/삭제 연동 강화
+
+## 2026-04-30
+
 - 작업: Room 영속 저장소 및 Settings(BYOK 상태) 구현
 - 변경 파일:
   - `gradle/libs.versions.toml`, `build.gradle.kts`, `app/build.gradle.kts`
