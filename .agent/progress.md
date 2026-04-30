@@ -166,6 +166,10 @@
 검증:
 - 변경된 워크플로로 CI 재검증 예정
 
+추가 수정:
+- CI lint 오류(`PermissionImpliesUnsupportedChromeOsHardware`) 대응을 위해
+  `uses-feature android.hardware.camera required=false`를 매니페스트에 추가했습니다.
+
 ## 2026-04-30
 
 Initial planning documents created.

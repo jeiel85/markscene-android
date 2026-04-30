@@ -2,6 +2,18 @@
 
 ## 2026-04-30
 
+- 작업: CI lint 카메라 feature 오류 수정
+- 변경 파일:
+  - `app/src/main/AndroidManifest.xml`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI 실패 로그 확인 후 매니페스트 수정
+- 결과: lint 차단 이슈 수정 완료
+- 후속 작업:
+  - CI 재실행 결과 확인
+
+## 2026-04-30
+
 - 작업: GitHub Actions 품질 게이트 강화
 - 변경 파일:
   - `.github/workflows/android-ci.yml`

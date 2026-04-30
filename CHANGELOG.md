@@ -165,6 +165,9 @@
 - GitHub Actions 검증 단계를 `lint`, `testDebugUnitTest`, `assembleDebug`로 확장했습니다.
 - Actions Node 런타임 경고 완화를 위해 Node 24 강제 환경 변수를 추가했습니다.
 
+### Fixed
+- lint 오류 대응을 위해 매니페스트에 `android.hardware.camera`의 `required=false` feature 선언을 추가했습니다.
+
 ## v0.1.0 - 2026-04-30
 
 ### Added
