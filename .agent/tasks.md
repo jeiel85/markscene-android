@@ -55,7 +55,7 @@ Build the smallest useful MVP vertical slice.
 
 ### Privacy and Release
 
-- [ ] Add in-app privacy notice.
+- [x] Add in-app privacy notice.
 - [ ] Add no-secrets `.gitignore` entries.
 - [ ] Add release checklist.
 - [ ] Add privacy policy draft before store release.

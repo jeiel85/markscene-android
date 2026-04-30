@@ -2,6 +2,23 @@
 
 ## 2026-04-30
 
+- 작업: 인앱 개인정보 고지 및 Mock 고급분석 UI 추가
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ai/provider/MockAdvancedVisionProvider.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/PrivacyNoticeScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordDetailScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI: GitHub Actions `Android CI`로 검증
+- 결과: 사용자 실행/동의 기반 고급분석 흐름(mock)과 프라이버시 고지 화면 반영
+- 후속 작업:
+  - Mock 고급분석 결과의 저장/편집 연동
+  - 실제 Gemini provider 구현
+
+## 2026-04-30
+
 - 작업: 캡처 권한/촬영 플로우 및 상세 화면 추가
 - 변경 파일:
   - `app/src/main/AndroidManifest.xml`, `app/src/main/res/xml/file_paths.xml`

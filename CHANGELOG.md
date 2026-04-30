@@ -109,6 +109,19 @@
 ### Verification
 - CI 기준 `assembleDebug` 검증 진행
 
+## v0.3.2 - 2026-04-30
+
+### Added
+- 인앱 `Privacy Notice` 화면을 추가했습니다.
+- Record Detail에서 사용자 실행 기반 `Advanced Analysis (Mock)` 기능을 추가했습니다.
+- 고급분석 실행 전 외부 전송 안내 다이얼로그를 추가했습니다.
+
+### Changed
+- 설정 화면에서 개인정보 고지 화면으로 이동할 수 있도록 변경했습니다.
+
+### Verification
+- CI 기준 `assembleDebug` 검증 진행
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

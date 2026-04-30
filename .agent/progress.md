@@ -109,6 +109,16 @@
 - 로컬 SDK 경로 미설정으로 로컬 빌드는 제한
 - CI에서 `assembleDebug` 확인 예정
 
+## 2026-04-30 (Iteration 2.2 - 개인정보 고지/Mock 고급분석)
+
+작업 내용:
+- 설정 화면에서 인앱 개인정보 고지 화면으로 이동하도록 연결했습니다.
+- 상세 화면에 `Run Advanced Analysis (Mock)`를 추가했습니다.
+- 분석 실행 전 외부 전송 고지 다이얼로그를 추가하고, 동의 시 mock 분석 결과(요약/추천 태그/경고)를 표시하도록 구현했습니다.
+
+검증:
+- CI에서 `assembleDebug` 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

@@ -20,6 +20,7 @@ import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.ui.screen.CreateRecordScreen
 import com.markscene.app.ui.screen.HomeScreen
+import com.markscene.app.ui.screen.PrivacyNoticeScreen
 import com.markscene.app.ui.screen.RecordDetailScreen
 import com.markscene.app.ui.screen.RecordListScreen
 import com.markscene.app.ui.screen.SettingsScreen
@@ -32,6 +33,7 @@ private const val SEARCH_ROUTE = "search"
 private const val SETTINGS_ROUTE = "settings"
 private const val DETAIL_ROUTE = "detail"
 private const val DETAIL_ID_ARG = "recordId"
+private const val PRIVACY_ROUTE = "privacy_notice"
 
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
@@ -121,8 +123,12 @@ fun MarkSceneApp() {
                         "Mock 연결 테스트 성공: 실제 외부 API 호출은 아직 비활성화 상태입니다."
                     }
                 },
+                onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(PRIVACY_ROUTE) {
+            PrivacyNoticeScreen(onBack = { navController.popBackStack() })
         }
     }
 }

@@ -23,6 +23,7 @@ fun SettingsScreen(
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
+    onOpenPrivacyNotice: () -> Unit,
     onBack: () -> Unit
 ) {
     var apiKeyInput by rememberSaveable { mutableStateOf("") }
@@ -71,6 +72,10 @@ fun SettingsScreen(
             resultMessage = "API Key를 삭제했습니다."
         }, modifier = Modifier.fillMaxWidth()) {
             Text("Delete API Key")
+        }
+
+        Button(onClick = onOpenPrivacyNotice, modifier = Modifier.fillMaxWidth()) {
+            Text("Open Privacy Notice")
         }
 
         Text(
