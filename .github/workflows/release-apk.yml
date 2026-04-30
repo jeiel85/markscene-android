@@ -47,7 +47,8 @@ jobs:
 
       - name: Prepare Signing Key
         run: |
-          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 --decode > app/release.jks
+          echo "${{ secrets.RELEASE_KEYSTORE }}" > keystore.base64
+          base64 -d keystore.base64 > app/release.jks
         shell: bash
 
       - name: Build release APK
