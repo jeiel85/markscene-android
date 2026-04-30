@@ -1,5 +1,22 @@
 # Agent Progress
 
+## 2026-04-30 (Iteration 2.8 - CameraX 캡처 플로우 전환)
+
+작업 내용:
+- CameraX 의존성(`camera-core`, `camera-camera2`, `camera-lifecycle`, `camera-view`)을 추가했습니다.
+- `CreateRecordScreen`의 캡처 경로를 `TakePicture` 계약 기반에서 CameraX 프리뷰/촬영 기반으로 전환했습니다.
+- 캡처 소스 선택 시:
+  - 카메라 권한 확인/요청
+  - 실시간 프리뷰 표시
+  - 촬영 버튼으로 이미지 저장 후 기존 태그 생성/저장 플로우에 연결
+- `.agent/tasks.md`에서 CameraX 작업(#1)을 완료 처리했습니다.
+
+검증:
+- 로컬: `./gradlew :app:compileDebugKotlin` 실행 시도
+- 로컬 결과: 실패
+- 사유: Android SDK 경로 미설정 (`ANDROID_HOME` 또는 `local.properties`의 `sdk.dir` 필요)
+- CI: 커밋/푸시 후 GitHub Actions로 검증 예정
+
 ## 2026-04-30 (Iteration 1 - Compose Shell Bootstrap)
 
 작업 내용:

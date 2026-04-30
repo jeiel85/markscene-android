@@ -24,7 +24,7 @@ Build the smallest useful MVP vertical slice.
 ### Photo Input
 
 - [x] Add Photo Picker import flow.
-- [ ] Add CameraX capture flow. (#1)
+- [x] Add CameraX capture flow. (#1)
 - [x] Store selected/captured image reference safely.
 - [x] Show image preview immediately.
 

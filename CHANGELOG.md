@@ -2,6 +2,20 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## v0.3.8 - 2026-04-30
+
+### Added
+- CameraX 기반 캡처 의존성(`camera-core`, `camera-camera2`, `camera-lifecycle`, `camera-view`)을 추가했습니다.
+
+### Changed
+- `Create Record`의 촬영 경로를 기존 `TakePicture` 계약 방식에서 CameraX 실시간 프리뷰 + 촬영 방식으로 전환했습니다.
+- 캡처 후 결과 이미지를 기존 태그 초안 생성 및 저장 플로우에 그대로 연결했습니다.
+
+### Verification
+- 로컬: `./gradlew :app:compileDebugKotlin` 실행 시도
+- 로컬 결과: Android SDK 경로 미설정으로 실패 (`ANDROID_HOME` 또는 `local.properties`의 `sdk.dir` 필요)
+- CI: 커밋 푸시 후 GitHub Actions에서 검증
+
 ## v0.1.1 - 2026-04-30
 
 ### Added

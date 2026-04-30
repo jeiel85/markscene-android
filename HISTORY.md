@@ -2,6 +2,23 @@
 
 ## 2026-04-30
 
+- 작업: CameraX 기반 실제 캡처 플로우 적용 (#1)
+- 변경 파일:
+  - `gradle/libs.versions.toml`
+  - `app/build.gradle.kts`
+  - `app/src/main/java/com/markscene/app/ui/screen/CreateRecordScreen.kt`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin` 실행 시도
+  - 결과: Android SDK 경로 미설정으로 실패
+  - CI: 푸시 후 GitHub Actions로 검증 예정
+- 결과: 캡처 경로가 CameraX 프리뷰/촬영 기반으로 전환되어 #1 범위 기능 구현 완료
+- 후속 작업:
+  - CI 결과 확인 후 필요 시 보정
+  - CameraX 캡처 UX 세부 개선(초점/회전/오류 문구 정교화)
+
+## 2026-04-30
+
 - 작업: 브랜딩 아이콘/gh.io 페이지 구성 및 남은 작업 이슈화
 - 변경 파일:
   - `app/src/main/res/drawable/ic_launcher_foreground.xml`
