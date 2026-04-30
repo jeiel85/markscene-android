@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.markscene.app.ai.provider.GeminiAdvancedVisionProvider
 import com.markscene.app.ai.provider.MlKitLocalImageTagger
 import com.markscene.app.core.database.MarkSceneDatabase
 import com.markscene.app.core.model.AdvancedAnalysis
@@ -69,6 +70,7 @@ fun MarkSceneApp() {
     val scope = rememberCoroutineScope()
 
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext) }
+    val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
     val database = remember {
         Room.databaseBuilder(
             context.applicationContext,
@@ -130,6 +132,11 @@ fun MarkSceneApp() {
                 RecordDetailScreen(
                     record = record,
                     latestAnalysis = latestAnalysis,
+                    onRunAdvancedAnalysis = { targetRecord ->
+                        val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
+                        if (apiKey.isBlank()) error("API key missing")
+                        geminiProvider.analyze(targetRecord, apiKey).getOrThrow()
+                    },
                     onApplyAdvancedAnalysis = { result ->
                         scope.launch {
                             val now = System.currentTimeMillis()
@@ -156,7 +163,7 @@ fun MarkSceneApp() {
                                 AdvancedAnalysis(
                                     id = UUID.randomUUID().toString(),
                                     recordId = record.id,
-                                    provider = "mock",
+                                    provider = if (hasApiKey) "gemini" else "mock",
                                     sceneSummary = result.sceneSummary,
                                     createdAt = now
                                 )
@@ -182,7 +189,7 @@ fun MarkSceneApp() {
                     if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
                         "API Key가 없어 테스트할 수 없습니다."
                     } else {
-                        "Mock 연결 테스트 성공: 실제 외부 API 호출은 아직 비활성화 상태입니다."
+                        "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
                     }
                 },
                 onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },

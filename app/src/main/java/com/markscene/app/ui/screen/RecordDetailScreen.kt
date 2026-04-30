@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,17 +25,21 @@ import com.markscene.app.ai.provider.MockAdvancedVisionProvider
 import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.PhotoRecord
+import kotlinx.coroutines.launch
 
 @Composable
 fun RecordDetailScreen(
     record: PhotoRecord,
     latestAnalysis: AdvancedAnalysis?,
+    onRunAdvancedAnalysis: suspend (PhotoRecord) -> MockAdvancedAnalysisResult,
     onApplyAdvancedAnalysis: (MockAdvancedAnalysisResult) -> Unit,
     onBack: () -> Unit
 ) {
     val mockProvider = remember { MockAdvancedVisionProvider() }
+    val scope = rememberCoroutineScope()
     var analysisResult by remember { mutableStateOf<MockAdvancedAnalysisResult?>(null) }
     var showConsentDialog by remember { mutableStateOf(false) }
+    var analysisStatusText by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -55,8 +60,10 @@ fun RecordDetailScreen(
             Text(it.sceneSummary)
         }
 
+        analysisStatusText?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+
         Button(onClick = { showConsentDialog = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("Run Advanced Analysis (Mock)")
+            Text("Run Advanced Analysis")
         }
 
         analysisResult?.let { result ->
@@ -82,7 +89,16 @@ fun RecordDetailScreen(
             text = { Text("고급 분석을 실행하면 선택한 이미지와 프롬프트가 AI 제공자에 전송될 수 있습니다.") },
             confirmButton = {
                 Button(onClick = {
-                    analysisResult = mockProvider.analyze(record)
+                    scope.launch {
+                        analysisStatusText = "고급 분석 실행 중..."
+                        analysisResult = runCatching {
+                            onRunAdvancedAnalysis(record)
+                        }.getOrElse {
+                            analysisStatusText = "실제 분석 실패, mock 결과로 대체합니다."
+                            mockProvider.analyze(record)
+                        }
+                        analysisStatusText = "고급 분석 결과가 준비되었습니다."
+                    }
                     showConsentDialog = false
                 }) { Text("Analyze") }
             },

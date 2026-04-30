@@ -144,6 +144,19 @@
 검증:
 - CI에서 `assembleDebug` 확인 예정
 
+## 2026-04-30 (Iteration 2.5 - Gemini BYOK 실제 호출 경로)
+
+작업 내용:
+- `GeminiAdvancedVisionProvider`를 추가해 BYOK 기반 실제 이미지 분석 요청 경로를 구현했습니다.
+- `INTERNET` 권한을 추가했습니다.
+- 상세 화면 고급분석 실행 시:
+  - API Key가 있으면 Gemini 호출 시도
+  - 실패 또는 키 없음이면 mock 결과로 안전 폴백
+- 분석 적용 시 provider 정보를 `gemini/mock`로 구분 저장하도록 반영했습니다.
+
+검증:
+- CI에서 `assembleDebug` 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

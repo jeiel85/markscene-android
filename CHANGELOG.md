@@ -146,6 +146,19 @@
 ### Verification
 - CI 기준 `assembleDebug` 검증 진행
 
+## v0.3.5 - 2026-04-30
+
+### Added
+- Gemini BYOK 실제 이미지 분석 provider를 추가했습니다.
+- 앱에 `INTERNET` 권한을 추가했습니다.
+
+### Changed
+- 상세 화면 고급분석 실행 시 API Key가 있으면 Gemini 호출을 시도하고, 실패 시 mock 결과로 폴백하도록 변경했습니다.
+- 분석 결과 저장 시 provider(`gemini`/`mock`)를 구분 저장하도록 변경했습니다.
+
+### Verification
+- CI 기준 `assembleDebug` 검증 진행
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

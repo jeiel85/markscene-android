@@ -51,7 +51,7 @@ Build the smallest useful MVP vertical slice.
 - [x] Add API key delete action.
 - [x] Add mock advanced AI provider.
 - [x] Add external analysis warning.
-- [ ] Add Gemini provider after mock flow is stable.
+- [x] Add Gemini provider after mock flow is stable.
 
 ### Privacy and Release
 

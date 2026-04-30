@@ -2,6 +2,23 @@
 
 ## 2026-04-30
 
+- 작업: Gemini BYOK 실제 분석 호출 경로 추가
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ai/provider/GeminiAdvancedVisionProvider.kt`
+  - `app/src/main/AndroidManifest.xml`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordDetailScreen.kt`
+  - `gradle/libs.versions.toml`, `app/build.gradle.kts`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI: GitHub Actions `Android CI`로 검증
+- 결과: API Key 존재 시 실제 분석 호출, 실패 시 mock 폴백 경로 완성
+- 후속 작업:
+  - Gemini 응답 스키마 안정화/예외 메시지 고도화
+  - 고급분석 결과 편집 UX 개선
+
+## 2026-04-30
+
 - 작업: 고급분석(mock) 결과의 영속 저장/태그 반영 연동
 - 변경 파일:
   - `app/src/main/java/com/markscene/app/core/database/AdvancedAnalysisEntity.kt`
