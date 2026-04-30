@@ -10,7 +10,7 @@ securityCrypto = "1.1.0-alpha06"
 coil = "2.7.0"
 mlkitLabeling = "17.0.9"
 okhttp = "4.12.0"
-cameraX = "1.6.0"
+cameraX = "1.5.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

@@ -17,6 +17,10 @@
 - 사유: Android SDK 경로 미설정 (`ANDROID_HOME` 또는 `local.properties`의 `sdk.dir` 필요)
 - CI: 커밋/푸시 후 GitHub Actions로 검증 예정
 
+추가 수정:
+- CI 실패 로그에서 `CameraX 1.6.0`이 현재 AGP(`8.5.2`) / compileSdk(`35`)와 비호환임을 확인했습니다.
+- `cameraX` 버전을 `1.5.3`으로 조정해 빌드 호환성을 복구했습니다.
+
 ## 2026-04-30 (Iteration 1 - Compose Shell Bootstrap)
 
 작업 내용:

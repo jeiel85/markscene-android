@@ -11,7 +11,7 @@
 - 검증:
   - 로컬: `./gradlew :app:compileDebugKotlin` 실행 시도
   - 결과: Android SDK 경로 미설정으로 실패
-  - CI: 푸시 후 GitHub Actions로 검증 예정
+  - CI: 첫 실행 실패(`CameraX 1.6.0`의 AGP/compileSdk 요구사항 불일치) 확인 후 `1.5.3`으로 수정 재푸시
 - 결과: 캡처 경로가 CameraX 프리뷰/촬영 기반으로 전환되어 #1 범위 기능 구현 완료
 - 후속 작업:
   - CI 결과 확인 후 필요 시 보정

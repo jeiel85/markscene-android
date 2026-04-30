@@ -16,6 +16,9 @@
 - 로컬 결과: Android SDK 경로 미설정으로 실패 (`ANDROID_HOME` 또는 `local.properties`의 `sdk.dir` 필요)
 - CI: 커밋 푸시 후 GitHub Actions에서 검증
 
+### Build / CI
+- CI 호환성 문제를 피하기 위해 CameraX 버전을 `1.6.0`에서 `1.5.3`으로 조정했습니다.
+
 ## v0.1.1 - 2026-04-30
 
 ### Added
