@@ -130,6 +130,20 @@
 검증:
 - CI에서 `assembleDebug` 확인 예정
 
+## 2026-04-30 (Iteration 2.4 - 고급분석 결과 저장 연동)
+
+작업 내용:
+- `advanced_analysis` 테이블과 DAO를 추가하고 DB 버전을 2로 올렸습니다.
+- `1 -> 2` 마이그레이션을 추가해 기존 사용자 데이터 손실 없이 테이블을 확장했습니다.
+- 상세 화면에서 mock 고급분석 결과를 적용하면:
+  - 요약을 `advanced_analysis`에 저장
+  - 추천 태그를 `AdvancedAi` 소스로 기록에 병합 저장
+  - 레코드 `analysisStatus`를 `AdvancedComplete`로 갱신
+- 저장된 최신 분석 요약을 상세 화면에 다시 표시하도록 연결했습니다.
+
+검증:
+- CI에서 `assembleDebug` 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

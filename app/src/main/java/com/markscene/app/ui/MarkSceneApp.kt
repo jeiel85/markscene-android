@@ -14,8 +14,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.markscene.app.ai.provider.MlKitLocalImageTagger
 import com.markscene.app.core.database.MarkSceneDatabase
+import com.markscene.app.core.model.AdvancedAnalysis
+import com.markscene.app.core.model.AnalysisStatus
+import com.markscene.app.core.model.PhotoTag
+import com.markscene.app.core.model.TagSource
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.ui.screen.CreateRecordScreen
@@ -24,7 +30,9 @@ import com.markscene.app.ui.screen.PrivacyNoticeScreen
 import com.markscene.app.ui.screen.RecordDetailScreen
 import com.markscene.app.ui.screen.RecordListScreen
 import com.markscene.app.ui.screen.SettingsScreen
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 private const val HOME_ROUTE = "home"
 private const val CREATE_RECORD_ROUTE = "create_record"
@@ -38,6 +46,22 @@ private const val PRIVACY_ROUTE = "privacy_notice"
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
 
+private val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS advanced_analysis (
+                id TEXT NOT NULL PRIMARY KEY,
+                recordId TEXT NOT NULL,
+                provider TEXT NOT NULL,
+                sceneSummary TEXT NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 @Composable
 fun MarkSceneApp() {
     val context = LocalContext.current
@@ -50,9 +74,9 @@ fun MarkSceneApp() {
             context.applicationContext,
             MarkSceneDatabase::class.java,
             "markscene.db"
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
-    val repository = remember { RoomRecordRepository(database.recordDao()) }
+    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
 
     var searchQuery by remember { mutableStateOf("") }
@@ -101,8 +125,46 @@ fun MarkSceneApp() {
         ) { backStackEntry ->
             val recordId = backStackEntry.arguments?.getString(DETAIL_ID_ARG)
             val record = visibleRecords.firstOrNull { it.id == recordId }
+            val latestAnalysis by (recordId?.let { repository.observeLatestAnalysis(it) } ?: flowOf(null)).collectAsState(initial = null)
             if (record != null) {
-                RecordDetailScreen(record = record, onBack = { navController.popBackStack() })
+                RecordDetailScreen(
+                    record = record,
+                    latestAnalysis = latestAnalysis,
+                    onApplyAdvancedAnalysis = { result ->
+                        scope.launch {
+                            val now = System.currentTimeMillis()
+                            val advancedTags = result.suggestedTags.map { tagName ->
+                                PhotoTag(
+                                    id = UUID.randomUUID().toString(),
+                                    recordId = record.id,
+                                    name = tagName.lowercase(),
+                                    rawName = null,
+                                    source = TagSource.AdvancedAi,
+                                    confidence = null,
+                                    userConfirmed = false,
+                                    createdAt = now
+                                )
+                            }
+                            val mergedTags = (record.tags + advancedTags).distinctBy { it.name }
+                            val updatedRecord = record.copy(
+                                updatedAt = now,
+                                analysisStatus = AnalysisStatus.AdvancedComplete,
+                                tags = mergedTags
+                            )
+                            repository.saveRecord(updatedRecord)
+                            repository.saveAdvancedAnalysis(
+                                AdvancedAnalysis(
+                                    id = UUID.randomUUID().toString(),
+                                    recordId = record.id,
+                                    provider = "mock",
+                                    sceneSummary = result.sceneSummary,
+                                    createdAt = now
+                                )
+                            )
+                        }
+                    },
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
         composable(SETTINGS_ROUTE) {

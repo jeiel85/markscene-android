@@ -1,9 +1,12 @@
 package com.markscene.app.data.record
 
+import com.markscene.app.core.database.AdvancedAnalysisDao
+import com.markscene.app.core.database.AdvancedAnalysisEntity
 import com.markscene.app.core.database.PhotoRecordEntity
 import com.markscene.app.core.database.PhotoRecordWithTags
 import com.markscene.app.core.database.PhotoTagEntity
 import com.markscene.app.core.database.RecordDao
+import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
@@ -12,13 +15,27 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class RoomRecordRepository(
-    private val recordDao: RecordDao
+    private val recordDao: RecordDao,
+    private val analysisDao: AdvancedAnalysisDao
 ) {
     fun observeRecords(): Flow<List<PhotoRecord>> =
         recordDao.observeAllRecords().map { rows -> rows.map { it.toModel() } }
 
     fun search(query: String): Flow<List<PhotoRecord>> =
         recordDao.searchRecords(query).map { rows -> rows.map { it.toModel() } }
+
+    fun observeLatestAnalysis(recordId: String): Flow<AdvancedAnalysis?> =
+        analysisDao.observeLatest(recordId).map { entity ->
+            entity?.let {
+                AdvancedAnalysis(
+                    id = it.id,
+                    recordId = it.recordId,
+                    provider = it.provider,
+                    sceneSummary = it.sceneSummary,
+                    createdAt = it.createdAt
+                )
+            }
+        }
 
     suspend fun saveRecord(record: PhotoRecord) {
         recordDao.insertRecord(
@@ -49,7 +66,20 @@ class RoomRecordRepository(
         )
     }
 
+    suspend fun saveAdvancedAnalysis(analysis: AdvancedAnalysis) {
+        analysisDao.upsert(
+            AdvancedAnalysisEntity(
+                id = analysis.id,
+                recordId = analysis.recordId,
+                provider = analysis.provider,
+                sceneSummary = analysis.sceneSummary,
+                createdAt = analysis.createdAt
+            )
+        )
+    }
+
     suspend fun deleteRecord(recordId: String) {
+        analysisDao.deleteForRecord(recordId)
         recordDao.deleteRecord(recordId)
     }
 }

@@ -2,6 +2,25 @@
 
 ## 2026-04-30
 
+- 작업: 고급분석(mock) 결과의 영속 저장/태그 반영 연동
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/core/database/AdvancedAnalysisEntity.kt`
+  - `app/src/main/java/com/markscene/app/core/database/AdvancedAnalysisDao.kt`
+  - `app/src/main/java/com/markscene/app/core/database/MarkSceneDatabase.kt`
+  - `app/src/main/java/com/markscene/app/core/model/AdvancedAnalysis.kt`
+  - `app/src/main/java/com/markscene/app/data/record/RoomRecordRepository.kt`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordDetailScreen.kt`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI: GitHub Actions `Android CI`로 검증
+- 결과: 분석 요약 저장 + 추천 태그 기록 반영 + 상세 화면 재표시 연결 완료
+- 후속 작업:
+  - 실제 Gemini provider 연동
+  - 고급분석 결과 편집 UI 고도화
+
+## 2026-04-30
+
 - 작업: 로컬 태깅을 ML Kit 온디바이스 라벨링으로 전환
 - 변경 파일:
   - `gradle/libs.versions.toml`, `app/build.gradle.kts`

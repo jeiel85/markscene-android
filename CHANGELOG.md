@@ -132,6 +132,20 @@
 ### Verification
 - CI 기준 `assembleDebug` 검증 진행
 
+## v0.3.4 - 2026-04-30
+
+### Added
+- `advanced_analysis` 영속 테이블/DAO를 추가했습니다.
+- Record Detail에서 적용한 mock 고급분석 결과를 로컬 DB에 저장하도록 추가했습니다.
+
+### Changed
+- 고급분석 적용 시 추천 태그를 `AdvancedAi` 소스로 기록에 병합 저장하도록 변경했습니다.
+- 레코드 `analysisStatus`를 `AdvancedComplete`로 갱신하도록 변경했습니다.
+- 저장된 최신 분석 요약을 상세 화면에 표시하도록 변경했습니다.
+
+### Verification
+- CI 기준 `assembleDebug` 검증 진행
+
 ## v0.1.0 - 2026-04-30
 
 ### Added
