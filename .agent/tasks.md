@@ -1,0 +1,80 @@
+# Agent Tasks
+
+## Current Priority
+
+Build the smallest useful MVP vertical slice.
+
+## Task Backlog
+
+### Bootstrap
+
+- [ ] Create or verify Android project skeleton.
+- [ ] Add Jetpack Compose baseline.
+- [ ] Add Material 3 theme.
+- [ ] Add basic navigation shell.
+- [ ] Add placeholder app icon/name only if needed.
+
+### Core Records
+
+- [ ] Define domain models for `PhotoRecord` and `PhotoTag`.
+- [ ] Add Room database entities and DAO.
+- [ ] Add repository for records.
+- [ ] Add fake in-memory repository for previews/tests if useful.
+
+### Photo Input
+
+- [ ] Add Photo Picker import flow.
+- [ ] Add CameraX capture flow.
+- [ ] Store selected/captured image reference safely.
+- [ ] Show image preview immediately.
+
+### Local Tagging
+
+- [ ] Add `LocalImageTagger` interface.
+- [ ] Add mock local tagger.
+- [ ] Generate mock tags after image selection.
+- [ ] Add editable tag chips.
+- [ ] Save edited tags with record.
+- [ ] Replace mock with real on-device tagger later.
+
+### Search
+
+- [ ] Add record list screen.
+- [ ] Add search screen.
+- [ ] Search by tag/title/memo.
+
+### Settings and BYOK
+
+- [ ] Add settings screen.
+- [ ] Add API key status UI.
+- [ ] Add encrypted API key storage.
+- [ ] Add API key delete action.
+- [ ] Add mock advanced AI provider.
+- [ ] Add external analysis warning.
+- [ ] Add Gemini provider after mock flow is stable.
+
+### Privacy and Release
+
+- [ ] Add in-app privacy notice.
+- [ ] Add no-secrets `.gitignore` entries.
+- [ ] Add release checklist.
+- [ ] Add privacy policy draft before store release.
+
+## Recommended First Task
+
+Create the Android project skeleton and implement a Compose home screen with three actions:
+
+1. Capture photo.
+2. Import photo.
+3. Open settings.
+
+No AI provider is needed for the first task.
+
+### Repository / Agent Workflow
+
+- [ ] Replace `<TO_BE_FILLED>` in `AGENTS.md` with the real GitHub repository URL.
+- [ ] Decide initial license and add `LICENSE` if the repository will be public.
+- [ ] Add GitHub Actions workflow for fast Android validation.
+- [ ] Confirm `HISTORY.md` and `CHANGELOG.md` are updated after each meaningful change.
+- [ ] Add `CLAUDE.md`, `GEMINI.md`, or other agent entry files only as thin references to `AGENTS.md` if needed.
+

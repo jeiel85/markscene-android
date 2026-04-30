@@ -1,0 +1,3 @@
+# CODEX.md
+
+@AGENTS.md
