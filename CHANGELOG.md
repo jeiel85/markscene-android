@@ -78,6 +78,24 @@
 ### Verification
 - CI 실패 로그 확인: `sym_def_app_icon_round` 리소스 없음
 
+## v0.3.0 - 2026-04-30
+
+### Added
+- Room 기반 `PhotoRecord`/`PhotoTag` 영속 저장 계층(엔터티/DAO/DB/Repository)을 추가했습니다.
+- 설정 화면에서 BYOK API Key 상태 확인, 저장, 삭제, Mock 연결 테스트를 추가했습니다.
+- API Key를 기기 내부 암호화 저장소(`EncryptedSharedPreferences`)에 저장하도록 추가했습니다.
+
+### Changed
+- 기록 조회/검색을 인메모리에서 Room 기반으로 전환했습니다.
+- 기록 목록에서 삭제 동작을 추가했습니다.
+
+### Privacy
+- 외부 AI 호출 없이 Mock 테스트만 수행하도록 유지했습니다.
+- 설정 화면에 외부 분석 시 전송 고지 문구를 추가했습니다.
+
+### Verification
+- CI 기준 `assembleDebug` 검증 진행
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

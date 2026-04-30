@@ -5,18 +5,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.room.Room
 import com.markscene.app.ai.provider.MockLocalImageTagger
-import com.markscene.app.data.record.InMemoryRecordRepository
+import com.markscene.app.core.database.MarkSceneDatabase
+import com.markscene.app.data.record.RoomRecordRepository
+import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.ui.screen.CreateRecordScreen
 import com.markscene.app.ui.screen.HomeScreen
-import com.markscene.app.ui.screen.PlaceholderScreen
 import com.markscene.app.ui.screen.RecordListScreen
+import com.markscene.app.ui.screen.SettingsScreen
+import kotlinx.coroutines.launch
 
 private const val HOME_ROUTE = "home"
 private const val CREATE_RECORD_ROUTE = "create_record"
@@ -29,11 +35,25 @@ private const val SOURCE_IMPORT = "import"
 
 @Composable
 fun MarkSceneApp() {
+    val context = LocalContext.current
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
+
     val localTagger = remember { MockLocalImageTagger() }
-    val repository = remember { InMemoryRecordRepository() }
-    val records by repository.observeRecords().collectAsState()
+    val database = remember {
+        Room.databaseBuilder(
+            context.applicationContext,
+            MarkSceneDatabase::class.java,
+            "markscene.db"
+        ).build()
+    }
+    val repository = remember { RoomRecordRepository(database.recordDao()) }
+    val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
+
     var searchQuery by remember { mutableStateOf("") }
+    var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
+
+    val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
 
     NavHost(
         navController = navController,
@@ -60,22 +80,44 @@ fun MarkSceneApp() {
                 source = source,
                 localImageTagger = localTagger,
                 onSave = { record ->
-                    repository.saveRecord(record)
-                    navController.navigate(SEARCH_ROUTE)
+                    scope.launch {
+                        repository.saveRecord(record)
+                        navController.navigate(SEARCH_ROUTE)
+                    }
                 },
                 onBack = { navController.popBackStack() }
             )
         }
         composable(SEARCH_ROUTE) {
-            val visibleRecords = repository.search(searchQuery)
             RecordListScreen(
                 records = visibleRecords,
                 onSearch = { searchQuery = it },
+                onDeleteRecord = { recordId ->
+                    scope.launch { repository.deleteRecord(recordId) }
+                },
                 onBack = { navController.popBackStack() }
             )
         }
         composable(SETTINGS_ROUTE) {
-            PlaceholderScreen(title = "Settings")
+            SettingsScreen(
+                hasApiKey = hasApiKey,
+                onSaveApiKey = { key ->
+                    apiKeyStore.saveGeminiApiKey(key)
+                    hasApiKey = true
+                },
+                onDeleteApiKey = {
+                    apiKeyStore.clearGeminiApiKey()
+                    hasApiKey = false
+                },
+                onTestConnection = {
+                    if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
+                        "API Key가 없어 테스트할 수 없습니다."
+                    } else {
+                        "Mock 연결 테스트 성공: 실제 외부 API 호출은 아직 비활성화 상태입니다."
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

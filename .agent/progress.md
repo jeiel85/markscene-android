@@ -79,6 +79,24 @@
 - CI 실패 로그에서 `sym_def_app_icon_round` 리소스 미존재 오류를 확인했습니다.
 - `AndroidManifest.xml`에서 `roundIcon` 참조를 제거해 리소스 링크 오류를 수정했습니다.
 
+## 2026-04-30 (Iteration 2.0 - Room/Settings 기반 확장)
+
+작업 내용:
+- `Room` 엔터티/DAO/DB를 추가하고 기록 저장소를 `InMemory`에서 `RoomRecordRepository`로 전환했습니다.
+- `Record List / Search`에서 Room 데이터를 조회하고 레코드 삭제를 추가했습니다.
+- 설정 화면을 추가하고 BYOK 상태 UI를 연결했습니다.
+  - API Key 저장/삭제
+  - 암호화 저장소(`EncryptedSharedPreferences`) 적용
+  - 외부 호출 없는 Mock 연결 테스트
+  - 외부 분석 전송 안내 문구 표시
+
+검증:
+- CI(`Android CI`)에서 `assembleDebug` 실행 확인 예정
+
+다음 작업:
+- CameraX 캡처 및 이미지 미리보기 실제 구현
+- Room 기반 Record Detail/삭제 연계 정리
+
 ## 2026-04-30
 
 Initial planning documents created.

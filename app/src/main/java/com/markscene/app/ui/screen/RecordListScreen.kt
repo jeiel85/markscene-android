@@ -29,6 +29,7 @@ import com.markscene.app.core.model.PhotoRecord
 fun RecordListScreen(
     records: List<PhotoRecord>,
     onSearch: (String) -> Unit,
+    onDeleteRecord: (String) -> Unit,
     onBack: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
@@ -59,7 +60,7 @@ fun RecordListScreen(
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(records, key = { it.id }) { record ->
-                    RecordItem(record = record)
+                    RecordItem(record = record, onDeleteRecord = onDeleteRecord)
                 }
             }
         }
@@ -71,7 +72,10 @@ fun RecordListScreen(
 }
 
 @Composable
-private fun RecordItem(record: PhotoRecord) {
+private fun RecordItem(
+    record: PhotoRecord,
+    onDeleteRecord: (String) -> Unit
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -88,6 +92,9 @@ private fun RecordItem(record: PhotoRecord) {
                 record.tags.take(4).forEach { tag ->
                     AssistChip(onClick = {}, label = { Text(tag.name) })
                 }
+            }
+            Button(onClick = { onDeleteRecord(record.id) }, modifier = Modifier.fillMaxWidth()) {
+                Text("Delete Record")
             }
         }
     }

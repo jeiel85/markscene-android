@@ -17,7 +17,7 @@ Build the smallest useful MVP vertical slice.
 ### Core Records
 
 - [x] Define domain models for `PhotoRecord` and `PhotoTag`.
-- [ ] Add Room database entities and DAO.
+- [x] Add Room database entities and DAO.
 - [x] Add repository for records.
 - [x] Add fake in-memory repository for previews/tests if useful.
 
@@ -45,12 +45,12 @@ Build the smallest useful MVP vertical slice.
 
 ### Settings and BYOK
 
-- [ ] Add settings screen.
-- [ ] Add API key status UI.
-- [ ] Add encrypted API key storage.
-- [ ] Add API key delete action.
-- [ ] Add mock advanced AI provider.
-- [ ] Add external analysis warning.
+- [x] Add settings screen.
+- [x] Add API key status UI.
+- [x] Add encrypted API key storage.
+- [x] Add API key delete action.
+- [x] Add mock advanced AI provider.
+- [x] Add external analysis warning.
 - [ ] Add Gemini provider after mock flow is stable.
 
 ### Privacy and Release

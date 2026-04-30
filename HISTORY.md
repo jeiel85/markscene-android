@@ -2,6 +2,26 @@
 
 ## 2026-04-30
 
+- 작업: Room 영속 저장소 및 Settings(BYOK 상태) 구현
+- 변경 파일:
+  - `gradle/libs.versions.toml`, `build.gradle.kts`, `app/build.gradle.kts`
+  - `app/src/main/java/com/markscene/app/core/database/*`
+  - `app/src/main/java/com/markscene/app/data/record/RoomRecordRepository.kt`
+  - `app/src/main/java/com/markscene/app/data/settings/ApiKeyStore.kt`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - 로컬: SDK 경로 미설정 환경이라 `assembleDebug` 제한
+  - CI: GitHub Actions `Android CI`로 검증
+- 결과: Room/Settings 기반 MVP 골격 확장 완료
+- 후속 작업:
+  - CameraX 캡처 연결
+  - Record Detail 화면 및 삭제/상세 흐름 강화
+
+## 2026-04-30
+
 - 작업: CI 매니페스트 아이콘 링크 오류 수정
 - 변경 파일:
   - `app/src/main/AndroidManifest.xml`
