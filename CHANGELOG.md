@@ -4,11 +4,16 @@
 
 ## v0.4.2 - 2026-04-30
 
-### Added
+### Build / CI
+- 릴리즈용 키스토어 생성 및 GitHub Secrets 연동 설정.
+- `app/build.gradle.kts`에 CI 환경 변수 기반 서명 로직 추가.
+- `.github/workflows/release-apk.yml` 워크플로우를 Secrets 기반 자동 서명 방식으로 고도화.
+
+### Documentation
 - MIT License (`LICENSE`) 추가 (#5).
 - 배포용 개인정보 처리방침 초안 (`docs/PRIVACY_POLICY.md`) 추가 (#3).
-- 기본 단위 테스트 3개 추가 (`PhotoRecordTest`, `PhotoTagTest`, `MockLocalImageTaggerTest`).
 - `RELEASE_SETUP.md` (릴리즈 서명 설정 가이드) 추가.
+
 
 ### Changed
 - README.md 개선 (다른 레포 대비 내용 보강).

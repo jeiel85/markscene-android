@@ -2,6 +2,18 @@
 
 ## 2026-04-30
 
+- 작업: 릴리즈 키스토어 생성 및 GitHub Actions 자동 서명 빌드 설정
+- 변경 파일:
+  - `app/build.gradle.kts`: CI 환경 변수 및 local.properties 지원 서명 로직 추가
+  - `.github/workflows/release-apk.yml`: Secrets 기반 키스토어 디코딩 및 자동 서명 단계 추가
+- 검증:
+  - 로컬: `./gradlew help` 실행으로 스크립트 문법 및 설정 정합성 확인
+  - 보안: 생성된 키스토어의 Base64 인코딩 값을 사용자에게 전달 후 즉시 삭제 처리
+- 결과: 태그 푸시 시 자동으로 서명된 릴리즈 APK가 생성되어 GitHub Release에 업로드되는 환경 구축 완료
+- 후속 작업:
+  - 사용자의 GitHub Secrets 설정 확인
+  - 실제 태그 푸시를 통한 엔드투엔드 워크플로우 실행 테스트
+
 - 작업: GitHub Pages 루트 브랜딩 페이지 구성 및 최초 APK 릴리즈 자동화
 - 변경 파일:
   - `docs/index.html`

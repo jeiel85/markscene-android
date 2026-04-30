@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -24,18 +26,30 @@ android {
 
     signingConfigs {
         create("release") {
-            // local.properties에서 키스토어 정보 읽기
-            val propertiesFile = rootProject.file("local.properties")
-            if (propertiesFile.exists()) {
-                val properties = java.util.Properties()
-                properties.load(propertiesFile.inputStream())
-                storeFile = file(properties.getProperty("RELEASE_STORE_FILE", ""))
-                storePassword = properties.getProperty("RELEASE_STORE_PASSWORD", "")
-                keyAlias = properties.getProperty("RELEASE_KEY_ALIAS", "")
-                keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD", "")
+            // 우선순위: 1. 환경 변수 (CI), 2. local.properties (로컬)
+            val envStoreFile = System.getenv("RELEASE_STORE_FILE")
+            val envStorePassword = System.getenv("RELEASE_STORE_PASSWORD")
+            val envKeyAlias = System.getenv("RELEASE_KEY_ALIAS")
+            val envKeyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+
+            if (!envStoreFile.isNullOrEmpty()) {
+                storeFile = file(envStoreFile)
+                storePassword = envStorePassword
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPassword
+            } else {
+                val propertiesFile = rootProject.file("local.properties")
+                if (propertiesFile.exists()) {
+                    val properties = Properties()
+                    propertiesFile.inputStream().use { properties.load(it) }
+                    storeFile = file(properties.getProperty("RELEASE_STORE_FILE", ""))
+                    storePassword = properties.getProperty("RELEASE_STORE_PASSWORD", "")
+                    keyAlias = properties.getProperty("RELEASE_KEY_ALIAS", "")
+                    keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD", "")
+                }
             }
         }
-        create("debug") {
+        getByName("debug") {
             // 프로젝트 내 고정 디버그 키스토어 사용 (CI와 로컬 동일한 서명)
             storeFile = file("keystore/debug.keystore")
             storePassword = "android"
