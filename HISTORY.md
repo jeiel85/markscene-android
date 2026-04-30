@@ -2,6 +2,18 @@
 
 ## 2026-04-30
 
+- 작업: GitHub Actions 품질 게이트 강화
+- 변경 파일:
+  - `.github/workflows/android-ci.yml`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI: lint/test/build 단계 추가 후 재검증
+- 결과: 빌드 단일 검증에서 품질 게이트 확장 완료
+- 후속 작업:
+  - 필요 시 instrumentation test 단계 추가
+
+## 2026-04-30
+
 - 작업: Gemini BYOK 실제 분석 호출 경로 추가
 - 변경 파일:
   - `app/src/main/java/com/markscene/app/ai/provider/GeminiAdvancedVisionProvider.kt`

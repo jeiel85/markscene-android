@@ -157,6 +157,15 @@
 검증:
 - CI에서 `assembleDebug` 확인 예정
 
+## 2026-04-30 (Iteration 2.6 - CI 품질 게이트 강화)
+
+작업 내용:
+- GitHub Actions 워크플로를 `lint + unit test + assembleDebug` 순으로 확장했습니다.
+- `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`를 설정해 Node 20 경고 완화를 적용했습니다.
+
+검증:
+- 변경된 워크플로로 CI 재검증 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

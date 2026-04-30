@@ -1,5 +1,8 @@
 name: Android CI
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: [ "main" ]
@@ -28,6 +31,12 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x gradlew
+
+      - name: Lint
+        run: ./gradlew :app:lintDebug
+
+      - name: Unit Test
+        run: ./gradlew :app:testDebugUnitTest
 
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug
