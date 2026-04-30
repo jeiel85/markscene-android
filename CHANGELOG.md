@@ -2,6 +2,18 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## v0.4.1 - 2026-04-30
+
+### Fixed
+- GitHub Release APK 업로드 경로를 실제 산출물 패턴(`app/build/outputs/apk/release/*.apk`)으로 수정했습니다.
+
+### Changed
+- 릴리즈 워크플로에 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`를 추가했습니다.
+- 앱 버전을 `versionName 0.4.1`, `versionCode 3`으로 업데이트했습니다.
+
+### Verification
+- CI: `Release APK` 태그 빌드에서 APK 자산 업로드 확인
+
 ## v0.4.0 - 2026-04-30
 
 ### Added

@@ -17,6 +17,21 @@
 - 후속 작업:
   - 릴리즈 산출물(앱 서명 정책, AAB 병행 여부) 정교화
   - release checklist 문서(#4) 반영
+  - v0.4.0 릴리즈 APK 자산 누락 보정
+
+## 2026-04-30
+
+- 작업: 릴리즈 APK 업로드 경로 보정 및 재릴리즈 준비
+- 변경 파일:
+  - `.github/workflows/release-apk.yml`
+  - `app/build.gradle.kts`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - v0.4.0 Release 워크플로 로그에서 파일 패턴 불일치 확인
+  - `*.apk` 패턴으로 수정 후 신규 태그 릴리즈 예정
+- 결과: Release APK 자산 누락 재발 방지 수정 완료
+- 후속 작업:
+  - v0.4.1 태그 발행 및 자산 업로드 확인
 
 ## 2026-04-30
 
