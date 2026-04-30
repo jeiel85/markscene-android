@@ -8,10 +8,10 @@ Build the smallest useful MVP vertical slice.
 
 ### Bootstrap
 
-- [ ] Create or verify Android project skeleton.
-- [ ] Add Jetpack Compose baseline.
-- [ ] Add Material 3 theme.
-- [ ] Add basic navigation shell.
+- [x] Create or verify Android project skeleton.
+- [x] Add Jetpack Compose baseline.
+- [x] Add Material 3 theme.
+- [x] Add basic navigation shell.
 - [ ] Add placeholder app icon/name only if needed.
 
 ### Core Records
@@ -72,9 +72,8 @@ No AI provider is needed for the first task.
 
 ### Repository / Agent Workflow
 
-- [ ] Replace `<TO_BE_FILLED>` in `AGENTS.md` with the real GitHub repository URL.
+- [x] Replace `<TO_BE_FILLED>` in `AGENTS.md` with the real GitHub repository URL.
 - [ ] Decide initial license and add `LICENSE` if the repository will be public.
-- [ ] Add GitHub Actions workflow for fast Android validation.
+- [x] Add GitHub Actions workflow for fast Android validation.
 - [ ] Confirm `HISTORY.md` and `CHANGELOG.md` are updated after each meaningful change.
 - [ ] Add `CLAUDE.md`, `GEMINI.md`, or other agent entry files only as thin references to `AGENTS.md` if needed.
-

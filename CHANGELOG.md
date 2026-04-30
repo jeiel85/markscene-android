@@ -19,6 +19,20 @@
 - 로컬 결과: `gradle-wrapper.jar` 누락으로 실행 실패
 - CI: 아직 구성되지 않음
 
+## v0.1.2 - 2026-04-30
+
+### Added
+- `Create Record` 화면 분리 및 `Capture`/`Import` 진입 소스 구분 라우팅을 추가했습니다.
+- GitHub Actions 기반 Android 기본 CI 워크플로를 추가했습니다.
+
+### Changed
+- 누락되어 있던 `gradle-wrapper.jar`를 추가해 Gradle Wrapper 실행 불가 상태를 복구했습니다.
+
+### Verification
+- 로컬: `./gradlew :app:assembleDebug` 실행
+- 로컬 결과: Android SDK 경로 미설정으로 실패 (`ANDROID_HOME` 또는 `local.properties` 필요)
+- CI: 워크플로 파일 추가 완료 (실행 결과는 다음 푸시 후 확인)
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

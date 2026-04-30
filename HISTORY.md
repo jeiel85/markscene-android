@@ -2,6 +2,23 @@
 
 ## 2026-04-30
 
+- 작업: 빌드 체인 복구(Wrapper) 및 Compose 다음 페이즈 최소 확장
+- 변경 파일:
+  - `gradle/wrapper/gradle-wrapper.jar`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `app/src/main/java/com/markscene/app/ui/screen/CreateRecordScreen.kt`
+  - `.github/workflows/android-ci.yml`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - 로컬: `./gradlew :app:assembleDebug`
+  - 결과: Android SDK 경로 미설정으로 실패
+- 결과: 부분 성공 (Wrapper 복구 및 다음 페이즈 UI/CI 골격 반영)
+- 후속 작업:
+  - SDK 경로 설정 후 로컬 검증 재실행
+  - CameraX/Photo Picker 실제 연결
+
+## 2026-04-30
+
 - 작업: MarkScene Android 프로젝트 1차 부트스트랩 및 Compose 셸 구현
 - 변경 파일:
   - `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties`, `gradle/libs.versions.toml`

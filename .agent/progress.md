@@ -24,6 +24,23 @@
 - Gradle Wrapper JAR을 추가해 로컬 빌드 가능 상태를 먼저 복구
 - Home 액션을 실제 Capture/Import 플로우와 연결
 
+## 2026-04-30 (Iteration 1.1 - 빌드 체인 복구 및 다음 페이즈)
+
+작업 내용:
+- `gradle/wrapper/gradle-wrapper.jar`를 추가해 Gradle Wrapper 실행 문제를 복구했습니다.
+- `Create Record` 화면을 분리하고 `Capture Photo`/`Import Photo` 진입 소스를 라우트 인자로 구분했습니다.
+- GitHub Actions 기본 Android CI 워크플로(`.github/workflows/android-ci.yml`)를 추가했습니다.
+- `.agent/tasks.md`에서 완료된 부트스트랩 항목과 CI 항목을 체크했습니다.
+
+검증:
+- `./gradlew :app:assembleDebug` 실행
+- 결과: 실패
+- 사유: 로컬 Android SDK 경로 미설정 (`ANDROID_HOME` 또는 `local.properties`의 `sdk.dir` 필요)
+
+다음 작업:
+- 로컬 SDK 경로를 설정한 뒤 `test`, `lint`, `assembleDebug`를 순차 검증
+- `Create Record` 화면에 Photo Picker/CameraX 실제 연결
+
 ## 2026-04-30
 
 Initial planning documents created.
