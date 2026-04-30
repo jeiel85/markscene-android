@@ -8,6 +8,7 @@ composeBom = "2024.09.00"
 room = "2.6.1"
 securityCrypto = "1.1.0-alpha06"
 coil = "2.7.0"
+mlkitLabeling = "17.0.9"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -24,6 +25,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCrypto" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+mlkit-image-labeling = { group = "com.google.mlkit", name = "image-labeling", version.ref = "mlkitLabeling" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

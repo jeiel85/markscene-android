@@ -35,7 +35,7 @@ Build the smallest useful MVP vertical slice.
 - [x] Generate mock tags after image selection.
 - [x] Add editable tag chips.
 - [x] Save edited tags with record.
-- [ ] Replace mock with real on-device tagger later.
+- [x] Replace mock with real on-device tagger later.
 
 ### Search
 

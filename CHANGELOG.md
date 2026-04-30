@@ -122,6 +122,16 @@
 ### Verification
 - CI 기준 `assembleDebug` 검증 진행
 
+## v0.3.3 - 2026-04-30
+
+### Changed
+- 로컬 태그 생성을 `MockLocalImageTagger` 기본값에서 ML Kit 온디바이스 라벨링으로 전환했습니다.
+- 라벨 confidence 임계값 적용 및 태그 정규화 사전을 추가했습니다.
+- ML Kit 처리 실패 시 mock 태거로 폴백하도록 보강했습니다.
+
+### Verification
+- CI 기준 `assembleDebug` 검증 진행
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
-import com.markscene.app.ai.provider.MockLocalImageTagger
+import com.markscene.app.ai.provider.MlKitLocalImageTagger
 import com.markscene.app.core.database.MarkSceneDatabase
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
@@ -44,7 +44,7 @@ fun MarkSceneApp() {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
-    val localTagger = remember { MockLocalImageTagger() }
+    val localTagger = remember { MlKitLocalImageTagger(context.applicationContext) }
     val database = remember {
         Room.databaseBuilder(
             context.applicationContext,

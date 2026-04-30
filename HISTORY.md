@@ -2,6 +2,21 @@
 
 ## 2026-04-30
 
+- 작업: 로컬 태깅을 ML Kit 온디바이스 라벨링으로 전환
+- 변경 파일:
+  - `gradle/libs.versions.toml`, `app/build.gradle.kts`
+  - `app/src/main/java/com/markscene/app/ai/provider/MlKitLocalImageTagger.kt`
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - CI: GitHub Actions `Android CI`로 검증
+- 결과: mock 기본 태깅에서 온디바이스 태깅으로 전환 완료(실패 시 mock 폴백)
+- 후속 작업:
+  - 태그 한글화/정규화 사전 확장
+  - 고급분석 결과 저장/편집 연동
+
+## 2026-04-30
+
 - 작업: 인앱 개인정보 고지 및 Mock 고급분석 UI 추가
 - 변경 파일:
   - `app/src/main/java/com/markscene/app/ai/provider/MockAdvancedVisionProvider.kt`

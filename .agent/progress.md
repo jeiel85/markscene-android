@@ -119,6 +119,17 @@
 검증:
 - CI에서 `assembleDebug` 확인 예정
 
+## 2026-04-30 (Iteration 2.3 - ML Kit 로컬 태깅 전환)
+
+작업 내용:
+- `MlKitLocalImageTagger`를 추가해 온디바이스 이미지 라벨링을 적용했습니다.
+- 라벨 confidence 임계값(0.6)과 기본 정규화 딕셔너리를 반영했습니다.
+- 태깅 실패/결과 없음 시 기존 `MockLocalImageTagger`로 폴백하도록 안전장치를 넣었습니다.
+- 앱 기본 태거를 mock에서 ML Kit 구현으로 전환했습니다.
+
+검증:
+- CI에서 `assembleDebug` 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.
