@@ -38,5 +38,12 @@ jobs:
       - name: Unit Test
         run: ./gradlew :app:testDebugUnitTest
 
+      - name: Restore debug keystore
+        run: |
+          mkdir -p keystore
+          echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > keystore/debug.keystore
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug

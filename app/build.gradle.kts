@@ -35,9 +35,18 @@ android {
                 keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD", "")
             }
         }
+        create("debug") {
+            // 프로젝트 내 고정 디버그 키스토어 사용 (CI와 로컬 동일한 서명)
+            storeFile = file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
+        // debug: 기본 Android debug.keystore 사용 (~/.android/debug.keystore)
+        debug {}
         release {
             isMinifyEnabled = false
             proguardFiles(
