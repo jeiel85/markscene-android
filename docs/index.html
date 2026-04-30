@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MarkScene</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --accent: #14b8a6;
+      --accent2: #22d3ee;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --line: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(1000px 500px at -10% -10%, #1e293b 0%, transparent 50%),
+        radial-gradient(800px 400px at 110% 0%, #0f766e 0%, transparent 40%),
+        var(--bg);
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 56px 20px 72px; }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent2);
+      font-size: 13px;
+      background: rgba(18, 26, 47, 0.7);
+    }
+    h1 { margin: 16px 0 10px; font-size: clamp(30px, 5vw, 56px); line-height: 1.1; }
+    .lead { margin: 0; color: var(--muted); font-size: clamp(15px, 2vw, 20px); }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+    a.btn {
+      display: inline-block;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      text-decoration: none;
+      padding: 10px 14px;
+      font-weight: 600;
+    }
+    a.btn.primary {
+      background: linear-gradient(135deg, #0f766e, #155e75);
+      border: 0;
+    }
+    .footer { margin-top: 24px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <span class="badge">MarkScene • Android • Local First</span>
+    <h1>사진을 검색 가능한 비주얼 메모로</h1>
+    <p class="lead">MarkScene은 사진 기록을 로컬 태그와 메모로 구조화해, 다시 찾는 시간을 줄여주는 프라이버시 우선 Android 앱입니다.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/jeiel85/markscene-android/releases">APK 다운로드</a>
+      <a class="btn" href="./branding/">브랜딩 페이지 보기</a>
+      <a class="btn" href="https://github.com/jeiel85/markscene-android">GitHub 저장소</a>
+    </div>
+    <p class="footer">기본 기능은 API Key 없이 동작하며, 고급 분석은 BYOK 기반 선택 기능입니다.</p>
+  </main>
+</body>
+</html>

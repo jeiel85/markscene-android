@@ -2,6 +2,21 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## v0.4.0 - 2026-04-30
+
+### Added
+- GitHub Pages 루트 진입점(`docs/index.html`)을 추가해 브랜딩 페이지 접근성을 개선했습니다.
+- 태그 푸시(`v*.*.*`) 시 릴리즈 APK를 자동 빌드/업로드하는 GitHub Actions 워크플로(`release-apk.yml`)를 추가했습니다.
+
+### Changed
+- Pages 배포 범위를 `docs/branding`에서 `docs` 전체로 확장해 사이트 루트 URL에서 바로 페이지가 열리도록 변경했습니다.
+- 앱 버전을 `versionName 0.4.0`, `versionCode 2`로 업데이트했습니다.
+
+### Verification
+- 로컬: Android SDK 경로 미설정으로 빌드 검증 제한
+- CI: 푸시 후 `Android CI`, `Deploy GitHub Pages` 확인
+- 릴리즈: 태그 `v0.4.0` 푸시 후 `Release APK` 워크플로와 GitHub Release 아티팩트 확인
+
 ## v0.3.8 - 2026-04-30
 
 ### Added

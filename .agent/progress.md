@@ -1,5 +1,18 @@
 # Agent Progress
 
+## 2026-04-30 (Iteration 2.9 - Pages 루트/릴리즈 APK 자동화)
+
+작업 내용:
+- Pages 루트 URL에서 바로 열리는 브랜딩 진입 페이지(`docs/index.html`)를 추가했습니다.
+- Pages 배포 아티팩트 경로를 `docs/branding`에서 `docs` 전체로 확장했습니다.
+- 태그 푸시(`v*.*.*`) 시 `assembleRelease` 후 APK를 GitHub Release에 업로드하는 워크플로(`release-apk.yml`)를 추가했습니다.
+- 앱 버전을 `versionName 0.4.0`, `versionCode 2`로 올렸습니다.
+
+검증:
+- 로컬: Android SDK 경로 미설정으로 빌드 검증 제한
+- CI: 커밋 푸시 후 `Android CI` 및 `Deploy GitHub Pages` 확인 예정
+- 릴리즈: `v0.4.0` 태그 푸시 후 `Release APK` 확인 예정
+
 ## 2026-04-30 (Iteration 2.8 - CameraX 캡처 플로우 전환)
 
 작업 내용:

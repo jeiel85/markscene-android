@@ -2,6 +2,24 @@
 
 ## 2026-04-30
 
+- 작업: GitHub Pages 루트 브랜딩 페이지 구성 및 최초 APK 릴리즈 자동화
+- 변경 파일:
+  - `docs/index.html`
+  - `.github/workflows/pages.yml`
+  - `.github/workflows/release-apk.yml`
+  - `app/build.gradle.kts`
+  - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - 로컬: Android SDK 경로 미설정으로 빌드 제한
+  - CI: 푸시 후 Android CI / Pages 배포 확인
+  - 릴리즈: `v0.4.0` 태그 푸시 후 Release APK 워크플로 결과 확인
+- 결과: Pages 루트 접근 경로와 APK 릴리즈 파이프라인 준비 완료
+- 후속 작업:
+  - 릴리즈 산출물(앱 서명 정책, AAB 병행 여부) 정교화
+  - release checklist 문서(#4) 반영
+
+## 2026-04-30
+
 - 작업: CameraX 기반 실제 캡처 플로우 적용 (#1)
 - 변경 파일:
   - `gradle/libs.versions.toml`
