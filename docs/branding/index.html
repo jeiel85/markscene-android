@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MarkScene - Visual Notes, Local First</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --accent: #14b8a6;
+      --accent-2: #22d3ee;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --line: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 500px at -10% -10%, #1e293b 0%, transparent 50%),
+        radial-gradient(800px 400px at 110% 0%, #0f766e 0%, transparent 40%),
+        var(--bg);
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 56px 20px 72px; }
+    .hero { display: grid; gap: 20px; }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-size: 13px;
+      background: rgba(18, 26, 47, 0.7);
+      width: fit-content;
+    }
+    h1 { margin: 0; font-size: clamp(28px, 4.5vw, 54px); line-height: 1.1; }
+    p.lead { margin: 0; color: var(--muted); font-size: clamp(15px, 2vw, 20px); }
+    .cards {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(18,26,47,.95), rgba(10,16,32,.95));
+    }
+    .card h3 { margin: 0 0 8px; color: var(--accent); }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .footer { margin-top: 28px; color: var(--muted); font-size: 13px; }
+    a { color: var(--accent-2); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <span class="badge">MarkScene • Android • Local First</span>
+      <h1>사진을 검색 가능한 비주얼 메모로</h1>
+      <p class="lead">
+        MarkScene은 사진을 로컬 태그와 메모로 구조화해 나중에 빠르게 찾을 수 있게 만드는
+        프라이버시 우선 Android 앱입니다.
+      </p>
+    </section>
+
+    <section class="cards">
+      <article class="card">
+        <h3>Local First</h3>
+        <p>기본 기능은 API Key 없이 기기에서 바로 동작하며, 로컬 저장/검색을 우선합니다.</p>
+      </article>
+      <article class="card">
+        <h3>Editable AI</h3>
+        <p>태그와 분석 결과는 확정값이 아니라 제안으로 제공되며, 사용자가 직접 수정합니다.</p>
+      </article>
+      <article class="card">
+        <h3>BYOK Advanced</h3>
+        <p>고급 분석은 사용자가 실행할 때만 수행되며, BYOK 설정에서 선택적으로 사용합니다.</p>
+      </article>
+    </section>
+
+    <p class="footer">
+      Source: <a href="https://github.com/jeiel85/markscene-android">github.com/jeiel85/markscene-android</a>
+    </p>
+  </main>
+</body>
+</html>

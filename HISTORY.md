@@ -2,6 +2,26 @@
 
 ## 2026-04-30
 
+- 작업: 브랜딩 아이콘/gh.io 페이지 구성 및 남은 작업 이슈화
+- 변경 파일:
+  - `app/src/main/res/drawable/ic_launcher_foreground.xml`
+  - `app/src/main/res/drawable/ic_launcher_background.xml`
+  - `app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`
+  - `app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml`
+  - `app/src/main/AndroidManifest.xml`
+  - `docs/branding/index.html`
+  - `.github/workflows/pages.yml`
+  - `.agent/tasks.md`, `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
+- 검증:
+  - GitHub Issue 등록 완료: #1~#6
+  - CI/Pages 워크플로 실행 결과 확인 예정
+- 결과: 앱/웹 브랜딩 반영 및 남은 작업 관리 체계 이슈 기반으로 전환 완료
+- 후속 작업:
+  - #1 CameraX 전환
+  - #2~#6 문서/운영 항목 완료
+
+## 2026-04-30
+
 - 작업: CI lint 카메라 feature 오류 수정
 - 변경 파일:
   - `app/src/main/AndroidManifest.xml`

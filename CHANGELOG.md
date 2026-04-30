@@ -168,6 +168,16 @@
 ### Fixed
 - lint 오류 대응을 위해 매니페스트에 `android.hardware.camera`의 `required=false` feature 선언을 추가했습니다.
 
+## v0.3.7 - 2026-04-30
+
+### Added
+- MarkScene 브랜드 아이콘(adaptive icon) 리소스를 추가했습니다.
+- GitHub Pages 브랜딩 페이지(`docs/branding`)와 배포 워크플로를 추가했습니다.
+
+### Changed
+- 매니페스트 앱 아이콘을 기본 시스템 아이콘에서 프로젝트 아이콘(`@mipmap/ic_launcher`)으로 교체했습니다.
+- 남은 작업 항목을 GitHub Issues(#1~#6)로 등록하고 `.agent/tasks.md`와 동기화했습니다.
+
 ## v0.1.0 - 2026-04-30
 
 ### Added

@@ -170,6 +170,17 @@
 - CI lint 오류(`PermissionImpliesUnsupportedChromeOsHardware`) 대응을 위해
   `uses-feature android.hardware.camera required=false`를 매니페스트에 추가했습니다.
 
+## 2026-04-30 (Iteration 2.7 - 브랜딩/이슈 동기화)
+
+작업 내용:
+- 기본 앱 아이콘을 MarkScene 정체성에 맞는 adaptive icon으로 교체했습니다.
+- GitHub Pages 브랜딩 페이지(`docs/branding/index.html`)와 배포 워크플로(`pages.yml`)를 추가했습니다.
+- 남은 작업을 GitHub Issues로 등록했습니다: #1 ~ #6
+- `.agent/tasks.md`를 이슈 번호와 동기화하고 완료/미완료 상태를 갱신했습니다.
+
+검증:
+- CI(`Android CI`) 및 Pages 배포 워크플로 실행 확인 예정
+
 ## 2026-04-30
 
 Initial planning documents created.

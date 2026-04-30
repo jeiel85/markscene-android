@@ -12,7 +12,7 @@ Build the smallest useful MVP vertical slice.
 - [x] Add Jetpack Compose baseline.
 - [x] Add Material 3 theme.
 - [x] Add basic navigation shell.
-- [ ] Add placeholder app icon/name only if needed.
+- [x] Add placeholder app icon/name only if needed.
 
 ### Core Records
 
@@ -24,7 +24,7 @@ Build the smallest useful MVP vertical slice.
 ### Photo Input
 
 - [x] Add Photo Picker import flow.
-- [ ] Add CameraX capture flow.
+- [ ] Add CameraX capture flow. (#1)
 - [x] Store selected/captured image reference safely.
 - [x] Show image preview immediately.
 
@@ -56,24 +56,19 @@ Build the smallest useful MVP vertical slice.
 ### Privacy and Release
 
 - [x] Add in-app privacy notice.
-- [ ] Add no-secrets `.gitignore` entries.
-- [ ] Add release checklist.
-- [ ] Add privacy policy draft before store release.
+- [ ] Add no-secrets `.gitignore` entries. (#2)
+- [ ] Add release checklist. (#4)
+- [ ] Add privacy policy draft before store release. (#3)
 
-## Recommended First Task
+### Branding and Web
 
-Create the Android project skeleton and implement a Compose home screen with three actions:
-
-1. Capture photo.
-2. Import photo.
-3. Open settings.
-
-No AI provider is needed for the first task.
+- [x] Replace default launcher icon with product identity icon.
+- [x] Add GitHub Pages branding site (`docs/branding`) and deploy workflow.
 
 ### Repository / Agent Workflow
 
 - [x] Replace `<TO_BE_FILLED>` in `AGENTS.md` with the real GitHub repository URL.
-- [ ] Decide initial license and add `LICENSE` if the repository will be public.
+- [ ] Decide initial license and add `LICENSE` if the repository will be public. (#5)
 - [x] Add GitHub Actions workflow for fast Android validation.
-- [ ] Confirm `HISTORY.md` and `CHANGELOG.md` are updated after each meaningful change.
-- [ ] Add `CLAUDE.md`, `GEMINI.md`, or other agent entry files only as thin references to `AGENTS.md` if needed.
+- [ ] Confirm `HISTORY.md` and `CHANGELOG.md` are updated after each meaningful change. (#6)
+- [ ] Add `CLAUDE.md`, `GEMINI.md`, or other agent entry files only as thin references to `AGENTS.md` if needed. (#6)
