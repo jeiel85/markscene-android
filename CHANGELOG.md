@@ -17,6 +17,9 @@
 - CI: 푸시 후 `Android CI`, `Deploy GitHub Pages` 확인
 - 릴리즈: 태그 `v0.4.0` 푸시 후 `Release APK` 워크플로와 GitHub Release 아티팩트 확인
 
+### Build / CI
+- CameraX 요구사항에 맞추기 위해 Android Gradle Plugin 버전을 `8.6.1`로 업데이트했습니다.
+
 ## v0.3.8 - 2026-04-30
 
 ### Added

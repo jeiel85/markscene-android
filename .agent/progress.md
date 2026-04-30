@@ -13,6 +13,9 @@
 - CI: 커밋 푸시 후 `Android CI` 및 `Deploy GitHub Pages` 확인 예정
 - 릴리즈: `v0.4.0` 태그 푸시 후 `Release APK` 확인 예정
 
+추가 수정:
+- CameraX AAR metadata 요구사항(AGP 8.6+)에 맞춰 Android Gradle Plugin 버전을 `8.6.1`로 상향했습니다.
+
 ## 2026-04-30 (Iteration 2.8 - CameraX 캡처 플로우 전환)
 
 작업 내용:

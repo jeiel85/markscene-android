@@ -11,7 +11,7 @@
   - `.agent/progress.md`, `HISTORY.md`, `CHANGELOG.md`
 - 검증:
   - 로컬: Android SDK 경로 미설정으로 빌드 제한
-  - CI: 푸시 후 Android CI / Pages 배포 확인
+  - CI: CameraX 의존성의 AGP 요구사항으로 초기 실패 확인 후 AGP `8.6.1` 상향 재검증
   - 릴리즈: `v0.4.0` 태그 푸시 후 Release APK 워크플로 결과 확인
 - 결과: Pages 루트 접근 경로와 APK 릴리즈 파이프라인 준비 완료
 - 후속 작업:
