@@ -26,6 +26,10 @@ fun SettingsScreen(
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
+    onExportBackup: () -> Unit,
+    onImportBackup: () -> Unit,
+    externalMessage: String? = null,
+    onMessageShown: () -> Unit,
     onOpenPrivacyNotice: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -126,6 +130,24 @@ fun SettingsScreen(
                 }
             }
 
+            // Backup Section
+            SettingsSection(title = "데이터 및 백업") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SettingsItem(
+                        icon = Icons.Default.CloudDownload,
+                        title = "데이터 내보내기",
+                        description = "모든 기록과 사진을 ZIP 파일로 저장",
+                        onClick = onExportBackup
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.CloudUpload,
+                        title = "데이터 가져오기",
+                        description = "백업된 ZIP 파일로부터 기록 복구",
+                        onClick = onImportBackup
+                    )
+                }
+            }
+
             // Privacy Section
             SettingsSection(title = "보안 및 개인정보") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -158,17 +180,31 @@ fun SettingsScreen(
             }
 
             // Message Display
-            resultMessage?.let {
+            val messageToShow = externalMessage ?: resultMessage
+            messageToShow?.let {
                 Snackbar(
                     modifier = Modifier.padding(vertical = 8.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(it)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(it)
+                        TextButton(onClick = { 
+                            if (externalMessage != null) onMessageShown() else resultMessage = null 
+                        }) {
+                            Text("확인", color = MaterialTheme.colorScheme.inversePrimary)
+                        }
+                    }
                 }
                 
-                LaunchedEffect(it) {
-                    kotlinx.coroutines.delay(3000)
-                    resultMessage = null
+                if (externalMessage == null) {
+                    LaunchedEffect(it) {
+                        kotlinx.coroutines.delay(5000)
+                        resultMessage = null
+                    }
                 }
             }
         }

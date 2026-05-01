@@ -1,5 +1,7 @@
 package com.markscene.app.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +26,7 @@ import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
+import com.markscene.app.data.backup.BackupManager
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.ui.screen.CreateRecordScreen
@@ -88,9 +91,33 @@ fun MarkSceneApp() {
     }
     val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
+    val backupManager = remember { BackupManager(context.applicationContext, repository) }
 
     var searchQuery by remember { mutableStateOf("") }
     var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
+    var backupStatusMessage by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                val result = backupManager.exportBackup(it)
+                backupStatusMessage = if (result.isSuccess) "백업이 성공적으로 완료되었습니다." else "백업 실패: ${result.exceptionOrNull()?.message}"
+            }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                val result = backupManager.importBackup(it)
+                backupStatusMessage = if (result.isSuccess) "${result.getOrNull()}개의 기록을 복구했습니다." else "복구 실패: ${result.exceptionOrNull()?.message}"
+            }
+        }
+    }
 
     val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
 
@@ -209,6 +236,10 @@ fun MarkSceneApp() {
                         "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
                     }
                 },
+                onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
+                onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
+                externalMessage = backupStatusMessage,
+                onMessageShown = { backupStatusMessage = null },
                 onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
                 onBack = { navController.popBackStack() }
             )

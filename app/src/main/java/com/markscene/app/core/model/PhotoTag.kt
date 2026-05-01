@@ -1,5 +1,8 @@
 package com.markscene.app.core.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PhotoTag(
     val id: String,
     val recordId: String,
