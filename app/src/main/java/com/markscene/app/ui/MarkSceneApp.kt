@@ -18,6 +18,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.markscene.app.ai.provider.GeminiAdvancedVisionProvider
 import com.markscene.app.ai.provider.MlKitLocalImageTagger
+import com.markscene.app.ai.provider.MlKitTextRecognizer
 import com.markscene.app.core.database.MarkSceneDatabase
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
@@ -63,6 +64,12 @@ private val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
+private val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE photo_records ADD COLUMN ocrText TEXT")
+    }
+}
+
 @Composable
 fun MarkSceneApp() {
     val context = LocalContext.current
@@ -70,13 +77,14 @@ fun MarkSceneApp() {
     val scope = rememberCoroutineScope()
 
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext) }
+    val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
     val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
     val database = remember {
         Room.databaseBuilder(
             context.applicationContext,
             MarkSceneDatabase::class.java,
             "markscene.db"
-        ).addMigrations(MIGRATION_1_2).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
     val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
@@ -103,6 +111,7 @@ fun MarkSceneApp() {
             CreateRecordScreen(
                 source = source,
                 localImageTagger = localTagger,
+                textRecognizer = textRecognizer,
                 onSave = { record ->
                     scope.launch {
                         repository.saveRecord(record)

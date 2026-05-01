@@ -11,5 +11,6 @@ data class PhotoRecordEntity(
     val memo: String?,
     val createdAt: Long,
     val updatedAt: Long,
-    val analysisStatus: String
+    val analysisStatus: String,
+    val ocrText: String?
 )

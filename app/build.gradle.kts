@@ -15,8 +15,8 @@ android {
         applicationId = "com.markscene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.5.3"
+        versionCode = 20
+        versionName = "0.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -104,6 +104,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.coil.compose)
     implementation(libs.mlkit.image.labeling)
+    implementation(libs.mlkit.text.recognition.korean)
     implementation(libs.okhttp)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

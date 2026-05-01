@@ -21,6 +21,7 @@ interface RecordDao {
         WHERE :query = ''
            OR LOWER(COALESCE(r.title, '')) LIKE '%' || LOWER(:query) || '%'
            OR LOWER(COALESCE(r.memo, '')) LIKE '%' || LOWER(:query) || '%'
+           OR LOWER(COALESCE(r.ocrText, '')) LIKE '%' || LOWER(:query) || '%'
            OR LOWER(COALESCE(t.name, '')) LIKE '%' || LOWER(:query) || '%'
         ORDER BY r.createdAt DESC
         """

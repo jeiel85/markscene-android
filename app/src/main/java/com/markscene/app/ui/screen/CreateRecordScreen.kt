@@ -41,6 +41,7 @@ import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.google.common.util.concurrent.ListenableFuture
 import com.markscene.app.ai.provider.LocalImageTagger
+import com.markscene.app.ai.provider.TextRecognizer
 import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
@@ -55,6 +56,7 @@ import kotlin.coroutines.suspendCoroutine
 fun CreateRecordScreen(
     source: String,
     localImageTagger: LocalImageTagger,
+    textRecognizer: TextRecognizer,
     onSave: (PhotoRecord) -> Unit,
     onBack: () -> Unit
 ) {
@@ -62,6 +64,7 @@ fun CreateRecordScreen(
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var title by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
+    var ocrText by remember { mutableStateOf<String?>(null) }
     var customTag by remember { mutableStateOf("") }
     var statusText by remember { mutableStateOf("") }
     var isAnalyzing by remember { mutableStateOf(false) }
@@ -82,12 +85,19 @@ fun CreateRecordScreen(
     LaunchedEffect(imageUri) {
         val uri = imageUri ?: return@LaunchedEffect
         isAnalyzing = true
-        statusText = "AI가 태그를 분석 중입니다..."
-        val tags = localImageTagger.generateTags(uri).map { it.name }
-        editableTags.clear()
-        editableTags.addAll(tags)
-        isAnalyzing = false
-        statusText = "분석이 완료되었습니다."
+        statusText = "AI가 태그와 텍스트를 분석 중입니다..."
+        try {
+            val tagsResult = localImageTagger.generateTags(uri)
+            val ocrResult = textRecognizer.recognizeText(uri)
+            editableTags.clear()
+            editableTags.addAll(tagsResult.map { it.name })
+            ocrText = ocrResult.getOrNull()
+            statusText = "분석이 완료되었습니다."
+        } catch (e: Exception) {
+            statusText = "분석 중 오류 발생: ${e.message}"
+        } finally {
+            isAnalyzing = false
+        }
     }
 
     Scaffold(
@@ -126,6 +136,7 @@ fun CreateRecordScreen(
                                     createdAt = now,
                                     updatedAt = now,
                                     analysisStatus = AnalysisStatus.LocalComplete,
+                                    ocrText = ocrText,
                                     tags = tags
                                 )
                             )

@@ -46,7 +46,8 @@ class RoomRecordRepository(
                 memo = record.memo,
                 createdAt = record.createdAt,
                 updatedAt = record.updatedAt,
-                analysisStatus = record.analysisStatus.name
+                analysisStatus = record.analysisStatus.name,
+                ocrText = record.ocrText
             )
         )
         recordDao.deleteTagsForRecord(record.id)
@@ -93,6 +94,7 @@ private fun PhotoRecordWithTags.toModel(): PhotoRecord =
         createdAt = record.createdAt,
         updatedAt = record.updatedAt,
         analysisStatus = AnalysisStatus.valueOf(record.analysisStatus),
+        ocrText = record.ocrText,
         tags = tags.map { tag ->
             PhotoTag(
                 id = tag.id,
