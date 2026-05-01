@@ -1,25 +1,28 @@
 package com.markscene.app.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.markscene.app.ai.provider.MockAdvancedVisionProvider
 import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
@@ -27,84 +30,247 @@ import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.PhotoRecord
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RecordDetailScreen(
     record: PhotoRecord,
     latestAnalysis: AdvancedAnalysis?,
     onRunAdvancedAnalysis: suspend (PhotoRecord) -> MockAdvancedAnalysisResult,
     onApplyAdvancedAnalysis: (MockAdvancedAnalysisResult) -> Unit,
+    onDeleteRecord: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val mockProvider = remember { MockAdvancedVisionProvider() }
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    
     var analysisResult by remember { mutableStateOf<MockAdvancedAnalysisResult?>(null) }
     var showConsentDialog by remember { mutableStateOf(false) }
-    var analysisStatusText by remember { mutableStateOf<String?>(null) }
+    var isAnalyzing by remember { mutableStateOf(false) }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Record Detail", style = MaterialTheme.typography.headlineSmall)
-        AsyncImage(model = record.imageUri, contentDescription = "record image", modifier = Modifier.fillMaxWidth())
-        Text(record.title ?: "Untitled", style = MaterialTheme.typography.titleMedium)
-        Text(record.memo ?: "메모 없음", style = MaterialTheme.typography.bodyMedium)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(record.tags) { tag -> AssistChip(onClick = {}, label = { Text(tag.name) }) }
-        }
-
-        latestAnalysis?.let {
-            Text("Saved Analysis", style = MaterialTheme.typography.titleMedium)
-            Text(it.sceneSummary)
-        }
-
-        analysisStatusText?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-
-        Button(onClick = { showConsentDialog = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("Run Advanced Analysis")
-        }
-
-        analysisResult?.let { result ->
-            Text("Scene Summary", style = MaterialTheme.typography.titleMedium)
-            Text(result.sceneSummary)
-            Text("Suggested Tags", style = MaterialTheme.typography.titleMedium)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(result.suggestedTags) { tag -> AssistChip(onClick = {}, label = { Text(tag) }) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("") },
+                navigationIcon = {
+                    IconButton(onClick = onBack, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onDeleteRecord(record.id) }, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+        ) {
+            // Image Header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+            ) {
+                AsyncImage(
+                    model = record.imageUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                // Bottom Gradient Overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.background),
+                                startY = 800f
+                            )
+                        )
+                )
             }
-            Text(result.warnings.joinToString("\n"), style = MaterialTheme.typography.bodySmall)
-            Button(onClick = { onApplyAdvancedAnalysis(result) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Apply Analysis To Record")
+
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .offset(y = (-40).dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                // Info Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = record.title ?: "제목 없는 기록",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        if (!record.memo.isNullOrBlank()) {
+                            Text(
+                                text = record.memo,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                lineHeight = 24.sp
+                            )
+                        }
+
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            record.tags.forEach { tag ->
+                                SuggestionChip(
+                                    onClick = {},
+                                    label = { Text(tag.name) },
+                                    colors = SuggestionChipDefaults.suggestionChipColors(
+                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                        labelColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    border = null
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // AI Insights Section
+                Text(
+                    text = "AI Insights",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                if (latestAnalysis != null) {
+                    AIInsightCard(summary = latestAnalysis.sceneSummary)
+                } else if (analysisResult != null) {
+                    AIInsightCard(
+                        summary = analysisResult!!.sceneSummary,
+                        suggestedTags = analysisResult!!.suggestedTags,
+                        onApply = { onApplyAdvancedAnalysis(analysisResult!!) }
+                    )
+                } else {
+                    OutlinedButton(
+                        onClick = { showConsentDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        enabled = !isAnalyzing
+                    ) {
+                        if (isAnalyzing) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(12.dp))
+                            Text("분석 중...")
+                        } else {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("고급 AI 분석 실행하기")
+                        }
+                    }
+                }
+                
+                statusMessage?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                }
+                
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
-
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Back") }
     }
 
     if (showConsentDialog) {
         AlertDialog(
             onDismissRequest = { showConsentDialog = false },
-            title = { Text("외부 분석 안내") },
-            text = { Text("고급 분석을 실행하면 선택한 이미지와 프롬프트가 AI 제공자에 전송될 수 있습니다.") },
+            title = { Text("AI 고급 분석 안내") },
+            text = { Text("이 사진을 분석하기 위해 외부 AI 엔진으로 전송합니다. 계속하시겠습니까?") },
             confirmButton = {
                 Button(onClick = {
-                    scope.launch {
-                        analysisStatusText = "고급 분석 실행 중..."
-                        analysisResult = runCatching {
-                            onRunAdvancedAnalysis(record)
-                        }.getOrElse {
-                            analysisStatusText = "실제 분석 실패, mock 결과로 대체합니다."
-                            mockProvider.analyze(record)
-                        }
-                        analysisStatusText = "고급 분석 결과가 준비되었습니다."
-                    }
                     showConsentDialog = false
-                }) { Text("Analyze") }
+                    isAnalyzing = true
+                    scope.launch {
+                        try {
+                            analysisResult = onRunAdvancedAnalysis(record)
+                            statusMessage = "분석이 완료되었습니다."
+                        } catch (e: Exception) {
+                            statusMessage = "분석 중 오류 발생: ${e.message}"
+                        } finally {
+                            isAnalyzing = false
+                        }
+                    }
+                }) { Text("분석 시작") }
             },
             dismissButton = {
-                Button(onClick = { showConsentDialog = false }) { Text("Cancel") }
-            }
+                TextButton(onClick = { showConsentDialog = false }) { Text("취소") }
+            },
+            shape = RoundedCornerShape(24.dp)
         )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AIInsightCard(
+    summary: String,
+    suggestedTags: List<String>? = null,
+    onApply: (() -> Unit)? = null
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Default.TipsAndUpdates, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text("장면 요약", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 24.sp
+            )
+
+            if (suggestedTags != null) {
+                Divider(alpha = 0.1f)
+                Text("추천 태그", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    suggestedTags.forEach { tag ->
+                        SuggestionChip(onClick = {}, label = { Text(tag) })
+                    }
+                }
+                
+                Button(
+                    onClick = { onApply?.invoke() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("태그 적용하기")
+                }
+            }
+        }
     }
 }

@@ -13,32 +13,28 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
@@ -53,6 +49,7 @@ import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CreateRecordScreen(
     source: String,
@@ -65,7 +62,8 @@ fun CreateRecordScreen(
     var title by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
     var customTag by remember { mutableStateOf("") }
-    var statusText by remember { mutableStateOf("사진을 선택하면 태그 초안을 생성합니다.") }
+    var statusText by remember { mutableStateOf("") }
+    var isAnalyzing by remember { mutableStateOf(false) }
     val editableTags = remember { mutableStateListOf<String>() }
 
     val pickerLauncher = rememberLauncherForActivityResult(
@@ -77,152 +75,208 @@ fun CreateRecordScreen(
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) {
-            statusText = "촬영 버튼을 눌러 사진을 찍으세요."
-        } else {
-            statusText = "카메라 권한이 필요합니다."
-        }
-    }
-
-    LaunchedEffect(source) {
-        if (source == SOURCE_IMPORT) {
-            statusText = "가져올 사진을 선택하세요."
-        } else {
-            statusText = "촬영 버튼으로 사진을 찍으세요."
-        }
+        if (!granted) statusText = "카메라 권한이 필요합니다."
     }
 
     LaunchedEffect(imageUri) {
         val uri = imageUri ?: return@LaunchedEffect
-        statusText = "로컬 태그 초안을 생성 중입니다..."
+        isAnalyzing = true
+        statusText = "AI가 태그를 분석 중입니다..."
         val tags = localImageTagger.generateTags(uri).map { it.name }
         editableTags.clear()
         editableTags.addAll(tags)
-        statusText = "태그 초안이 생성되었습니다. 필요한 경우 수정하세요."
+        isAnalyzing = false
+        statusText = "분석이 완료되었습니다."
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text(text = "Create Record", style = MaterialTheme.typography.headlineSmall)
-        Text(text = statusText, style = MaterialTheme.typography.bodySmall)
-
-        if (source == SOURCE_IMPORT) {
-            Button(
-                onClick = {
-                    pickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Import Photo") }
-        }
-
-        if (source == SOURCE_CAPTURE) {
-            val granted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-
-            if (!granted) {
-                Button(
-                    onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("카메라 권한 요청") }
-            } else if (imageUri == null) {
-                CameraCapturePreview(
-                    onCaptured = { capturedUri ->
-                        imageUri = capturedUri
-                        statusText = "사진 촬영이 완료되었습니다."
-                    },
-                    onError = { message ->
-                        statusText = message
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("새 메모 기록", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.Close, contentDescription = "Close")
                     }
-                )
-            } else {
-                Button(
-                    onClick = {
-                        imageUri = null
-                        statusText = "다시 촬영할 수 있습니다."
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("다시 촬영") }
-            }
-        }
-
-        if (imageUri != null) {
-            AsyncImage(
-                model = imageUri,
-                contentDescription = "selected image",
-                modifier = Modifier.fillMaxWidth()
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            val selectedUri = imageUri ?: return@TextButton
+                            val now = System.currentTimeMillis()
+                            val recordId = UUID.randomUUID().toString()
+                            val tags = editableTags.map { tagName ->
+                                PhotoTag(
+                                    id = UUID.randomUUID().toString(),
+                                    recordId = recordId,
+                                    name = tagName,
+                                    rawName = null,
+                                    source = TagSource.LocalImageLabel,
+                                    confidence = null,
+                                    userConfirmed = true,
+                                    createdAt = now
+                                )
+                            }
+                            onSave(
+                                PhotoRecord(
+                                    id = recordId,
+                                    imageUri = selectedUri.toString(),
+                                    title = title.ifBlank { null },
+                                    memo = memo.ifBlank { null },
+                                    createdAt = now,
+                                    updatedAt = now,
+                                    analysisStatus = AnalysisStatus.LocalComplete,
+                                    tags = tags
+                                )
+                            )
+                        },
+                        enabled = imageUri != null && !isAnalyzing
+                    ) {
+                        Text("저장", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Image Preview Area
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    IconButton(
+                        onClick = { imageUri = null },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(12.dp)
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.White)
+                    }
+                } else {
+                    if (source == SOURCE_CAPTURE) {
+                        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                        if (granted) {
+                            CameraCapturePreview(
+                                onCaptured = { imageUri = it },
+                                onError = { statusText = it }
+                            )
+                        } else {
+                            Button(onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }) {
+                                Text("카메라 권한 허용")
+                            }
+                        }
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.clickable { 
+                                pickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) 
+                            }
+                        ) {
+                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, size = 48.dp, tint = MaterialTheme.colorScheme.primary)
+                            Text("사진 선택하기", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+            }
 
-        Text(
-            text = "선택 이미지: ${imageUri?.toString() ?: "없음"}",
-            style = MaterialTheme.typography.bodySmall
-        )
+            if (statusText.isNotBlank()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (isAnalyzing) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        else Icon(Icons.Default.AutoAwesome, contentDescription = null, size = 16.dp, tint = MaterialTheme.colorScheme.primary)
+                        Text(statusText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
 
-        OutlinedTextField(value = title, onValueChange = { title = it }, modifier = Modifier.fillMaxWidth(), label = { Text("제목 (선택)") })
-        OutlinedTextField(value = memo, onValueChange = { memo = it }, modifier = Modifier.fillMaxWidth(), label = { Text("메모 (선택)") })
+            // Input Fields
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("제목") },
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = memo,
+                    onValueChange = { memo = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("메모") },
+                    shape = RoundedCornerShape(12.dp),
+                    minLines = 3
+                )
+            }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            editableTags.forEach { tag ->
-                AssistChip(onClick = { editableTags.remove(tag) }, label = { Text(tag) })
+            // Tags Section
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("태그", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    editableTags.forEach { tag ->
+                        InputChip(
+                            selected = true,
+                            onClick = { editableTags.remove(tag) },
+                            label = { Text(tag) },
+                            trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, size = 14.dp) }
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = customTag,
+                    onValueChange = { customTag = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("태그 직접 입력 후 엔터") },
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            val normalized = customTag.trim().lowercase()
+                            if (normalized.isNotBlank() && !editableTags.contains(normalized)) {
+                                editableTags.add(normalized)
+                                customTag = ""
+                            }
+                        }) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                        }
+                    },
+                    singleLine = true
+                )
             }
         }
-
-        OutlinedTextField(value = customTag, onValueChange = { customTag = it }, modifier = Modifier.fillMaxWidth(), label = { Text("태그 추가") })
-
-        Button(
-            onClick = {
-                val normalized = customTag.trim().lowercase()
-                if (normalized.isNotBlank() && normalized !in editableTags) {
-                    editableTags.add(normalized)
-                    customTag = ""
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Add Tag") }
-
-        Button(
-            onClick = {
-                val selectedUri = imageUri ?: return@Button
-                val now = System.currentTimeMillis()
-                val recordId = UUID.randomUUID().toString()
-                val tags = editableTags.map { tagName ->
-                    PhotoTag(
-                        id = UUID.randomUUID().toString(),
-                        recordId = recordId,
-                        name = tagName,
-                        rawName = null,
-                        source = TagSource.Mock,
-                        confidence = null,
-                        userConfirmed = true,
-                        createdAt = now
-                    )
-                }
-                onSave(
-                    PhotoRecord(
-                        id = recordId,
-                        imageUri = selectedUri.toString(),
-                        title = title.ifBlank { null },
-                        memo = memo.ifBlank { null },
-                        createdAt = now,
-                        updatedAt = now,
-                        analysisStatus = AnalysisStatus.LocalComplete,
-                        tags = tags
-                    )
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = imageUri != null
-        ) { Text("Save Record") }
-
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Back") }
     }
 }
 
@@ -236,82 +290,56 @@ private fun CameraCapturePreview(
     val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }
     val previewView = remember { PreviewView(context) }
     val imageCapture = remember {
-        ImageCapture.Builder()
-            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-            .build()
+        ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
     }
 
-    LaunchedEffect(lifecycleOwner, previewView, imageCapture) {
+    LaunchedEffect(lifecycleOwner) {
         val providerFuture = ProcessCameraProvider.getInstance(context)
         val cameraProvider = providerFuture.await(cameraExecutor)
-        val preview = Preview.Builder().build().also {
-            it.setSurfaceProvider(previewView.surfaceProvider)
-        }
+        val preview = Preview.Builder().build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
         cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(
-            lifecycleOwner,
-            CameraSelector.DEFAULT_BACK_CAMERA,
-            preview,
-            imageCapture
-        )
+        cameraProvider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            ProcessCameraProvider.getInstance(context).apply {
-                if (isDone) {
-                    get().unbindAll()
-                }
-            }
+    Box(modifier = Modifier.fillMaxSize()) {
+        AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+        
+        // Shutter Button
+        FloatingActionButton(
+            onClick = {
+                val captureTarget = createCaptureTarget(context)
+                val output = ImageCapture.OutputFileOptions.Builder(captureTarget.file).build()
+                imageCapture.takePicture(
+                    output,
+                    cameraExecutor,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            onCaptured(captureTarget.uri)
+                        }
+                        override fun onError(exception: ImageCaptureException) {
+                            onError("촬영 실패: ${exception.message}")
+                        }
+                    }
+                )
+            },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp),
+            containerColor = Color.White,
+            contentColor = Primary,
+            shape = CircleShape
+        ) {
+            Icon(Icons.Default.PhotoCamera, contentDescription = "Capture", modifier = Modifier.size(32.dp))
         }
     }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(320.dp)
-    ) {
-        AndroidView(
-            factory = { previewView },
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-
-    Button(
-        onClick = {
-            val captureTarget = createCaptureTarget(context)
-            val output = ImageCapture.OutputFileOptions.Builder(captureTarget.file).build()
-            imageCapture.takePicture(
-                output,
-                cameraExecutor,
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        onCaptured(captureTarget.uri)
-                    }
-
-                    override fun onError(exception: ImageCaptureException) {
-                        onError("사진 촬영에 실패했습니다: ${exception.message ?: "알 수 없는 오류"}")
-                    }
-                }
-            )
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) { Text("Capture Photo") }
 }
 
-private data class CaptureTarget(
-    val file: File,
-    val uri: Uri
-)
+private data class CaptureTarget(val file: File, val uri: Uri)
 
 private fun createCaptureTarget(context: Context): CaptureTarget {
     val directory = File(context.cacheDir, "camera").apply { mkdirs() }
     val file = File(directory, "capture_${System.currentTimeMillis()}.jpg")
-    val uri = FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.fileprovider",
-        file
-    )
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     return CaptureTarget(file = file, uri = uri)
 }
 
@@ -321,8 +349,7 @@ private const val SOURCE_IMPORT = "import"
 private suspend fun ListenableFuture<ProcessCameraProvider>.await(
     executor: java.util.concurrent.Executor
 ): ProcessCameraProvider = suspendCoroutine { continuation ->
-    addListener(
-        { continuation.resume(get()) },
-        executor
-    )
+    addListener({ continuation.resume(get()) }, executor)
 }
+
+private fun Modifier.size(size: androidx.compose.ui.unit.Dp): Modifier = this.width(size).height(size)
