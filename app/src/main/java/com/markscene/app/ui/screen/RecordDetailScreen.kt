@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -262,7 +263,7 @@ private fun AIInsightCard(
             )
 
             if (suggestedTags != null) {
-                HorizontalDivider(modifier = Modifier.alpha(0.1f))
+                HorizontalDivider(modifier = Modifier.graphicsLayer { alpha = 0.1f })
                 Text("추천 태그", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -286,7 +287,3 @@ private fun AIInsightCard(
 }
 
 private fun Modifier.size(size: androidx.compose.ui.unit.Dp): Modifier = this.width(size).height(size)
-private fun Modifier.alpha(alpha: Float): Modifier = this.graphicsLayer { this.alpha = alpha }
-
-// Helper for alpha if graphicsLayer is not enough or confusing
-import androidx.compose.ui.graphics.graphicsLayer
