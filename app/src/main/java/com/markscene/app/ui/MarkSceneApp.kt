@@ -35,6 +35,9 @@ import com.markscene.app.ui.screen.PrivacyNoticeScreen
 import com.markscene.app.ui.screen.RecordDetailScreen
 import com.markscene.app.ui.screen.RecordListScreen
 import com.markscene.app.ui.screen.SettingsScreen
+import androidx.fragment.app.FragmentActivity
+import com.markscene.app.data.settings.SecurityStore
+import com.markscene.app.ui.security.BiometricAuthenticator
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -76,6 +79,7 @@ private val MIGRATION_2_3 = object : Migration(2, 3) {
 @Composable
 fun MarkSceneApp() {
     val context = LocalContext.current
+    val activity = context as FragmentActivity
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
@@ -91,11 +95,27 @@ fun MarkSceneApp() {
     }
     val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
+    val securityStore = remember { SecurityStore(context.applicationContext) }
     val backupManager = remember { BackupManager(context.applicationContext, repository) }
+    val authenticator = remember { BiometricAuthenticator(activity) }
 
     var searchQuery by remember { mutableStateOf("") }
     var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
+    var isBiometricLockEnabled by remember { mutableStateOf(securityStore.isBiometricLockEnabled()) }
+    var isAppLocked by remember { mutableStateOf(isBiometricLockEnabled) }
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
+
+    // Biometric Authentication on Start
+    LaunchedEffect(Unit) {
+        if (isBiometricLockEnabled) {
+            authenticator.authenticate(
+                onSuccess = { isAppLocked = false },
+                onError = { message ->
+                    backupStatusMessage = "인증 실패: $message"
+                }
+            )
+        }
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
@@ -121,7 +141,59 @@ fun MarkSceneApp() {
 
     val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
 
-    NavHost(navController = navController, startDestination = HOME_ROUTE) {
+    if (isAppLocked) {
+        // Simple Lock Screen Overlay
+        Box(
+            modifier = androidx.compose.ui.Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    modifier = androidx.compose.ui.Modifier.size(80.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "앱이 잠겨 있습니다",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Button(
+                    onClick = {
+                        authenticator.authenticate(
+                            onSuccess = { isAppLocked = false },
+                            onError = { backupStatusMessage = it }
+                        )
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)
+                ) {
+                    Text("인증하여 해제")
+                }
+            }
+
+            // Message Display for Authentication Errors
+            backupStatusMessage?.let {
+                Snackbar(
+                    modifier = androidx.compose.ui.Modifier.padding(paddingValues = PaddingValues(16.dp)).align(Alignment.BottomCenter),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(it)
+                }
+                LaunchedEffect(it) {
+                    kotlinx.coroutines.delay(3000)
+                    backupStatusMessage = null
+                }
+            }
+        }
+    } else {
+        NavHost(navController = navController, startDestination = HOME_ROUTE) {
         composable(HOME_ROUTE) {
             HomeScreen(
                 onCapturePhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_CAPTURE") },

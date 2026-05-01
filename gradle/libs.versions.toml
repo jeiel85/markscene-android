@@ -8,6 +8,7 @@ activityCompose = "1.9.2"
 composeBom = "2024.09.00"
 room = "2.6.1"
 securityCrypto = "1.1.0-alpha06"
+biometric = "1.2.0-alpha05"
 coil = "2.7.0"
 mlkitLabeling = "17.0.9"
 mlkitTextRecognition = "16.0.1"
@@ -31,6 +32,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCrypto" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 mlkit-image-labeling = { group = "com.google.mlkit", name = "image-labeling", version.ref = "mlkitLabeling" }
 mlkit-text-recognition-korean = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-korean", version.ref = "mlkitTextRecognition" }

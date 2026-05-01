@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SettingsScreen(
     hasApiKey: Boolean,
+    isBiometricLockEnabled: Boolean,
+    onToggleBiometricLock: (Boolean) -> Unit,
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
@@ -148,9 +150,33 @@ fun SettingsScreen(
                 }
             }
 
-            // Privacy Section
+            // Security Section
             SettingsSection(title = "보안 및 개인정보") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.Fingerprint, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = "생체 인식 잠금", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = "앱 실행 시 지문 또는 얼굴 인식 사용", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isBiometricLockEnabled,
+                                onCheckedChange = onToggleBiometricLock,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary)
+                            )
+                        }
+                    }
+
                     SettingsItem(
                         icon = Icons.Default.PrivacyTip,
                         title = "개인정보 처리방침",
