@@ -106,7 +106,9 @@ fun MarkSceneApp() {
                 onSave = { record ->
                     scope.launch {
                         repository.saveRecord(record)
-                        navController.navigate(SEARCH_ROUTE)
+                        navController.navigate(SEARCH_ROUTE) {
+                            popUpTo(HOME_ROUTE)
+                        }
                     }
                 },
                 onBack = { navController.popBackStack() }
@@ -163,11 +165,17 @@ fun MarkSceneApp() {
                                 AdvancedAnalysis(
                                     id = UUID.randomUUID().toString(),
                                     recordId = record.id,
-                                    provider = if (hasApiKey) "gemini" else "mock",
+                                    provider = if (apiKeyStore.getGeminiApiKey() != null) "gemini" else "mock",
                                     sceneSummary = result.sceneSummary,
                                     createdAt = now
                                 )
                             )
+                        }
+                    },
+                    onDeleteRecord = { id ->
+                        scope.launch {
+                            repository.deleteRecord(id)
+                            navController.popBackStack()
                         }
                     },
                     onBack = { navController.popBackStack() }

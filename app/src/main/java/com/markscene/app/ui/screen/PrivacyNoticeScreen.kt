@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +69,7 @@ fun PrivacyNoticeScreen(onBack: () -> Unit) {
                 lineHeight = 24.sp
             )
 
-            Divider(alpha = 0.1f)
+            HorizontalDivider(modifier = Modifier.alpha(0.1f))
 
             PrivacyItem(
                 title = "1. 로컬 우선 처리",
@@ -112,5 +113,3 @@ private fun PrivacyItem(title: String, description: String) {
         )
     }
 }
-
-private fun Modifier.size(size: androidx.compose.ui.unit.Dp): Modifier = this.width(size).height(size)

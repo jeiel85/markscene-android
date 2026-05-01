@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,7 +41,6 @@ fun RecordDetailScreen(
     onDeleteRecord: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    val mockProvider = remember { MockAdvancedVisionProvider() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
@@ -54,12 +54,22 @@ fun RecordDetailScreen(
             TopAppBar(
                 title = { Text("") },
                 navigationIcon = {
-                    IconButton(onClick = onBack, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                    IconButton(
+                        onClick = onBack, 
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                    ) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onDeleteRecord(record.id) }, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                    IconButton(
+                        onClick = { onDeleteRecord(record.id) }, 
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                    ) {
                         Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
                     }
                 },
@@ -252,7 +262,7 @@ private fun AIInsightCard(
             )
 
             if (suggestedTags != null) {
-                Divider(alpha = 0.1f)
+                HorizontalDivider(modifier = Modifier.alpha(0.1f))
                 Text("추천 태그", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -274,3 +284,9 @@ private fun AIInsightCard(
         }
     }
 }
+
+private fun Modifier.size(size: androidx.compose.ui.unit.Dp): Modifier = this.width(size).height(size)
+private fun Modifier.alpha(alpha: Float): Modifier = this.graphicsLayer { this.alpha = alpha }
+
+// Helper for alpha if graphicsLayer is not enough or confusing
+import androidx.compose.ui.graphics.graphicsLayer

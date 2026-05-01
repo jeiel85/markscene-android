@@ -14,6 +14,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -193,7 +194,7 @@ fun CreateRecordScreen(
                                 pickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) 
                             }
                         ) {
-                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, size = 48.dp, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
                             Text("사진 선택하기", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                         }
                     }
@@ -211,7 +212,7 @@ fun CreateRecordScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (isAnalyzing) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                        else Icon(Icons.Default.AutoAwesome, contentDescription = null, size = 16.dp, tint = MaterialTheme.colorScheme.primary)
+                        else Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
                         Text(statusText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
@@ -251,7 +252,7 @@ fun CreateRecordScreen(
                             selected = true,
                             onClick = { editableTags.remove(tag) },
                             label = { Text(tag) },
-                            trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, size = 14.dp) }
+                            trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp)) }
                         )
                     }
                 }
@@ -326,7 +327,7 @@ private fun CameraCapturePreview(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 24.dp),
             containerColor = Color.White,
-            contentColor = Primary,
+            contentColor = MaterialTheme.colorScheme.primary,
             shape = CircleShape
         ) {
             Icon(Icons.Default.PhotoCamera, contentDescription = "Capture", modifier = Modifier.size(32.dp))

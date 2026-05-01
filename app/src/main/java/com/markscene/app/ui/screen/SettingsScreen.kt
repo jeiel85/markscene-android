@@ -3,6 +3,7 @@ package com.markscene.app.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -117,7 +118,7 @@ fun SettingsScreen(
                             onClick = { resultMessage = onTestConnection() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.SettingsInputComponent, contentDescription = null, size = 18.dp)
+                            Icon(Icons.Default.SettingsInputComponent, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text("연결 테스트 실행")
                         }
@@ -144,7 +145,7 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.Top,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 20.dp)
+                            Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                             Text(
                                 text = "MarkScene은 로컬 우선으로 동작합니다. 고급 분석 실행 시에만 선택한 이미지가 암호화되어 AI 제공자에게 전송됩니다.",
                                 style = MaterialTheme.typography.bodySmall,
