@@ -77,7 +77,7 @@ private val MIGRATION_2_3 = object : Migration(2, 3) {
 }
 
 @Composable
-fun MarkSceneApp() {
+fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
     val context = LocalContext.current
     val activity = context as FragmentActivity
     val navController = rememberNavController()
@@ -109,11 +109,18 @@ fun MarkSceneApp() {
     LaunchedEffect(Unit) {
         if (isBiometricLockEnabled) {
             authenticator.authenticate(
-                onSuccess = { isAppLocked = false },
+                onSuccess = { 
+                    isAppLocked = false
+                    if (sharedImageUri != null) {
+                        navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT?uri=${android.net.Uri.encode(sharedImageUri.toString())}")
+                    }
+                },
                 onError = { message ->
                     backupStatusMessage = "인증 실패: $message"
                 }
             )
+        } else if (sharedImageUri != null) {
+            navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT?uri=${android.net.Uri.encode(sharedImageUri.toString())}")
         }
     }
 

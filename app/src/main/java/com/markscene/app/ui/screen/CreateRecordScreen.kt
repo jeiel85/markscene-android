@@ -55,13 +55,14 @@ import kotlin.coroutines.suspendCoroutine
 @Composable
 fun CreateRecordScreen(
     source: String,
+    initialImageUri: Uri? = null,
     localImageTagger: LocalImageTagger,
     textRecognizer: TextRecognizer,
     onSave: (PhotoRecord) -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageUri by remember { mutableStateOf<Uri?>(initialImageUri) }
     var title by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
     var ocrText by remember { mutableStateOf<String?>(null) }
