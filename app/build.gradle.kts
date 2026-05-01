@@ -15,8 +15,8 @@ android {
         applicationId = "com.markscene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "0.5.2"
+        versionCode = 13
+        versionName = "0.5.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -51,7 +51,7 @@ android {
         }
         getByName("debug") {
             // 프로젝트 내 고정 디버그 키스토어 사용 (CI와 로컬 동일한 서명)
-            storeFile = file("keystore/debug.keystore")
+            storeFile = rootProject.file("keystore/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
