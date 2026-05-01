@@ -3,6 +3,8 @@ package com.markscene.app.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,10 +12,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,14 +25,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.markscene.app.core.model.PhotoRecord
 
 @Composable
 fun HomeScreen(
+    records: List<PhotoRecord>,
     onCapturePhoto: () -> Unit,
     onImportPhoto: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit
 ) {
+    val spaceCounts = remember(records) {
+        records.mapNotNull { it.space }.groupingBy { it }.eachCount()
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
@@ -102,6 +112,30 @@ fun HomeScreen(
                 )
             }
 
+            // Space Summary Section
+            if (spaceCounts.isNotEmpty()) {
+                Text(
+                    text = "공간별 현황",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    spaceCounts.forEach { (space, count) ->
+                        item {
+                            SpaceSummaryCard(
+                                name = space,
+                                count = count,
+                                onClick = onOpenSearch
+                            )
+                        }
+                    }
+                }
+            }
+
             // Search Bar Placeholder (Link to Search)
             Surface(
                 modifier = Modifier
@@ -148,7 +182,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "사진을 찍으면 AI가 자동으로 태그를 제안합니다. 나중에 태그로 손쉽게 검색해 보세요.",
+                        text = "사진을 찍으면 AI가 자동으로 태그를 제안합니다. 공간별로 분류하면 나중에 더 찾기 쉬워요.",
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 20.sp
                     )
@@ -189,6 +223,45 @@ private fun QuickActionCard(
                 style = MaterialTheme.typography.titleMedium,
                 color = contentColor,
                 fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpaceSummaryCard(
+    name: String,
+    count: Int,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .width(120.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onClick() },
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 1.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Place,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Text(
+                text = "${count}개의 기록",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

@@ -2,12 +2,15 @@ package com.markscene.app.ui.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +33,24 @@ fun RecordListScreen(
     onBack: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
+    var selectedSpace by remember { mutableStateOf<String?>(null) }
+    
+    val spaces = remember(records) { 
+        (records.mapNotNull { it.space } + listOf("책상", "주방", "창고", "아이방", "사무실", "거실")).distinct() 
+    }
+    
+    val filteredRecords = remember(records, query, selectedSpace) {
+        records.filter { record ->
+            val matchesQuery = query.isBlank() || 
+                record.title?.contains(query, ignoreCase = true) == true ||
+                record.memo?.contains(query, ignoreCase = true) == true ||
+                record.ocrText?.contains(query, ignoreCase = true) == true ||
+                record.tags.any { it.name.contains(query, ignoreCase = true) }
+            
+            val matchesSpace = selectedSpace == null || record.space == selectedSpace
+            matchesQuery && matchesSpace
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -74,7 +95,7 @@ fun RecordListScreen(
                         onSearch(it)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("태그, 제목, 메모 검색...") },
+                    placeholder = { Text("태그, 제목, 메모, 텍스트 검색...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -87,10 +108,34 @@ fun RecordListScreen(
                 )
             }
 
-            if (records.isEmpty()) {
+            // Space Filter Chips
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    FilterChip(
+                        selected = selectedSpace == null,
+                        onClick = { selectedSpace = null },
+                        label = { Text("전체") },
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+                items(spaces) { space ->
+                    FilterChip(
+                        selected = selectedSpace == space,
+                        onClick = { selectedSpace = if (selectedSpace == space) null else space },
+                        label = { Text(space) },
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+            }
+
+            if (filteredRecords.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "검색 결과가 없습니다.",
+                        text = "결과가 없습니다.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -103,7 +148,7 @@ fun RecordListScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalItemSpacing = 12.dp
                 ) {
-                    items(records, key = { it.id }) { record ->
+                    items(filteredRecords, key = { it.id }) { record ->
                         GalleryItem(
                             record = record,
                             onClick = { onOpenDetail(record.id) }
@@ -142,6 +187,18 @@ private fun GalleryItem(
                 modifier = Modifier.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                if (record.space != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Icon(Icons.Default.Place, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.secondary)
+                        Text(
+                            text = record.space,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 if (!record.title.isNullOrBlank()) {
                     Text(
                         text = record.title,

@@ -12,5 +12,6 @@ data class PhotoRecord(
     val updatedAt: Long,
     val analysisStatus: AnalysisStatus,
     val ocrText: String? = null,
+    val space: String? = null,
     val tags: List<PhotoTag>
 )

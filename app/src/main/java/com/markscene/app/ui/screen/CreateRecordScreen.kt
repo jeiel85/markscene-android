@@ -46,6 +46,8 @@ import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
+import com.markscene.app.ui.util.ImageOptimizer
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 import kotlin.coroutines.resume
@@ -62,13 +64,18 @@ fun CreateRecordScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val defaultSpaces = listOf("책상", "주방", "창고", "아이방", "사무실", "거실", "기타")
+
     var imageUri by remember { mutableStateOf<Uri?>(initialImageUri) }
     var title by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
+    var selectedSpace by remember { mutableStateOf<String?>(null) }
     var ocrText by remember { mutableStateOf<String?>(null) }
     var customTag by remember { mutableStateOf("") }
     var statusText by remember { mutableStateOf("") }
     var isAnalyzing by remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
     val editableTags = remember { mutableStateListOf<String>() }
 
     val pickerLauncher = rememberLauncherForActivityResult(
@@ -110,13 +117,7 @@ fun CreateRecordScreen(
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 },
-import com.markscene.app.ui.util.ImageOptimizer
-import kotlinx.coroutines.launch
-...
                 actions = {
-                    val scope = rememberCoroutineScope()
-                    var isSaving by remember { mutableStateOf(false) }
-
                     TextButton(
                         onClick = {
                             val selectedUri = imageUri ?: return@TextButton
@@ -125,7 +126,6 @@ import kotlinx.coroutines.launch
                                 val now = System.currentTimeMillis()
                                 val recordId = UUID.randomUUID().toString()
                                 
-                                // Optimize and save image to internal storage
                                 val optimizedFile = ImageOptimizer.optimize(
                                     context = context,
                                     inputUri = selectedUri,
@@ -151,6 +151,7 @@ import kotlinx.coroutines.launch
                                             imageUri = Uri.fromFile(optimizedFile).toString(),
                                             title = title.ifBlank { null },
                                             memo = memo.ifBlank { null },
+                                            space = selectedSpace,
                                             createdAt = now,
                                             updatedAt = now,
                                             analysisStatus = AnalysisStatus.LocalComplete,
@@ -255,6 +256,22 @@ import kotlinx.coroutines.launch
 
             // Input Fields
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text("공간 선택", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    defaultSpaces.forEach { space ->
+                        FilterChip(
+                            selected = selectedSpace == space,
+                            onClick = { selectedSpace = if (selectedSpace == space) null else space },
+                            label = { Text(space) },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+                }
+
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
@@ -362,7 +379,7 @@ private fun CameraCapturePreview(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 24.dp),
             containerColor = Color.White,
-            contentColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color(0xFF2D5AFE),
             shape = CircleShape
         ) {
             Icon(Icons.Default.PhotoCamera, contentDescription = "Capture", modifier = Modifier.size(32.dp))

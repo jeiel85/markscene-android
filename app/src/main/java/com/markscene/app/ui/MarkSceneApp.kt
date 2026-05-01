@@ -91,7 +91,7 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
             context.applicationContext,
             MarkSceneDatabase::class.java,
             "markscene.db"
-        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
     }
     val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
@@ -203,6 +203,7 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
         NavHost(navController = navController, startDestination = HOME_ROUTE) {
         composable(HOME_ROUTE) {
             HomeScreen(
+                records = visibleRecords,
                 onCapturePhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_CAPTURE") },
                 onImportPhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT") },
                 onOpenSettings = { navController.navigate(SETTINGS_ROUTE) },

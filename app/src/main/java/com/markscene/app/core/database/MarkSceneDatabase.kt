@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [PhotoRecordEntity::class, PhotoTagEntity::class, AdvancedAnalysisEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class MarkSceneDatabase : RoomDatabase() {
