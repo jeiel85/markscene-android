@@ -110,41 +110,64 @@ fun CreateRecordScreen(
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 },
+import com.markscene.app.ui.util.ImageOptimizer
+import kotlinx.coroutines.launch
+...
                 actions = {
+                    val scope = rememberCoroutineScope()
+                    var isSaving by remember { mutableStateOf(false) }
+
                     TextButton(
                         onClick = {
                             val selectedUri = imageUri ?: return@TextButton
-                            val now = System.currentTimeMillis()
-                            val recordId = UUID.randomUUID().toString()
-                            val tags = editableTags.map { tagName ->
-                                PhotoTag(
-                                    id = UUID.randomUUID().toString(),
-                                    recordId = recordId,
-                                    name = tagName,
-                                    rawName = null,
-                                    source = TagSource.LocalImageLabel,
-                                    confidence = null,
-                                    userConfirmed = true,
-                                    createdAt = now
+                            isSaving = true
+                            scope.launch {
+                                val now = System.currentTimeMillis()
+                                val recordId = UUID.randomUUID().toString()
+                                
+                                // Optimize and save image to internal storage
+                                val optimizedFile = ImageOptimizer.optimize(
+                                    context = context,
+                                    inputUri = selectedUri,
+                                    targetFileName = "$recordId.webp"
                                 )
+                                
+                                if (optimizedFile != null) {
+                                    val tags = editableTags.map { tagName ->
+                                        PhotoTag(
+                                            id = UUID.randomUUID().toString(),
+                                            recordId = recordId,
+                                            name = tagName,
+                                            rawName = null,
+                                            source = TagSource.LocalImageLabel,
+                                            confidence = null,
+                                            userConfirmed = true,
+                                            createdAt = now
+                                        )
+                                    }
+                                    onSave(
+                                        PhotoRecord(
+                                            id = recordId,
+                                            imageUri = Uri.fromFile(optimizedFile).toString(),
+                                            title = title.ifBlank { null },
+                                            memo = memo.ifBlank { null },
+                                            createdAt = now,
+                                            updatedAt = now,
+                                            analysisStatus = AnalysisStatus.LocalComplete,
+                                            ocrText = ocrText,
+                                            tags = tags
+                                        )
+                                    )
+                                } else {
+                                    statusText = "이미지 처리 실패"
+                                    isSaving = false
+                                }
                             }
-                            onSave(
-                                PhotoRecord(
-                                    id = recordId,
-                                    imageUri = selectedUri.toString(),
-                                    title = title.ifBlank { null },
-                                    memo = memo.ifBlank { null },
-                                    createdAt = now,
-                                    updatedAt = now,
-                                    analysisStatus = AnalysisStatus.LocalComplete,
-                                    ocrText = ocrText,
-                                    tags = tags
-                                )
-                            )
                         },
-                        enabled = imageUri != null && !isAnalyzing
+                        enabled = imageUri != null && !isAnalyzing && !isSaving
                     ) {
-                        Text("저장", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        if (isSaving) CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                        else Text("저장", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
