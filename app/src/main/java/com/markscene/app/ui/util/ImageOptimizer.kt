@@ -3,7 +3,6 @@ package com.markscene.app.ui.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.graphics.BitmapFactory as GFXBitmapFactory
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import kotlinx.coroutines.Dispatchers
@@ -29,14 +28,14 @@ object ImageOptimizer {
             val exif = ExifInterface(bytes.inputStream())
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
-            val opts = GFXBitmapFactory.Options()
+            val opts: android.graphics.BitmapFactory.Options = android.graphics.BitmapFactory.Options()
             opts.inJustDecodeSize = true
-            GFXBitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
             
             opts.inSampleSize = calculateInSampleSize(opts, maxWidth, maxHeight)
             opts.inJustDecodeSize = false
             
-            var bitmap = GFXBitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return@withContext null
+            var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return@withContext null
 
             bitmap = rotateBitmap(bitmap, orientation)
 
@@ -60,7 +59,7 @@ object ImageOptimizer {
         }
     }
 
-    private fun calculateInSampleSize(options: GFXBitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(options: android.graphics.BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         val h = options.outHeight
         val w = options.outWidth
         var inSampleSize = 1
