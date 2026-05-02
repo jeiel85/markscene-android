@@ -37,9 +37,11 @@ import kotlinx.coroutines.launch
 fun RecordDetailScreen(
     record: PhotoRecord,
     latestAnalysis: AdvancedAnalysis?,
+    historyRecords: List<PhotoRecord> = emptyList(),
     onRunAdvancedAnalysis: suspend (PhotoRecord) -> MockAdvancedAnalysisResult,
     onApplyAdvancedAnalysis: (MockAdvancedAnalysisResult) -> Unit,
     onDeleteRecord: (String) -> Unit,
+    onOpenOtherRecord: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -217,6 +219,24 @@ fun RecordDetailScreen(
                             Icon(Icons.Default.AutoAwesome, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
                             Text("고급 AI 분석 실행하기")
+                        }
+                    }
+                }
+                
+                // Location History Section
+                if (historyRecords.size > 1) {
+                    Text(
+                        text = "위치 히스토리",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        historyRecords.filter { it.id != record.id }.forEach { history ->
+                            HistoryItem(
+                                record = history,
+                                onClick = { onOpenOtherRecord(history.id) }
+                            )
                         }
                     }
                 }

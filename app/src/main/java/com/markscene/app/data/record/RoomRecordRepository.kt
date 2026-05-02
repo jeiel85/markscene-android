@@ -24,6 +24,9 @@ class RoomRecordRepository(
     fun search(query: String): Flow<List<PhotoRecord>> =
         recordDao.searchRecords(query).map { rows -> rows.map { it.toModel() } }
 
+    fun observeRecordsByTag(tagName: String): Flow<List<PhotoRecord>> =
+        recordDao.observeRecordsByTag(tagName).map { rows -> rows.map { it.toModel() } }
+
     fun observeLatestAnalysis(recordId: String): Flow<AdvancedAnalysis?> =
         analysisDao.observeLatest(recordId).map { entity ->
             entity?.let {

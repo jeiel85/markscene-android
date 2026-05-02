@@ -33,7 +33,8 @@ fun HomeScreen(
     onCapturePhoto: () -> Unit,
     onImportPhoto: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenSearch: () -> Unit
+    onOpenSearch: () -> Unit,
+    onOpenSpaceTimeline: (String) -> Unit
 ) {
     val spaceCounts = remember(records) {
         records.mapNotNull { it.space }.groupingBy { it }.eachCount()
@@ -129,7 +130,7 @@ fun HomeScreen(
                             SpaceSummaryCard(
                                 name = space,
                                 count = count,
-                                onClick = onOpenSearch
+                                onClick = { onOpenSpaceTimeline(space) }
                             )
                         }
                     }

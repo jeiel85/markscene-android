@@ -39,4 +39,15 @@ interface RecordDao {
 
     @Query("DELETE FROM photo_tags WHERE recordId = :recordId")
     suspend fun deleteTagsForRecord(recordId: String)
+
+    @Transaction
+    @Query(
+        """
+        SELECT DISTINCT r.* FROM photo_records r
+        INNER JOIN photo_tags t ON t.recordId = r.id
+        WHERE LOWER(t.name) = LOWER(:tagName)
+        ORDER BY r.createdAt DESC
+        """
+    )
+    fun observeRecordsByTag(tagName: String): Flow<List<PhotoRecordWithTags>>
 }
