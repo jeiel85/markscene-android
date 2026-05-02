@@ -24,6 +24,7 @@ import com.markscene.app.ai.provider.MlKitTextRecognizer
 import com.markscene.app.core.database.MarkSceneDatabase
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
+import com.markscene.app.core.model.ChatMessage
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
 import com.markscene.app.data.backup.BackupManager
@@ -41,6 +42,7 @@ import com.markscene.app.ui.screen.CompareScreen
 import androidx.fragment.app.FragmentActivity
 import com.markscene.app.data.settings.SecurityStore
 import com.markscene.app.ui.security.BiometricAuthenticator
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -105,6 +107,22 @@ private val MIGRATION_4_5 = object : Migration(4, 5) {
     }
 }
 
+private val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id TEXT NOT NULL PRIMARY KEY,
+                recordId TEXT NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 @Composable
 fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
     val context = LocalContext.current
@@ -117,12 +135,12 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
             context.applicationContext,
             MarkSceneDatabase::class.java,
             "markscene.db"
-        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build()
     }
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
     val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
     val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
-    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
+    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
     val backupManager = remember { BackupManager(context.applicationContext, repository) }
@@ -181,7 +199,7 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
         uri?.let {
             scope.launch {
                 try {
-                    val csvData = DataExporter.toCsv(repository.search("").first())
+                    val csvData = DataExporter.toCsv(repository.observeRecords().first())
                     context.contentResolver.openOutputStream(it)?.use { out -> out.write(csvData.toByteArray()) }
                     backupStatusMessage = "CSV 내보내기가 완료되었습니다."
                 } catch (e: Exception) {
@@ -197,7 +215,7 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
         uri?.let {
             scope.launch {
                 try {
-                    val mdData = DataExporter.toMarkdownList(repository.search("").first())
+                    val mdData = DataExporter.toMarkdownList(repository.observeRecords().first())
                     context.contentResolver.openOutputStream(it)?.use { out -> out.write(mdData.toByteArray()) }
                     backupStatusMessage = "Markdown 내보내기가 완료되었습니다."
                 } catch (e: Exception) {
@@ -332,12 +350,16 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                 // Fetch history based on the first tag (item name)
                 val firstTagName = record?.tags?.firstOrNull()?.name
                 val historyRecords by (firstTagName?.let { repository.observeRecordsByTag(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
+                
+                // Fetch chat messages
+                val chatMessages by (recordId?.let { repository.observeMessages(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
 
                 if (record != null) {
                     RecordDetailScreen(
                         record = record,
                         latestAnalysis = latestAnalysis,
                         historyRecords = historyRecords,
+                        chatMessages = chatMessages,
                         onRunAdvancedAnalysis = { targetRecord ->
                             val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
                             if (apiKey.isBlank()) error("API key missing")
@@ -374,6 +396,24 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                                         createdAt = now
                                     )
                                 )
+                            }
+                        },
+                        onSendQuestion = { question ->
+                            scope.launch {
+                                val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
+                                if (apiKey.isNotBlank()) {
+                                    // 1. Save user message
+                                    repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis()))
+                                    
+                                    // 2. Ask AI
+                                    val response = geminiProvider.askQuestion(record, question, apiKey)
+                                    val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다.")
+                                    
+                                    // 3. Save assistant message
+                                    repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis()))
+                                } else {
+                                    backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다."
+                                }
                             }
                         },
                         onDeleteRecord = { id ->

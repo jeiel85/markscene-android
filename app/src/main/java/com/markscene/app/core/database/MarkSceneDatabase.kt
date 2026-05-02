@@ -8,13 +8,15 @@ import androidx.room.RoomDatabase
         PhotoRecordEntity::class, 
         PhotoTagEntity::class, 
         AdvancedAnalysisEntity::class,
-        TagCorrectionEntity::class
+        TagCorrectionEntity::class,
+        ChatMessageEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class MarkSceneDatabase : RoomDatabase() {
     abstract fun recordDao(): RecordDao
     abstract fun advancedAnalysisDao(): AdvancedAnalysisDao
     abstract fun tagCorrectionDao(): TagCorrectionDao
+    abstract fun chatMessageDao(): ChatMessageDao
 }

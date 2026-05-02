@@ -2,12 +2,15 @@ package com.markscene.app.data.record
 
 import com.markscene.app.core.database.AdvancedAnalysisDao
 import com.markscene.app.core.database.AdvancedAnalysisEntity
+import com.markscene.app.core.database.ChatMessageDao
+import com.markscene.app.core.database.ChatMessageEntity
 import com.markscene.app.core.database.PhotoRecordEntity
 import com.markscene.app.core.database.PhotoRecordWithTags
 import com.markscene.app.core.database.PhotoTagEntity
 import com.markscene.app.core.database.RecordDao
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
+import com.markscene.app.core.model.ChatMessage
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
@@ -16,7 +19,8 @@ import kotlinx.coroutines.flow.map
 
 class RoomRecordRepository(
     private val recordDao: RecordDao,
-    private val analysisDao: AdvancedAnalysisDao
+    private val analysisDao: AdvancedAnalysisDao,
+    private val chatMessageDao: ChatMessageDao
 ) {
     fun observeRecords(): Flow<List<PhotoRecord>> =
         recordDao.observeAllRecords().map { rows -> rows.map { it.toModel() } }
@@ -39,6 +43,19 @@ class RoomRecordRepository(
                 )
             }
         }
+
+    fun observeMessages(recordId: String): Flow<List<ChatMessage>> =
+        chatMessageDao.observeMessagesForRecord(recordId).map { entities ->
+            entities.map {
+                ChatMessage(it.id, it.recordId, it.role, it.content, it.createdAt)
+            }
+        }
+
+    suspend fun saveChatMessage(message: ChatMessage) {
+        chatMessageDao.insertMessage(
+            ChatMessageEntity(message.id, message.recordId, message.role, message.content, message.createdAt)
+        )
+    }
 
     suspend fun saveRecord(record: PhotoRecord) {
         recordDao.insertRecord(
@@ -85,11 +102,15 @@ class RoomRecordRepository(
 
     suspend fun deleteRecord(recordId: String) {
         analysisDao.deleteForRecord(recordId)
+        chatMessageDao.deleteMessagesForRecord(recordId)
         recordDao.deleteRecord(recordId)
     }
 
     suspend fun deleteRecords(recordIds: List<String>) {
-        recordIds.forEach { analysisDao.deleteForRecord(it) }
+        recordIds.forEach { 
+            analysisDao.deleteForRecord(it) 
+            chatMessageDao.deleteMessagesForRecord(it)
+        }
         recordDao.deleteRecords(recordIds)
         recordDao.deleteTagsForRecords(recordIds)
     }

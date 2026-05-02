@@ -6,8 +6,10 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,8 +37,10 @@ import com.markscene.app.R
 import com.markscene.app.ai.provider.MockAdvancedVisionProvider
 import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
 import com.markscene.app.core.model.AdvancedAnalysis
+import com.markscene.app.core.model.ChatMessage
 import com.markscene.app.core.model.PhotoRecord
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -44,8 +48,10 @@ fun RecordDetailScreen(
     record: PhotoRecord,
     latestAnalysis: AdvancedAnalysis?,
     historyRecords: List<PhotoRecord> = emptyList(),
+    chatMessages: List<ChatMessage> = emptyList(),
     onRunAdvancedAnalysis: suspend (PhotoRecord) -> MockAdvancedAnalysisResult,
     onApplyAdvancedAnalysis: (MockAdvancedAnalysisResult) -> Unit,
+    onSendQuestion: (String) -> Unit,
     onDeleteRecord: (String) -> Unit,
     onOpenOtherRecord: (String) -> Unit,
     onBack: () -> Unit
@@ -58,6 +64,9 @@ fun RecordDetailScreen(
     var showConsentDialog by remember { mutableStateOf(false) }
     var isAnalyzing by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+
+    var questionInput by remember { mutableStateOf("") }
+    var isSendingQuestion by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -198,6 +207,61 @@ fun RecordDetailScreen(
                     }
                 }
 
+                // AI Chat Section (Visual Q&A)
+                Text(
+                    text = "비주얼 비서와 대화하기",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        chatMessages.forEach { msg ->
+                            ChatBubble(role = msg.role, content = msg.content)
+                        }
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = questionInput,
+                                onValueChange = { questionInput = it },
+                                modifier = Modifier.weight(1f),
+                                placeholder = { Text("사진에 대해 물어보세요...") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+                                enabled = !isSendingQuestion
+                            )
+                            IconButton(
+                                onClick = {
+                                    if (questionInput.isNotBlank()) {
+                                        isSendingQuestion = true
+                                        onSendQuestion(questionInput)
+                                        questionInput = ""
+                                        isSendingQuestion = false
+                                    }
+                                },
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary),
+                                enabled = questionInput.isNotBlank() && !isSendingQuestion
+                            ) {
+                                if (isSendingQuestion) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
+                                } else {
+                                    Icon(Icons.Default.Send, contentDescription = "Send", tint = Color.White)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // AI Insights Section
                 Text(
                     text = stringResource(R.string.detail_ai_insights),
@@ -286,6 +350,30 @@ fun RecordDetailScreen(
             },
             shape = RoundedCornerShape(24.dp)
         )
+    }
+}
+
+@Composable
+private fun ChatBubble(role: String, content: String) {
+    val isUser = role == "user"
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart) {
+        Surface(
+            color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(
+                topStart = 16.dp,
+                topEnd = 16.dp,
+                bottomStart = if (isUser) 16.dp else 4.dp,
+                bottomEnd = if (isUser) 4.dp else 16.dp
+            ),
+            tonalElevation = if (isUser) 0.dp else 1.dp
+        ) {
+            Text(
+                text = content,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
