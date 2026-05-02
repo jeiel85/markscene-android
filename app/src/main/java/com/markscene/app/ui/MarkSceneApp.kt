@@ -251,13 +251,23 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                     onToggleBiometricLock = { enabled ->
                         if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
                             backupStatusMessage = if (authenticator == null) "시스템 오류로 인증 기능을 사용할 수 없습니다." else "이 기기는 생체 인식을 지원하지 않습니다."
+                        } else if (!securityStore.isAvailable()) {
+                            backupStatusMessage = "보안 저장소를 사용할 수 없어 생체 잠금을 저장할 수 없습니다."
                         } else {
-                            securityStore.setBiometricLockEnabled(enabled)
-                            isBiometricLockEnabled = enabled
+                            val saved = securityStore.setBiometricLockEnabled(enabled)
+                            isBiometricLockEnabled = saved && enabled
+                            backupStatusMessage = if (saved) null else "생체 잠금 설정 저장에 실패했습니다."
                         }
                     },
-                    onSaveApiKey = { key -> apiKeyStore.saveGeminiApiKey(key); hasApiKey = true },
-                    onDeleteApiKey = { apiKeyStore.clearGeminiApiKey(); hasApiKey = false },
+                    onSaveApiKey = { key ->
+                        val saved = apiKeyStore.saveGeminiApiKey(key)
+                        hasApiKey = saved
+                        backupStatusMessage = if (saved) "API Key를 저장했습니다." else "보안 저장소를 사용할 수 없어 API Key를 저장하지 못했습니다."
+                    },
+                    onDeleteApiKey = {
+                        apiKeyStore.clearGeminiApiKey()
+                        hasApiKey = false
+                    },
                     onTestConnection = {
                         if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
                             "API Key가 없어 테스트할 수 없습니다."

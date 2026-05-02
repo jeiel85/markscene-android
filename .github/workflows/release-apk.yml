@@ -43,12 +43,21 @@ jobs:
             echo "Error: RELEASE_STORE_PASSWORD is not set."
             exit 1
           fi
+          if [ -z "${{ secrets.RELEASE_KEY_ALIAS }}" ]; then
+            echo "Error: RELEASE_KEY_ALIAS is not set."
+            exit 1
+          fi
+          if [ -z "${{ secrets.RELEASE_KEY_PASSWORD }}" ]; then
+            echo "Error: RELEASE_KEY_PASSWORD is not set."
+            exit 1
+          fi
         shell: bash
 
       - name: Prepare Signing Key
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" > keystore.base64
           base64 -d keystore.base64 > app/release.jks
+          test -f app/release.jks
         shell: bash
 
       - name: Build release APK

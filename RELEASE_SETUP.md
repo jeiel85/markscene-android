@@ -47,8 +47,8 @@ GitHub 저장소 → Settings → Secrets and variables → Actions에서 다음
 
 | 시크릿 이름 | 값 |
 |--------------|-----|
-| RELEASE_KEYSTORE_BASE64 | 키스토어 파일을 Base64로 인코딩한 값 |
-| RELEASE_KEYSTORE_PASSWORD | 키스토어 비밀번호 |
+| RELEASE_KEYSTORE | 키스토어 파일을 Base64로 인코딩한 값 |
+| RELEASE_STORE_PASSWORD | 키스토어 비밀번호 |
 | RELEASE_KEY_ALIAS | markscene-release |
 | RELEASE_KEY_PASSWORD | 키 비밀번호 |
 
@@ -57,9 +57,23 @@ Base64 인코딩 방법 (Windows PowerShell):
 [Convert]::ToBase64String([IO.File]::ReadBytes("keystore\release-key.jks")) | Set-Content "keystore_base64.txt"
 ```
 
-### 2. 워크플로우 업데이트
+### 2. 워크플로우 동작 방식
 
-`.github/workflows/release-apk.yml`에 서명 단계를 추가해야 합니다.
+`release-apk.yml`은 태그 푸시 시 `RELEASE_KEYSTORE`를 `app/release.jks`로 복원하고,
+`RELEASE_STORE_FILE=release.jks` 환경 변수로 Gradle release signingConfig에 전달합니다.
+
+`app/build.gradle.kts`가 `app` 모듈 안에 있으므로, 여기서의 상대 경로 `release.jks`는
+저장소 루트 기준 `app/release.jks`를 가리킵니다.
+
+따라서 GitHub Actions에서 사용하는 secret 이름과 경로는 아래 기준으로 맞아야 합니다.
+
+```text
+RELEASE_KEYSTORE        -> Base64 인코딩된 keystore 원문
+RELEASE_STORE_PASSWORD  -> keystore 비밀번호
+RELEASE_KEY_ALIAS       -> key alias
+RELEASE_KEY_PASSWORD    -> key 비밀번호
+RELEASE_STORE_FILE      -> release.jks (app 모듈 기준 상대 경로)
+```
 
 ## 현재 설정 상태
 

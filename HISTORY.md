@@ -2,6 +2,36 @@
 
 ## 2026-05-02
 
+- 작업: 릴리즈 APK 실행 실패 원인 조사 및 암호화 저장소 안전장치 보강
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/data/settings/ApiKeyStore.kt`: Android Keystore/EncryptedSharedPreferences 초기화 실패 시 앱 시작을 막지 않도록 안전 처리
+  - `app/src/main/java/com/markscene/app/data/settings/SecurityStore.kt`: 생체 잠금 저장소 초기화 및 읽기/쓰기 실패를 기본값/실패 상태로 처리
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: 보안 저장소 사용 불가 시 설정 저장 실패 메시지를 표시
+  - `gradle/libs.versions.toml`, `CHANGELOG.md`, `docs/RELEASE_CHECKLIST.md`: v2.0.4 릴리즈 버전 및 검증 기록 반영
+- 검증:
+  - 로컬: `./gradlew test` 성공
+  - 로컬: `./gradlew lint` 성공
+  - 로컬: `./gradlew assembleDebug` 성공
+  - 로컬: `./gradlew :app:assembleRelease`는 릴리즈 서명 키 미설정으로 실패 (`SigningConfig "release" is missing required property "storeFile"`)
+  - 기기: GitHub Release `v2.0.3` APK 새 설치 후 실행 crash 없음 확인
+  - 기기: `v1.9.2` 릴리즈 설치 후 `v2.0.3` 업데이트 설치 및 실행 crash 없음 확인
+  - 기기: 수정 후 debug APK 설치 및 실행 crash 없음 확인
+- 결과: 보안 저장소 초기화 실패가 앱 실행 자체를 막지 않도록 수정
+- 후속 작업:
+  - `v2.0.4` 태그 푸시 후 GitHub Actions Release APK 결과 확인
+
+- 작업: 릴리즈 서명 검증 보강 및 릴리즈 문서 정합성 보완
+- 변경 파일:
+  - `.github/workflows/release-apk.yml`: 누락 secret 검사를 보강하고 keystore 복원 결과를 즉시 검증하도록 보완
+  - `RELEASE_SETUP.md`: GitHub Actions secret 이름과 `release.jks`의 모듈 상대 경로 해석 방식을 일치하도록 정리
+  - `docs/RELEASE_CHECKLIST.md`: 현재 버전 표기를 실제 앱 버전(`2.0.3` / `203`)으로 갱신
+- 검증:
+  - 로컬: `./gradlew :app:assembleRelease`는 릴리즈 서명 키 미설정으로 실패
+  - CI: 태그 푸시 후 GitHub Actions에서 서명 릴리즈 빌드 검증 예정
+- 결과: 릴리즈 서명 입력값 검증을 강화하고 운영 문서와 실제 설정의 불일치를 줄임
+- 후속 작업:
+  - GitHub Secrets 실제 값과 업로드 키 지문이 Play/App 배포 경로와 일치하는지 확인
+
 - 작업: 앱 실행 안정성 강화 및 빌드 환경 개선
 - 변경 파일:
   - `app/build.gradle.kts`: 로컬 환경에서 `local.properties` 및 디버그 키스토어 누락 시에도 빌드가 가능하도록 개선
