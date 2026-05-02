@@ -15,9 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.markscene.app.R
 import com.markscene.app.core.database.TagCorrectionEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +45,7 @@ fun SettingsScreen(
     onOpenPrivacyNotice: () -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     var apiKeyInput by rememberSaveable { mutableStateOf("") }
     var resultMessage by rememberSaveable { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()
@@ -47,10 +53,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("설정", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.settings), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -67,10 +73,10 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             // API Key Section
-            SettingsSection(title = "AI 엔진 설정 (BYOK)") {
+            SettingsSection(title = stringResource(R.string.settings_ai_engine)) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     StatusBadge(
-                        label = if (hasApiKey) "Gemini API Key 활성화됨" else "API Key 등록 필요",
+                        label = if (hasApiKey) stringResource(R.string.settings_api_active) else stringResource(R.string.settings_api_required),
                         isActive = hasApiKey
                     )
 
@@ -78,8 +84,8 @@ fun SettingsScreen(
                         value = apiKeyInput,
                         onValueChange = { apiKeyInput = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Gemini API Key") },
-                        placeholder = { Text("키를 입력하세요") },
+                        label = { Text(stringResource(R.string.settings_api_label)) },
+                        placeholder = { Text(stringResource(R.string.settings_api_placeholder)) },
                         shape = RoundedCornerShape(12.dp),
                         trailingIcon = {
                             if (apiKeyInput.isNotBlank()) {
@@ -98,7 +104,7 @@ fun SettingsScreen(
                             onClick = {
                                 if (apiKeyInput.isNotBlank()) {
                                     onSaveApiKey(apiKeyInput.trim())
-                                    resultMessage = "API Key가 안전하게 저장되었습니다."
+                                    resultMessage = context.getString(R.string.settings_api_saved)
                                     apiKeyInput = ""
                                 }
                             },
@@ -106,20 +112,20 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(12.dp),
                             enabled = apiKeyInput.isNotBlank()
                         ) {
-                            Text("저장")
+                            Text(stringResource(R.string.save))
                         }
                         
                         if (hasApiKey) {
                             OutlinedButton(
                                 onClick = {
                                     onDeleteApiKey()
-                                    resultMessage = "API Key가 삭제되었습니다."
+                                    resultMessage = context.getString(R.string.settings_api_deleted)
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                             ) {
-                                Text("삭제")
+                                Text(stringResource(R.string.delete))
                             }
                         }
                     }
@@ -131,7 +137,7 @@ fun SettingsScreen(
                         ) {
                             Icon(Icons.Default.SettingsInputComponent, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("연결 테스트 실행")
+                            Text(stringResource(R.string.settings_api_test))
                         }
                     }
                 }
@@ -139,7 +145,7 @@ fun SettingsScreen(
 
             // Tag Correction Section
             if (tagCorrections.isNotEmpty()) {
-                SettingsSection(title = "태그 학습 사전") {
+                SettingsSection(title = stringResource(R.string.settings_tag_dictionary)) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -148,7 +154,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(
-                                "사용자가 교정한 태그 습관을 기억하고 있습니다.",
+                                stringResource(R.string.settings_tag_dictionary_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -164,10 +170,10 @@ fun SettingsScreen(
                                         Text(correction.correctedName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                                     }
                                     IconButton(onClick = { onDeleteTagCorrection(correction.originalName) }) {
-                                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                                        Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.error)
                                     }
                                 }
-                                if (correction != tagCorrections.last()) HorizontalDivider(alpha = 0.05f)
+                                if (correction != tagCorrections.last()) HorizontalDivider(modifier = Modifier.graphicsLayer { alpha = 0.05f })
                             }
                         }
                     }
@@ -175,37 +181,37 @@ fun SettingsScreen(
             }
 
             // Backup Section
-            SettingsSection(title = "데이터 및 백업") {
+            SettingsSection(title = stringResource(R.string.settings_data_backup)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SettingsItem(
                         icon = Icons.Default.CloudDownload,
-                        title = "통합 백업 (ZIP)",
-                        description = "모든 기록과 사진을 ZIP 파일로 보관",
+                        title = stringResource(R.string.settings_export_zip),
+                        description = stringResource(R.string.settings_export_zip_desc),
                         onClick = onExportBackup
                     )
                     SettingsItem(
                         icon = Icons.Default.Description,
-                        title = "Markdown 추출",
-                        description = "문서 도구 활용을 위한 MD 파일 생성",
+                        title = stringResource(R.string.settings_export_md),
+                        description = stringResource(R.string.settings_export_md_desc),
                         onClick = onExportMarkdown
                     )
                     SettingsItem(
                         icon = Icons.Default.TableChart,
-                        title = "CSV 추출",
-                        description = "엑셀 등에서 활용 가능한 데이터 추출",
+                        title = stringResource(R.string.settings_export_csv),
+                        description = stringResource(R.string.settings_export_csv_desc),
                         onClick = onExportCsv
                     )
                     SettingsItem(
                         icon = Icons.Default.CloudUpload,
-                        title = "데이터 가져오기",
-                        description = "백업된 ZIP 파일로부터 기록 복구",
+                        title = stringResource(R.string.settings_import),
+                        description = stringResource(R.string.settings_import_desc),
                         onClick = onImportBackup
                     )
                 }
             }
 
             // Security Section
-            SettingsSection(title = "보안 및 개인정보") {
+            SettingsSection(title = stringResource(R.string.settings_security)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -220,21 +226,22 @@ fun SettingsScreen(
                         ) {
                             Icon(Icons.Default.Fingerprint, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = "생체 인식 잠금", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                                Text(text = "앱 실행 시 지문 또는 얼굴 인식 사용", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(text = stringResource(R.string.settings_lock), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_lock_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Switch(
                                 checked = isBiometricLockEnabled,
                                 onCheckedChange = onToggleBiometricLock,
-                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary)
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.semantics { contentDescription = context.getString(R.string.settings_lock) }
                             )
                         }
                     }
 
                     SettingsItem(
                         icon = Icons.Default.PrivacyTip,
-                        title = "개인정보 처리방침",
-                        description = "데이터 관리 및 보안 정책 확인",
+                        title = stringResource(R.string.settings_privacy_policy),
+                        description = stringResource(R.string.settings_privacy_policy_desc),
                         onClick = onOpenPrivacyNotice
                     )
                     
@@ -249,7 +256,7 @@ fun SettingsScreen(
                         ) {
                             Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                             Text(
-                                text = "MarkScene은 로컬 우선으로 동작합니다. 고급 분석 실행 시에만 선택한 이미지가 암호화되어 AI 제공자에게 전송됩니다.",
+                                text = stringResource(R.string.settings_local_first_notice),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 18.sp
@@ -275,7 +282,7 @@ fun SettingsScreen(
                         TextButton(onClick = { 
                             if (externalMessage != null) onMessageShown() else resultMessage = null 
                         }) {
-                            Text("확인", color = MaterialTheme.colorScheme.inversePrimary)
+                            Text(stringResource(R.string.confirm), color = MaterialTheme.colorScheme.inversePrimary)
                         }
                     }
                 }

@@ -15,10 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -30,6 +35,7 @@ fun CompareScreen(
     record2: PhotoRecord,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     // Sort by date: record1 is older, record2 is newer
     val older = if (record1.createdAt < record2.createdAt) record1 else record2
     val newer = if (record1.createdAt < record2.createdAt) record2 else record1
@@ -39,10 +45,10 @@ fun CompareScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("변화 비교하기", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.compare_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -59,8 +65,9 @@ fun CompareScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             // Comparison Header
+            val spaceName = older.space ?: stringResource(R.string.detail_unassigned_space)
             Text(
-                text = "${older.space ?: "미지정 공간"}의 변화",
+                text = "$spaceName ${stringResource(R.string.compare_suffix)}",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -108,8 +115,10 @@ private fun CompareCard(
     record: PhotoRecord,
     labelColor: Color
 ) {
+    val a11yDesc = "$label, $date: ${record.title ?: "제목 없음"}"
+    
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().semantics { contentDescription = a11yDesc },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -138,7 +147,7 @@ private fun CompareCard(
             }
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(date, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(record.title ?: "제목 없음", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(record.title ?: stringResource(R.string.list_untitled), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 if (!record.memo.isNullOrBlank()) {
                     Text(
                         text = record.memo,

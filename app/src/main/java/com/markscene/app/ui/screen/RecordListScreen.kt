@@ -17,10 +17,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +40,7 @@ fun RecordListScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var selectedSpace by remember { mutableStateOf<String?>(null) }
+    val haptic = LocalHapticFeedback.current
     
     val spaces = remember(records) { 
         (records.mapNotNull { it.space } + listOf("책상", "주방", "창고", "아이방", "사무실", "거실")).distinct() 
@@ -57,14 +64,17 @@ fun RecordListScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "나의 기록", 
+                        stringResource(R.string.list_title), 
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onBack() 
+                    }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -94,8 +104,8 @@ fun RecordListScreen(
                         query = it
                         onSearch(it)
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("태그, 제목, 메모, 텍스트 검색...") },
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "기록 검색 입력창" },
+                    placeholder = { Text(stringResource(R.string.list_search_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -117,15 +127,21 @@ fun RecordListScreen(
                 item {
                     FilterChip(
                         selected = selectedSpace == null,
-                        onClick = { selectedSpace = null },
-                        label = { Text("전체") },
+                        onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            selectedSpace = null 
+                        },
+                        label = { Text(stringResource(R.string.list_all_spaces)) },
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
                 items(spaces) { space ->
                     FilterChip(
                         selected = selectedSpace == space,
-                        onClick = { selectedSpace = if (selectedSpace == space) null else space },
+                        onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            selectedSpace = if (selectedSpace == space) null else space 
+                        },
                         label = { Text(space) },
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -135,7 +151,7 @@ fun RecordListScreen(
             if (filteredRecords.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "결과가 없습니다.",
+                        text = stringResource(R.string.list_no_results),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -151,7 +167,10 @@ fun RecordListScreen(
                     items(filteredRecords, key = { it.id }) { record ->
                         GalleryItem(
                             record = record,
-                            onClick = { onOpenDetail(record.id) }
+                            onClick = { 
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onOpenDetail(record.id) 
+                            }
                         )
                     }
                 }
@@ -165,17 +184,28 @@ private fun GalleryItem(
     record: PhotoRecord,
     onClick: () -> Unit
 ) {
+    val spaceLabel = stringResource(R.string.create_field_space)
+    val tagsLabel = stringResource(R.string.create_field_tags)
+    val a11yDesc = buildString {
+        append(record.title ?: stringResource(R.string.list_untitled))
+        record.space?.let { append(", $spaceLabel: $it") }
+        if (record.tags.isNotEmpty()) {
+            append(", $tagsLabel: ${record.tags.joinToString { it.name }}")
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .semantics { contentDescription = a11yDesc },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
             AsyncImage(
                 model = record.imageUri,
-                contentDescription = record.title,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()

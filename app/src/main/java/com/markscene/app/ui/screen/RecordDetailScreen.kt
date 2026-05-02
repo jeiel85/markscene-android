@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -22,10 +23,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.markscene.app.R
 import com.markscene.app.ai.provider.MockAdvancedVisionProvider
 import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
 import com.markscene.app.core.model.AdvancedAnalysis
@@ -44,6 +50,7 @@ fun RecordDetailScreen(
     onOpenOtherRecord: (String) -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
@@ -62,8 +69,9 @@ fun RecordDetailScreen(
                         modifier = Modifier
                             .padding(8.dp)
                             .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                            .semantics { contentDescription = context.getString(R.string.back) }
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                     }
                 },
                 actions = {
@@ -72,8 +80,9 @@ fun RecordDetailScreen(
                         modifier = Modifier
                             .padding(8.dp)
                             .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                            .semantics { contentDescription = context.getString(R.string.delete) }
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                        Icon(Icons.Default.Delete, contentDescription = null, tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -91,6 +100,7 @@ fun RecordDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(450.dp)
+                    .semantics { contentDescription = "${record.title ?: context.getString(R.string.list_untitled)} 사진" }
             ) {
                 AsyncImage(
                     model = record.imageUri,
@@ -129,7 +139,7 @@ fun RecordDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = record.title ?: "제목 없는 기록",
+                            text = record.title ?: stringResource(R.string.list_untitled),
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -147,7 +157,7 @@ fun RecordDetailScreen(
                                     Icon(
                                         imageVector = Icons.Default.Place,
                                         contentDescription = null,
-                                        size = 16.dp,
+                                        modifier = Modifier.size(16.dp),
                                         tint = MaterialTheme.colorScheme.secondary
                                     )
                                     Text(
@@ -190,7 +200,7 @@ fun RecordDetailScreen(
 
                 // AI Insights Section
                 Text(
-                    text = "AI Insights",
+                    text = stringResource(R.string.detail_ai_insights),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -214,11 +224,11 @@ fun RecordDetailScreen(
                         if (isAnalyzing) {
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.width(12.dp))
-                            Text("분석 중...")
+                            Text(stringResource(R.string.loading))
                         } else {
                             Icon(Icons.Default.AutoAwesome, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("고급 AI 분석 실행하기")
+                            Text(stringResource(R.string.detail_run_advanced))
                         }
                     }
                 }
@@ -226,7 +236,7 @@ fun RecordDetailScreen(
                 // Location History Section
                 if (historyRecords.size > 1) {
                     Text(
-                        text = "위치 히스토리",
+                        text = stringResource(R.string.detail_location_history),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -253,8 +263,8 @@ fun RecordDetailScreen(
     if (showConsentDialog) {
         AlertDialog(
             onDismissRequest = { showConsentDialog = false },
-            title = { Text("AI 고급 분석 안내") },
-            text = { Text("이 사진을 분석하기 위해 외부 AI 엔진으로 전송합니다. 계속하시겠습니까?") },
+            title = { Text(stringResource(R.string.detail_ai_consent_title)) },
+            text = { Text(stringResource(R.string.detail_ai_consent_desc)) },
             confirmButton = {
                 Button(onClick = {
                     showConsentDialog = false
@@ -262,17 +272,17 @@ fun RecordDetailScreen(
                     scope.launch {
                         try {
                             analysisResult = onRunAdvancedAnalysis(record)
-                            statusMessage = "분석이 완료되었습니다."
+                            statusMessage = context.getString(R.string.create_analysis_done)
                         } catch (e: Exception) {
-                            statusMessage = "분석 중 오류 발생: ${e.message}"
+                            statusMessage = "${context.getString(R.string.error)}: ${e.message}"
                         } finally {
                             isAnalyzing = false
                         }
                     }
-                }) { Text("분석 시작") }
+                }) { Text(stringResource(R.string.detail_ai_start)) }
             },
             dismissButton = {
-                TextButton(onClick = { showConsentDialog = false }) { Text("취소") }
+                TextButton(onClick = { showConsentDialog = false }) { Text(stringResource(R.string.cancel)) }
             },
             shape = RoundedCornerShape(24.dp)
         )
@@ -299,7 +309,7 @@ private fun AIInsightCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Default.TipsAndUpdates, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Text("장면 요약", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.detail_scene_summary), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             
             Text(
@@ -310,7 +320,7 @@ private fun AIInsightCard(
 
             if (suggestedTags != null) {
                 HorizontalDivider(modifier = Modifier.graphicsLayer { alpha = 0.1f })
-                Text("추천 태그", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.detail_suggested_tags), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -325,9 +335,61 @@ private fun AIInsightCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("태그 적용하기")
+                    Text(stringResource(R.string.detail_apply_tags))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HistoryItem(
+    record: PhotoRecord,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val spaceName = record.space ?: stringResource(R.string.detail_unassigned_space)
+    val date = java.text.SimpleDateFormat("yyyy.MM.dd", java.util.Locale.getDefault()).format(record.createdAt)
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .semantics { contentDescription = "$spaceName, $date 기록 보기" },
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AsyncImage(
+                model = record.imageUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = spaceName,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = date,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

@@ -22,9 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 
 @Composable
@@ -39,6 +45,7 @@ fun HomeScreen(
     val spaceCounts = remember(records) {
         records.mapNotNull { it.space }.groupingBy { it }.eachCount()
     }
+    val haptic = LocalHapticFeedback.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -59,26 +66,30 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(
-                        text = "MarkScene",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displayMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        text = "당신의 시각적 기억을 기록하세요",
+                        text = stringResource(R.string.app_slogan),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 IconButton(
-                    onClick = onOpenSettings,
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onOpenSettings() 
+                    },
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surface)
+                        .semantics { contentDescription = context.getString(R.string.settings) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
+                        contentDescription = stringResource(R.string.settings),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -86,7 +97,7 @@ fun HomeScreen(
 
             // Quick Actions Section
             Text(
-                text = "새로운 기록",
+                text = stringResource(R.string.home_new_record),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -97,26 +108,32 @@ fun HomeScreen(
             ) {
                 QuickActionCard(
                     modifier = Modifier.weight(1f),
-                    title = "Capture",
+                    title = stringResource(R.string.home_capture),
                     icon = Icons.Default.PhotoCamera,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                    onClick = onCapturePhoto
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onCapturePhoto()
+                    }
                 )
                 QuickActionCard(
                     modifier = Modifier.weight(1f),
-                    title = "Import",
+                    title = stringResource(R.string.home_import),
                     icon = Icons.Default.PhotoLibrary,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onClick = onImportPhoto
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onImportPhoto()
+                    }
                 )
             }
 
             // Space Summary Section
             if (spaceCounts.isNotEmpty()) {
                 Text(
-                    text = "공간별 현황",
+                    text = stringResource(R.string.home_space_status),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -130,7 +147,10 @@ fun HomeScreen(
                             SpaceSummaryCard(
                                 name = space,
                                 count = count,
-                                onClick = { onOpenSpaceTimeline(space) }
+                                onClick = { 
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onOpenSpaceTimeline(space) 
+                                }
                             )
                         }
                     }
@@ -143,7 +163,11 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .height(56.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .clickable { onOpenSearch() },
+                    .clickable { 
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onOpenSearch() 
+                    }
+                    .semantics { contentDescription = context.getString(R.string.search) },
                 color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 2.dp
             ) {
@@ -154,11 +178,11 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "기록 검색하기...",
+                        text = stringResource(R.string.home_search_placeholder),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -177,13 +201,13 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Tips",
+                        text = stringResource(R.string.home_tip_title),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "사진을 찍으면 AI가 자동으로 태그를 제안합니다. 공간별로 분류하면 나중에 더 찾기 쉬워요.",
+                        text = stringResource(R.string.home_tip_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 20.sp
                     )
@@ -206,7 +230,8 @@ private fun QuickActionCard(
         modifier = modifier
             .height(140.dp)
             .clip(RoundedCornerShape(24.dp))
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .semantics { contentDescription = title },
         color = containerColor
     ) {
         Column(
@@ -215,7 +240,7 @@ private fun QuickActionCard(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = title,
+                contentDescription = null,
                 tint = contentColor,
                 modifier = Modifier.size(32.dp)
             )
@@ -239,7 +264,8 @@ private fun SpaceSummaryCard(
         modifier = Modifier
             .width(120.dp)
             .clip(RoundedCornerShape(20.dp))
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .semantics { contentDescription = name },
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 1.dp
     ) {
@@ -260,7 +286,7 @@ private fun SpaceSummaryCard(
                 maxLines = 1
             )
             Text(
-                text = "${count}개의 기록",
+                text = stringResource(R.string.home_records_count, count),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

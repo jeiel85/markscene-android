@@ -29,9 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +45,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.google.common.util.concurrent.ListenableFuture
+import com.markscene.app.R
 import com.markscene.app.ai.provider.LocalImageTagger
 import com.markscene.app.ai.provider.TextRecognizer
 import com.markscene.app.core.model.AnalysisStatus
@@ -66,6 +72,7 @@ fun CreateRecordScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
     val defaultSpaces = listOf("책상", "주방", "창고", "아이방", "사무실", "거실", "기타")
 
     var imageUri by remember { mutableStateOf<Uri?>(initialImageUri) }
@@ -79,25 +86,28 @@ fun CreateRecordScreen(
     var isSaving by remember { mutableStateOf(false) }
     
     val editableTags = remember { mutableStateListOf<String>() }
-    // AI가 처음 제안했던 태그 목록을 기억하여 학습에 사용
     val originalAiSuggestions = remember { mutableStateListOf<String>() }
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         imageUri = uri
+        if (uri != null) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (!granted) statusText = "카메라 권한이 필요합니다."
+        if (!granted) statusText = context.getString(R.string.create_camera_permission)
     }
+
+    val analyzingMsg = stringResource(R.string.create_analyzing)
+    val doneMsg = stringResource(R.string.create_analysis_done)
 
     LaunchedEffect(imageUri) {
         val uri = imageUri ?: return@LaunchedEffect
         isAnalyzing = true
-        statusText = "AI가 태그와 텍스트를 분석 중입니다..."
+        statusText = analyzingMsg
         try {
             val tagsResult = localImageTagger.generateTags(uri)
             val ocrResult = textRecognizer.recognizeText(uri)
@@ -110,9 +120,10 @@ fun CreateRecordScreen(
             originalAiSuggestions.addAll(suggestionNames)
             
             ocrText = ocrResult.getOrNull()
-            statusText = "분석이 완료되었습니다."
+            statusText = doneMsg
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         } catch (e: Exception) {
-            statusText = "분석 중 오류 발생: ${e.message}"
+            statusText = "${context.getString(R.string.error)}: ${e.message}"
         } finally {
             isAnalyzing = false
         }
@@ -121,10 +132,10 @@ fun CreateRecordScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("새 메모 기록", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.create_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
                     }
                 },
                 actions = {
@@ -132,13 +143,11 @@ fun CreateRecordScreen(
                         onClick = {
                             val selectedUri = imageUri ?: return@TextButton
                             isSaving = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             scope.launch {
                                 val now = System.currentTimeMillis()
                                 val recordId = UUID.randomUUID().toString()
                                 
-                                // Learn user preference: 
-                                // AI suggested 'A' but user changed it to 'B'.
-                                // Simple heuristic: 1 removed original tag and 1 added new tag.
                                 val removedSuggestions = originalAiSuggestions.filter { !editableTags.contains(it) }
                                 val addedTags = editableTags.filter { !originalAiSuggestions.contains(it) }
                                 if (removedSuggestions.size == 1 && addedTags.size == 1) {
@@ -179,7 +188,7 @@ fun CreateRecordScreen(
                                         )
                                     )
                                 } else {
-                                    statusText = "이미지 처리 실패"
+                                    statusText = context.getString(R.string.create_save_failed)
                                     isSaving = false
                                 }
                             }
@@ -187,7 +196,7 @@ fun CreateRecordScreen(
                         enabled = imageUri != null && !isAnalyzing && !isSaving
                     ) {
                         if (isSaving) CircularProgressIndicator(modifier = Modifier.size(16.dp))
-                        else Text("저장", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        else Text(stringResource(R.string.save), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -204,12 +213,14 @@ fun CreateRecordScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Image Preview Area
+            val imageAreaDesc = stringResource(R.string.create_image_area)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.surface)
+                    .semantics { contentDescription = imageAreaDesc },
                 contentAlignment = Alignment.Center
             ) {
                 if (imageUri != null) {
@@ -220,25 +231,35 @@ fun CreateRecordScreen(
                         contentScale = ContentScale.Crop
                     )
                     IconButton(
-                        onClick = { imageUri = null },
+                        onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            imageUri = null 
+                        },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(12.dp)
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .semantics { contentDescription = context.getString(R.string.delete) }
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.White)
+                        Icon(Icons.Default.Delete, contentDescription = null, tint = Color.White)
                     }
                 } else {
                     if (source == SOURCE_CAPTURE) {
                         val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                         if (granted) {
                             CameraCapturePreview(
-                                onCaptured = { imageUri = it },
+                                onCaptured = { 
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    imageUri = it 
+                                },
                                 onError = { statusText = it }
                             )
                         } else {
-                            Button(onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                                Text("카메라 권한 허용")
+                            Button(
+                                onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(stringResource(R.string.create_camera_permission))
                             }
                         }
                     } else {
@@ -246,11 +267,12 @@ fun CreateRecordScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.clickable { 
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 pickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) 
                             }
                         ) {
                             Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
-                            Text("사진 선택하기", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.home_import), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
@@ -275,7 +297,8 @@ fun CreateRecordScreen(
 
             // Input Fields
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("공간 선택", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.create_field_space), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -284,7 +307,10 @@ fun CreateRecordScreen(
                     defaultSpaces.forEach { space ->
                         FilterChip(
                             selected = selectedSpace == space,
-                            onClick = { selectedSpace = if (selectedSpace == space) null else space },
+                            onClick = { 
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                selectedSpace = if (selectedSpace == space) null else space 
+                            },
                             label = { Text(space) },
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -295,7 +321,7 @@ fun CreateRecordScreen(
                     value = title,
                     onValueChange = { title = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("제목") },
+                    label = { Text(stringResource(R.string.create_field_title)) },
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true
                 )
@@ -303,7 +329,7 @@ fun CreateRecordScreen(
                     value = memo,
                     onValueChange = { memo = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("메모") },
+                    label = { Text(stringResource(R.string.create_field_memo)) },
                     shape = RoundedCornerShape(12.dp),
                     minLines = 3
                 )
@@ -311,7 +337,7 @@ fun CreateRecordScreen(
 
             // Tags Section
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("태그", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.create_field_tags), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -321,7 +347,10 @@ fun CreateRecordScreen(
                     editableTags.forEach { tag ->
                         InputChip(
                             selected = true,
-                            onClick = { editableTags.remove(tag) },
+                            onClick = { 
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                editableTags.remove(tag) 
+                            },
                             label = { Text(tag) },
                             trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp)) }
                         )
@@ -332,13 +361,13 @@ fun CreateRecordScreen(
                     value = customTag,
                     onValueChange = { customTag = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("태그 직접 입력 후 엔터") },
+                    placeholder = { Text(stringResource(R.string.create_tag_placeholder)) },
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = {
                         IconButton(onClick = {
                             val normalized = customTag.trim().lowercase()
                             if (normalized.isNotBlank() && !editableTags.contains(normalized)) {
-                                // 만약 AI 제안 중 하나를 지우고 비슷한걸 넣었다면 학습 기회로 활용 가능 (추후 구현)
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 editableTags.add(normalized)
                                 customTag = ""
                             }
@@ -362,6 +391,7 @@ private fun CameraCapturePreview(
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }
     val previewView = remember { PreviewView(context) }
+    val haptic = LocalHapticFeedback.current
     val imageCapture = remember {
         ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
     }
@@ -380,6 +410,7 @@ private fun CameraCapturePreview(
         // Shutter Button
         FloatingActionButton(
             onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 val captureTarget = createCaptureTarget(context)
                 val output = ImageCapture.OutputFileOptions.Builder(captureTarget.file).build()
                 imageCapture.takePicture(
@@ -390,19 +421,20 @@ private fun CameraCapturePreview(
                             onCaptured(captureTarget.uri)
                         }
                         override fun onError(exception: ImageCaptureException) {
-                            onError("촬영 실패: ${exception.message}")
+                            onError("${context.getString(R.string.error)}: ${exception.message}")
                         }
                     }
                 )
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp),
+                .padding(bottom = 24.dp)
+                .semantics { contentDescription = context.getString(R.string.home_capture) },
             containerColor = Color.White,
             contentColor = Color(0xFF2D5AFE),
             shape = CircleShape
         ) {
-            Icon(Icons.Default.PhotoCamera, contentDescription = "Capture", modifier = Modifier.size(32.dp))
+            Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(32.dp))
         }
     }
 }

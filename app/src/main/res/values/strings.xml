@@ -1,3 +1,112 @@
 <resources>
     <string name="app_name">MarkScene</string>
+    <string name="app_slogan">당신의 시각적 기억을 기록하세요</string>
+
+    <!-- General -->
+    <string name="back">뒤로 가기</string>
+    <string name="close">닫기</string>
+    <string name="save">저장</string>
+    <string name="delete">삭제</string>
+    <string name="cancel">취소</string>
+    <string name="confirm">확인</string>
+    <string name="settings">설정</string>
+    <string name="search">검색</string>
+    <string name="loading">처리 중...</string>
+    <string name="error">오류가 발생했습니다.</string>
+
+    <!-- Home Screen -->
+    <string name="home_new_record">새로운 기록</string>
+    <string name="home_capture">촬영하기</string>
+    <string name="home_import">가져오기</string>
+    <string name="home_space_status">공간별 현황</string>
+    <string name="home_search_placeholder">기록 검색하기...</string>
+    <string name="home_tip_title">Tips</string>
+    <string name="home_tip_desc">사진을 찍으면 AI가 자동으로 태그를 제안합니다. 공간별로 분류하면 나중에 더 찾기 쉬워요.</string>
+    <string name="home_records_count">%1$d개의 기록</string>
+
+    <!-- List / Search Screen -->
+    <string name="list_title">나의 기록</string>
+    <string name="list_search_placeholder">태그, 제목, 메모, 텍스트 검색...</string>
+    <string name="list_no_results">결과가 없습니다.</string>
+    <string name="list_all_spaces">전체</string>
+    <string name="list_untitled">제목 없는 기록</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">새 메모 기록</string>
+    <string name="create_analyzing">AI가 태그와 텍스트를 분석 중입니다...</string>
+    <string name="create_analysis_done">분석이 완료되었습니다.</string>
+    <string name="create_field_space">공간 선택</string>
+    <string name="create_field_title">제목</string>
+    <string name="create_field_memo">메모</string>
+    <string name="create_field_tags">태그</string>
+    <string name="create_tag_placeholder">태그 직접 입력 후 추가</string>
+    <string name="create_image_area">사진 선택 또는 촬영 영역</string>
+    <string name="create_camera_permission">카메라 권한이 필요합니다.</string>
+    <string name="create_save_failed">이미지 처리 실패</string>
+
+    <!-- Detail Screen -->
+    <string name="detail_ai_insights">AI Insights</string>
+    <string name="detail_scene_summary">장면 요약</string>
+    <string name="detail_suggested_tags">추천 태그</string>
+    <string name="detail_apply_tags">태그 적용하기</string>
+    <string name="detail_run_advanced">고급 AI 분석 실행하기</string>
+    <string name="detail_location_history">위치 히스토리</string>
+    <string name="detail_unassigned_space">미지정 공간</string>
+    <string name="detail_ai_consent_title">AI 고급 분석 안내</string>
+    <string name="detail_ai_consent_desc">이 사진을 분석하기 위해 외부 AI 엔진으로 전송합니다. 계속하시겠습니까?</string>
+    <string name="detail_ai_start">분석 시작</string>
+
+    <!-- Space Timeline & Compare -->
+    <string name="space_history">공간 히스토리</string>
+    <string name="space_empty">이 공간에 아직 기록이 없습니다.</string>
+    <string name="space_compare_selected">2개의 기록이 선택됨</string>
+    <string name="space_compare_now">지금 비교하기</string>
+    <string name="compare_title">변화 비교하기</string>
+    <string name="compare_suffix">의 변화</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_ai_engine">AI 엔진 설정 (BYOK)</string>
+    <string name="settings_api_active">Gemini API Key 활성화됨</string>
+    <string name="settings_api_required">API Key 등록 필요</string>
+    <string name="settings_api_label">Gemini API Key</string>
+    <string name="settings_api_placeholder">키를 입력하세요</string>
+    <string name="settings_api_saved">API Key가 안전하게 저장되었습니다.</string>
+    <string name="settings_api_deleted">API Key가 삭제되었습니다.</string>
+    <string name="settings_api_test">연결 테스트 실행</string>
+    <string name="settings_api_test_ok">저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다.</string>
+    <string name="settings_api_test_no">API Key가 없어 테스트할 수 없습니다.</string>
+    
+    <string name="settings_tag_dictionary">태그 학습 사전</string>
+    <string name="settings_tag_dictionary_desc">사용자가 교정한 태그 습관을 기억하고 있습니다.</string>
+    
+    <string name="settings_data_backup">데이터 및 백업</string>
+    <string name="settings_export_zip">통합 백업 (ZIP)</string>
+    <string name="settings_export_zip_desc">모든 기록과 사진을 ZIP 파일로 보관</string>
+    <string name="settings_export_md">Markdown 추출</string>
+    <string name="settings_export_md_desc">문서 도구 활용을 위한 MD 파일 생성</string>
+    <string name="settings_export_csv">CSV 추출</string>
+    <string name="settings_export_csv_desc">엑셀 등에서 활용 가능한 데이터 추출</string>
+    <string name="settings_import">데이터 가져오기</string>
+    <string name="settings_import_desc">백업된 ZIP 파일로부터 기록 복구</string>
+    
+    <string name="settings_security">보안 및 개인정보</string>
+    <string name="settings_lock">생체 인식 잠금</string>
+    <string name="settings_lock_desc">앱 실행 시 지문 또는 얼굴 인식 사용</string>
+    <string name="settings_privacy_policy">개인정보 처리방침</string>
+    <string name="settings_privacy_policy_desc">데이터 관리 및 보안 정책 확인</string>
+    <string name="settings_local_first_notice">MarkScene은 로컬 우선으로 동작합니다. 고급 분석 실행 시에만 선택한 이미지가 암호화되어 AI 제공자에게 전송됩니다.</string>
+
+    <!-- Security -->
+    <string name="lock_title">앱이 잠겨 있습니다</string>
+    <string name="lock_unlock">인증하여 해제</string>
+    <string name="auth_failed">인증 실패: %1$s</string>
+    <string name="biometric_not_available">이 기기는 생체 인식을 지원하지 않습니다.</string>
+    
+    <!-- Backup/Restore Results -->
+    <string name="backup_success">백업이 성공적으로 완료되었습니다.</string>
+    <string name="backup_failed">백업 실패: %1$s</string>
+    <string name="restore_success">%1$d개의 기록을 복구했습니다.</string>
+    <string name="restore_failed">복구 실패: %1$s</string>
+    <string name="export_csv_success">CSV 내보내기가 완료되었습니다.</string>
+    <string name="export_md_success">Markdown 내보내기가 완료되었습니다.</string>
 </resources>

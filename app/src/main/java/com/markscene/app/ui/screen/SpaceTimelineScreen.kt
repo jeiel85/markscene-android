@@ -18,10 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -44,12 +48,12 @@ fun SpaceTimelineScreen(
                 title = { 
                     Column {
                         Text(spaceName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("공간 히스토리", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.space_history), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -60,7 +64,7 @@ fun SpaceTimelineScreen(
                         }) {
                             Icon(
                                 imageVector = if (isSelectMode) Icons.Default.History else Icons.Default.Compare, 
-                                contentDescription = "Toggle Compare Mode",
+                                contentDescription = if (isSelectMode) stringResource(R.string.space_history) else stringResource(R.string.space_compare_now),
                                 tint = if (isSelectMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -83,9 +87,9 @@ fun SpaceTimelineScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("2개의 기록이 선택됨", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.space_compare_selected), fontWeight = FontWeight.Bold)
                         Button(onClick = { onCompare(selectedIds[0], selectedIds[1]) }) {
-                            Text("지금 비교하기")
+                            Text(stringResource(R.string.space_compare_now))
                         }
                     }
                 }
@@ -95,7 +99,7 @@ fun SpaceTimelineScreen(
     ) { padding ->
         if (records.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("이 공간에 아직 기록이 없습니다.")
+                Text(stringResource(R.string.space_empty))
             }
         } else {
             LazyColumn(
@@ -134,11 +138,14 @@ private fun TimelineItem(
     onClick: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("MM월 dd일 HH:mm", Locale.getDefault()) }
+    val formatted = dateFormat.format(record.createdAt)
+    val a11yDesc = "$formatted 기록 보기"
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .semantics { contentDescription = a11yDesc },
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         // Left: Date & Dot
@@ -147,12 +154,12 @@ private fun TimelineItem(
             modifier = Modifier.width(60.dp)
         ) {
             Text(
-                text = dateFormat.format(record.createdAt).substring(0, 3),
+                text = formatted.substring(0, 3),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = dateFormat.format(record.createdAt).substring(4, 6),
+                text = formatted.substring(4, 6),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Black
             )
@@ -206,7 +213,7 @@ private fun TimelineItem(
                 shape = CircleShape
             ) {
                 Text(
-                    text = dateFormat.format(record.createdAt).substring(8),
+                    text = formatted.substring(8),
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall
