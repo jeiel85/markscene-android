@@ -316,11 +316,11 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                 RecordListScreen(
                     records = visibleRecords,
                     onSearch = { searchQuery = it },
-                    onDeleteRecord = { recordId -> scope.launch { repository.deleteRecord(recordId) } },
+                    onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } },
+                    onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
                     onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
                     onBack = { navController.popBackStack() }
-                )
-            }
+                )            }
             composable(
                 route = "$DETAIL_ROUTE/{$DETAIL_ID_ARG}",
                 arguments = listOf(navArgument(DETAIL_ID_ARG) { type = NavType.StringType })

@@ -36,12 +36,22 @@ interface RecordDao {
 
     @Query("DELETE FROM photo_records WHERE id = :recordId")
     suspend fun deleteRecord(recordId: String)
+@Query("DELETE FROM photo_tags WHERE recordId = :recordId")
+suspend fun deleteTagsForRecord(recordId: String)
 
-    @Query("DELETE FROM photo_tags WHERE recordId = :recordId")
-    suspend fun deleteTagsForRecord(recordId: String)
+@Query("DELETE FROM photo_records WHERE id IN (:recordIds)")
+suspend fun deleteRecords(recordIds: List<String>)
 
-    @Transaction
-    @Query(
+@Query("DELETE FROM photo_tags WHERE recordId IN (:recordIds)")
+suspend fun deleteTagsForRecords(recordIds: List<String>)
+
+@Query("UPDATE photo_records SET space = :newSpace, updatedAt = :now WHERE id IN (:recordIds)")
+suspend fun updateRecordsSpace(recordIds: List<String>, newSpace: String?, now: Long = System.currentTimeMillis())
+
+@Transaction
+@Query(
+...
+
         """
         SELECT DISTINCT r.* FROM photo_records r
         INNER JOIN photo_tags t ON t.recordId = r.id

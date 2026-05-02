@@ -87,6 +87,16 @@ class RoomRecordRepository(
         analysisDao.deleteForRecord(recordId)
         recordDao.deleteRecord(recordId)
     }
+
+    suspend fun deleteRecords(recordIds: List<String>) {
+        recordIds.forEach { analysisDao.deleteForRecord(it) }
+        recordDao.deleteRecords(recordIds)
+        recordDao.deleteTagsForRecords(recordIds)
+    }
+
+    suspend fun updateRecordsSpace(recordIds: List<String>, newSpace: String?) {
+        recordDao.updateRecordsSpace(recordIds, newSpace)
+    }
 }
 
 private fun PhotoRecordWithTags.toModel(): PhotoRecord =
