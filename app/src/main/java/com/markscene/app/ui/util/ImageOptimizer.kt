@@ -2,7 +2,6 @@ package com.markscene.app.ui.util
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
@@ -26,11 +25,9 @@ object ImageOptimizer {
             val bytes = inputStream.readBytes()
             inputStream.close()
 
-            // 1. Get orientation
             val exif = ExifInterface(bytes.inputStream())
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
-            // 2. Decode with scaling
             val options = android.graphics.BitmapFactory.Options()
             options.inJustDecodeSize = true
             android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
@@ -40,10 +37,8 @@ object ImageOptimizer {
             
             var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return@withContext null
 
-            // 3. Rotate if needed
             bitmap = rotateBitmap(bitmap, orientation)
 
-            // 4. Save as WebP
             val recordsDir = File(context.filesDir, "records").apply { mkdirs() }
             val outputFile = File(recordsDir, targetFileName)
             
