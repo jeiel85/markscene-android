@@ -27,6 +27,7 @@ import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
 import com.markscene.app.data.backup.BackupManager
+import com.markscene.app.data.backup.DataExporter
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.ui.screen.CreateRecordScreen
@@ -170,6 +171,38 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
             scope.launch {
                 val result = backupManager.importBackup(it)
                 backupStatusMessage = if (result.isSuccess) "${result.getOrNull()}개의 기록을 복구했습니다." else "복구 실패: ${result.exceptionOrNull()?.message}"
+            }
+        }
+    }
+
+    val csvExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                try {
+                    val csvData = DataExporter.toCsv(repository.search("").first())
+                    context.contentResolver.openOutputStream(it)?.use { out -> out.write(csvData.toByteArray()) }
+                    backupStatusMessage = "CSV 내보내기가 완료되었습니다."
+                } catch (e: Exception) {
+                    backupStatusMessage = "CSV 내보내기 실패: ${e.message}"
+                }
+            }
+        }
+    }
+
+    val mdExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/markdown")
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                try {
+                    val mdData = DataExporter.toMarkdownList(repository.search("").first())
+                    context.contentResolver.openOutputStream(it)?.use { out -> out.write(mdData.toByteArray()) }
+                    backupStatusMessage = "Markdown 내보내기가 완료되었습니다."
+                } catch (e: Exception) {
+                    backupStatusMessage = "Markdown 내보내기 실패: ${e.message}"
+                }
             }
         }
     }
@@ -420,6 +453,8 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                     },
                     onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
                     onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
+                    onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") },
+                    onExportMarkdown = { mdExportLauncher.launch("MarkScene_Records_${System.currentTimeMillis()}.md") },
                     onDeleteTagCorrection = { original ->
                         scope.launch { database.tagCorrectionDao().delete(original) }
                     },

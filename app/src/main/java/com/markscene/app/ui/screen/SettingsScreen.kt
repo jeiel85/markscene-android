@@ -32,6 +32,8 @@ fun SettingsScreen(
     onTestConnection: () -> String,
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
+    onExportCsv: () -> Unit = {},
+    onExportMarkdown: () -> Unit = {},
     onDeleteTagCorrection: (String) -> Unit = {},
     externalMessage: String? = null,
     onMessageShown: () -> Unit,
@@ -177,9 +179,21 @@ fun SettingsScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SettingsItem(
                         icon = Icons.Default.CloudDownload,
-                        title = "데이터 내보내기",
-                        description = "모든 기록과 사진을 ZIP 파일로 저장",
+                        title = "통합 백업 (ZIP)",
+                        description = "모든 기록과 사진을 ZIP 파일로 보관",
                         onClick = onExportBackup
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Description,
+                        title = "Markdown 추출",
+                        description = "문서 도구 활용을 위한 MD 파일 생성",
+                        onClick = onExportMarkdown
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.TableChart,
+                        title = "CSV 추출",
+                        description = "엑셀 등에서 활용 가능한 데이터 추출",
+                        onClick = onExportCsv
                     )
                     SettingsItem(
                         icon = Icons.Default.CloudUpload,
