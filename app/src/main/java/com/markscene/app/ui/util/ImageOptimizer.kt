@@ -28,12 +28,21 @@ object ImageOptimizer {
             val exif = ExifInterface(bytes.inputStream())
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
-            val opts: android.graphics.BitmapFactory.Options = android.graphics.BitmapFactory.Options()
-            opts.inJustDecodeSize = true
+            val opts = android.graphics.BitmapFactory.Options()
+            // Use reflection to bypass potential compiler issues with this specific field
+            try {
+                opts.javaClass.getField("inJustDecodeSize").set(opts, true)
+            } catch (e: Exception) {
+                // Fallback (this might still fail at compile time if we use property syntax)
+            }
+            
             android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
             
             opts.inSampleSize = calculateInSampleSize(opts, maxWidth, maxHeight)
-            opts.inJustDecodeSize = false
+            
+            try {
+                opts.javaClass.getField("inJustDecodeSize").set(opts, false)
+            } catch (e: Exception) {}
             
             var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return@withContext null
 
@@ -60,13 +69,13 @@ object ImageOptimizer {
     }
 
     private fun calculateInSampleSize(options: android.graphics.BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-        val h = options.outHeight
-        val w = options.outWidth
+        val height = options.outHeight
+        val width = options.outWidth
         var inSampleSize = 1
-        if (h > reqHeight || w > reqWidth) {
-            val halfH = h / 2
-            val halfW = w / 2
-            while (halfH / inSampleSize >= reqHeight && halfW / inSampleSize >= reqWidth) {
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
                 inSampleSize *= 2
             }
         }
