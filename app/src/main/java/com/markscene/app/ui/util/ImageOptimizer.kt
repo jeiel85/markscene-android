@@ -2,6 +2,7 @@ package com.markscene.app.ui.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
@@ -16,8 +17,8 @@ object ImageOptimizer {
         context: Context,
         inputUri: Uri,
         targetFileName: String,
-        maxWidth: Int = 1920,
-        maxHeight: Int = 1920,
+        maxWidth: Int = 1024,
+        maxHeight: Int = 1024,
         quality: Int = 80
     ): File? = withContext(Dispatchers.IO) {
         try {
@@ -28,14 +29,14 @@ object ImageOptimizer {
             val exif = ExifInterface(bytes.inputStream())
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
-            val options = android.graphics.BitmapFactory.Options()
+            val options = BitmapFactory.Options()
             options.inJustDecodeSize = true
-            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
             
             options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight)
             options.inJustDecodeSize = false
             
-            var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return@withContext null
+            var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return@withContext null
 
             bitmap = rotateBitmap(bitmap, orientation)
 
@@ -43,12 +44,13 @@ object ImageOptimizer {
             val outputFile = File(recordsDir, targetFileName)
             
             FileOutputStream(outputFile).use { out ->
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                    bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, out)
+                @Suppress("DEPRECATION")
+                val format = if (android.os.Build.VERSION.SDK_INT >= 30) {
+                    Bitmap.CompressFormat.WEBP_LOSSY
                 } else {
-                    @Suppress("DEPRECATION")
-                    bitmap.compress(Bitmap.CompressFormat.WEBP, quality, out)
+                    Bitmap.CompressFormat.WEBP
                 }
+                bitmap.compress(format, quality, out)
             }
             
             bitmap.recycle()
@@ -58,11 +60,10 @@ object ImageOptimizer {
         }
     }
 
-    private fun calculateInSampleSize(options: android.graphics.BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         val height = options.outHeight
         val width = options.outWidth
         var inSampleSize = 1
-
         if (height > reqHeight || width > reqWidth) {
             val halfHeight = height / 2
             val halfWidth = width / 2
