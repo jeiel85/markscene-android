@@ -26,6 +26,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.markscene.app.ai.provider.*
 import com.markscene.app.core.database.MarkSceneDatabase
+import com.markscene.app.core.database.TagCorrectionEntity
 import com.markscene.app.core.model.*
 import com.markscene.app.data.backup.BackupManager
 import com.markscene.app.data.backup.DataExporter
