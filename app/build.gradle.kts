@@ -16,8 +16,8 @@ android {
         applicationId = "com.markscene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 201
-        versionName = "2.0.1"
+        versionCode = 202
+        versionName = "2.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

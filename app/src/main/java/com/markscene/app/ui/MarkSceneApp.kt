@@ -97,6 +97,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val database = remember {
         Room.databaseBuilder(context.applicationContext, MarkSceneDatabase::class.java, "markscene.db")
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+            .fallbackToDestructiveMigration() // 안전장치 추가: 마이그레이션 실패 시 DB 재설정하여 크래시 방지
             .build()
     }
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
