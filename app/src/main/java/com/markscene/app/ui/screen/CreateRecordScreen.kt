@@ -61,6 +61,7 @@ fun CreateRecordScreen(
     localImageTagger: LocalImageTagger,
     textRecognizer: TextRecognizer,
     onSave: (PhotoRecord) -> Unit,
+    onLearnTagCorrection: (original: String, corrected: String) -> Unit = { _, _ -> },
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -76,7 +77,10 @@ fun CreateRecordScreen(
     var statusText by remember { mutableStateOf("") }
     var isAnalyzing by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
+    
     val editableTags = remember { mutableStateListOf<String>() }
+    // AI가 처음 제안했던 태그 목록을 기억하여 학습에 사용
+    val originalAiSuggestions = remember { mutableStateListOf<String>() }
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -97,8 +101,14 @@ fun CreateRecordScreen(
         try {
             val tagsResult = localImageTagger.generateTags(uri)
             val ocrResult = textRecognizer.recognizeText(uri)
+            
+            val suggestionNames = tagsResult.map { it.name }
             editableTags.clear()
-            editableTags.addAll(tagsResult.map { it.name })
+            editableTags.addAll(suggestionNames)
+            
+            originalAiSuggestions.clear()
+            originalAiSuggestions.addAll(suggestionNames)
+            
             ocrText = ocrResult.getOrNull()
             statusText = "분석이 완료되었습니다."
         } catch (e: Exception) {
@@ -126,6 +136,15 @@ fun CreateRecordScreen(
                                 val now = System.currentTimeMillis()
                                 val recordId = UUID.randomUUID().toString()
                                 
+                                // Learn user preference: 
+                                // AI suggested 'A' but user changed it to 'B'.
+                                // Simple heuristic: 1 removed original tag and 1 added new tag.
+                                val removedSuggestions = originalAiSuggestions.filter { !editableTags.contains(it) }
+                                val addedTags = editableTags.filter { !originalAiSuggestions.contains(it) }
+                                if (removedSuggestions.size == 1 && addedTags.size == 1) {
+                                    onLearnTagCorrection(removedSuggestions.first(), addedTags.first())
+                                }
+                                
                                 val optimizedFile = ImageOptimizer.optimize(
                                     context = context,
                                     inputUri = selectedUri,
@@ -139,7 +158,7 @@ fun CreateRecordScreen(
                                             recordId = recordId,
                                             name = tagName,
                                             rawName = null,
-                                            source = TagSource.LocalImageLabel,
+                                            source = if (originalAiSuggestions.contains(tagName)) TagSource.LocalImageLabel else TagSource.User,
                                             confidence = null,
                                             userConfirmed = true,
                                             createdAt = now
@@ -319,6 +338,7 @@ fun CreateRecordScreen(
                         IconButton(onClick = {
                             val normalized = customTag.trim().lowercase()
                             if (normalized.isNotBlank() && !editableTags.contains(normalized)) {
+                                // 만약 AI 제안 중 하나를 지우고 비슷한걸 넣었다면 학습 기회로 활용 가능 (추후 구현)
                                 editableTags.add(normalized)
                                 customTag = ""
                             }

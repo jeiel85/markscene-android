@@ -18,18 +18,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.markscene.app.core.database.TagCorrectionEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     hasApiKey: Boolean,
     isBiometricLockEnabled: Boolean,
+    tagCorrections: List<TagCorrectionEntity> = emptyList(),
     onToggleBiometricLock: (Boolean) -> Unit,
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
+    onDeleteTagCorrection: (String) -> Unit = {},
     externalMessage: String? = null,
     onMessageShown: () -> Unit,
     onOpenPrivacyNotice: () -> Unit,
@@ -59,7 +62,7 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(scrollState)
                 .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             // API Key Section
             SettingsSection(title = "AI 엔진 설정 (BYOK)") {
@@ -127,6 +130,43 @@ fun SettingsScreen(
                             Icon(Icons.Default.SettingsInputComponent, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text("연결 테스트 실행")
+                        }
+                    }
+                }
+            }
+
+            // Tag Correction Section
+            if (tagCorrections.isNotEmpty()) {
+                SettingsSection(title = "태그 학습 사전") {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                "사용자가 교정한 태그 습관을 기억하고 있습니다.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            tagCorrections.forEach { correction ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text(correction.originalName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Icon(Icons.Default.ArrowDownward, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.primary)
+                                        Text(correction.correctedName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                    }
+                                    IconButton(onClick = { onDeleteTagCorrection(correction.originalName) }) {
+                                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                                    }
+                                }
+                                if (correction != tagCorrections.last()) HorizontalDivider(alpha = 0.05f)
+                            }
                         }
                     }
                 }

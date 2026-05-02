@@ -89,6 +89,21 @@ private val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+private val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS tag_corrections (
+                originalName TEXT NOT NULL PRIMARY KEY,
+                correctedName TEXT NOT NULL,
+                usageCount INTEGER NOT NULL,
+                updatedAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 @Composable
 fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
     val context = LocalContext.current
@@ -96,16 +111,16 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
-    val localTagger = remember { MlKitLocalImageTagger(context.applicationContext) }
-    val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
-    val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
     val database = remember {
         Room.databaseBuilder(
             context.applicationContext,
             MarkSceneDatabase::class.java,
             "markscene.db"
-        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
     }
+    val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
+    val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
+    val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
     val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
@@ -225,12 +240,21 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                 )
             }
             composable(
-                route = "$CREATE_RECORD_ROUTE/{$CREATE_RECORD_SOURCE_ARG}",
-                arguments = listOf(navArgument(CREATE_RECORD_SOURCE_ARG) { type = NavType.StringType })
+                route = "$CREATE_RECORD_ROUTE/{$CREATE_RECORD_SOURCE_ARG}?uri={$DETAIL_ID_ARG}",
+                arguments = listOf(
+                    navArgument(CREATE_RECORD_SOURCE_ARG) { type = NavType.StringType },
+                    navArgument(DETAIL_ID_ARG) { 
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
             ) { backStackEntry ->
                 val source = backStackEntry.arguments?.getString(CREATE_RECORD_SOURCE_ARG).orEmpty()
+                val initialUri = backStackEntry.arguments?.getString(DETAIL_ID_ARG)?.let { android.net.Uri.parse(it) }
                 CreateRecordScreen(
                     source = source,
+                    initialImageUri = initialUri,
                     localImageTagger = localTagger,
                     textRecognizer = textRecognizer,
                     onSave = { record ->
@@ -238,6 +262,17 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                             repository.saveRecord(record)
                             navController.navigate(SEARCH_ROUTE) {
                                 popUpTo(HOME_ROUTE)
+                            }
+                        }
+                    },
+                    onLearnTagCorrection = { original, corrected ->
+                        scope.launch {
+                            val dao = database.tagCorrectionDao()
+                            val existing = dao.getCorrection(original)
+                            if (existing != null) {
+                                dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis()))
+                            } else {
+                                dao.upsert(com.markscene.app.core.database.TagCorrectionEntity(original, corrected))
                             }
                         }
                     },
@@ -355,9 +390,11 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                 }
             }
             composable(SETTINGS_ROUTE) {
+                val corrections by database.tagCorrectionDao().getAllCorrections().collectAsState(initial = emptyList())
                 SettingsScreen(
                     hasApiKey = hasApiKey,
                     isBiometricLockEnabled = isBiometricLockEnabled,
+                    tagCorrections = corrections,
                     onToggleBiometricLock = { enabled ->
                         if (enabled && !authenticator.isBiometricAvailable()) {
                             backupStatusMessage = "이 기기는 생체 인식을 지원하지 않습니다."
@@ -383,6 +420,9 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
                     },
                     onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
                     onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
+                    onDeleteTagCorrection = { original ->
+                        scope.launch { database.tagCorrectionDao().delete(original) }
+                    },
                     externalMessage = backupStatusMessage,
                     onMessageShown = { backupStatusMessage = null },
                     onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
