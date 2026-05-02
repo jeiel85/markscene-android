@@ -1,8 +1,20 @@
 # HISTORY.md
 
-## 2026-04-30
+## 2026-05-02
 
-- 작업: 릴리즈 키스토어 생성 및 GitHub Actions 자동 서명 빌드 설정
+- 작업: 앱 실행 안정성 강화 및 빌드 환경 개선
+- 변경 파일:
+  - `app/build.gradle.kts`: 로컬 환경에서 `local.properties` 및 디버그 키스토어 누락 시에도 빌드가 가능하도록 개선
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: 
+    - `LocalContext`에서 `FragmentActivity`를 안전하게 찾아내도록 수정 (ContextWrapper 대응)
+    - 암호화 저장소(`SecurityStore`) 및 데이터베이스 초기화 시 예외 처리 보강
+    - `BiometricAuthenticator` 사용 전 null 체크 추가
+- 검증:
+  - 로컬: `./gradlew assembleDebug` 및 `./gradlew test` 성공 확인
+- 결과: 특정 기기나 환경에서 발생할 수 있는 런타임 크래시 요소를 제거하고 빌드 호환성 확보
+- 후속 작업:
+  - 사용자 환경에서 정상 실행 여부 최종 확인
+
 - 변경 파일:
   - `app/build.gradle.kts`: CI 환경 변수 및 local.properties 지원 서명 로직 추가
   - `.github/workflows/release-apk.yml`: Secrets 기반 키스토어 디코딩 및 자동 서명 단계 추가

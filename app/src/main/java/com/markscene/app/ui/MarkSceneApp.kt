@@ -90,15 +90,27 @@ private val MIGRATION_5_6 = object : Migration(5, 6) {
 @Composable
 fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val context = LocalContext.current
-    val activity = context as FragmentActivity
+    val activity = remember(context) {
+        var c = context
+        while (c is android.content.ContextWrapper) {
+            if (c is FragmentActivity) break
+            c = c.baseContext
+        }
+        c as? FragmentActivity
+    }
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
     val database = remember {
-        Room.databaseBuilder(context.applicationContext, MarkSceneDatabase::class.java, "markscene.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
-            .fallbackToDestructiveMigration() // 안전장치 추가: 마이그레이션 실패 시 DB 재설정하여 크래시 방지
-            .build()
+        try {
+            Room.databaseBuilder(context.applicationContext, MarkSceneDatabase::class.java, "markscene.db")
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                .fallbackToDestructiveMigration()
+                .build()
+        } catch (e: Exception) {
+            // Re-throw or handle (Room.databaseBuilder itself shouldn't throw, but build() might)
+            throw e
+        }
     }
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
     val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
@@ -107,16 +119,18 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
     val backupManager = remember { BackupManager(context.applicationContext, repository) }
-    val authenticator = remember { BiometricAuthenticator(activity) }
+    val authenticator = remember { activity?.let { BiometricAuthenticator(it) } }
 
     var searchQuery by remember { mutableStateOf("") }
     var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
-    var isBiometricLockEnabled by remember { mutableStateOf(securityStore.isBiometricLockEnabled()) }
+    var isBiometricLockEnabled by remember { 
+        mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false }) 
+    }
     var isAppLocked by remember { mutableStateOf(isBiometricLockEnabled) }
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        if (isBiometricLockEnabled) {
+        if (isBiometricLockEnabled && authenticator != null) {
             authenticator.authenticate(
                 onSuccess = { 
                     isAppLocked = false
@@ -175,7 +189,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                 Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.primary)
                 Text("앱이 잠겨 있습니다", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Button(onClick = {
-                    authenticator.authenticate(onSuccess = { isAppLocked = false }, onError = { backupStatusMessage = it })
+                    authenticator?.authenticate(onSuccess = { isAppLocked = false }, onError = { backupStatusMessage = it })
                 }, shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)) {
                     Text("인증하여 해제")
                 }
@@ -230,7 +244,37 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
             }
             composable(SETTINGS_ROUTE) {
                 val corrections by database.tagCorrectionDao().getAllCorrections().collectAsState(initial = emptyList())
-                SettingsScreen(hasApiKey = hasApiKey, isBiometricLockEnabled = isBiometricLockEnabled, tagCorrections = corrections, onToggleBiometricLock = { enabled -> if (enabled && !authenticator.isBiometricAvailable()) { backupStatusMessage = "이 기기는 생체 인식을 지원하지 않습니다." } else { securityStore.setBiometricLockEnabled(enabled); isBiometricLockEnabled = enabled } }, onSaveApiKey = { key -> apiKeyStore.saveGeminiApiKey(key); hasApiKey = true }, onDeleteApiKey = { apiKeyStore.clearGeminiApiKey(); hasApiKey = false }, onTestConnection = { if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) { "API Key가 없어 테스트할 수 없습니다." } else { "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다." } }, onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") }, onImportBackup = { importLauncher.launch(arrayOf("application/zip")) }, onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") }, onExportMarkdown = { mdExportLauncher.launch("MarkScene_Records_${System.currentTimeMillis()}.md") }, onDeleteTagCorrection = { original -> scope.launch { database.tagCorrectionDao().delete(original) } }, externalMessage = backupStatusMessage, onMessageShown = { backupStatusMessage = null }, onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) }, onBack = { navController.popBackStack() })
+                SettingsScreen(
+                    hasApiKey = hasApiKey,
+                    isBiometricLockEnabled = isBiometricLockEnabled,
+                    tagCorrections = corrections,
+                    onToggleBiometricLock = { enabled ->
+                        if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
+                            backupStatusMessage = if (authenticator == null) "시스템 오류로 인증 기능을 사용할 수 없습니다." else "이 기기는 생체 인식을 지원하지 않습니다."
+                        } else {
+                            securityStore.setBiometricLockEnabled(enabled)
+                            isBiometricLockEnabled = enabled
+                        }
+                    },
+                    onSaveApiKey = { key -> apiKeyStore.saveGeminiApiKey(key); hasApiKey = true },
+                    onDeleteApiKey = { apiKeyStore.clearGeminiApiKey(); hasApiKey = false },
+                    onTestConnection = {
+                        if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
+                            "API Key가 없어 테스트할 수 없습니다."
+                        } else {
+                            "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
+                        }
+                    },
+                    onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
+                    onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
+                    onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") },
+                    onExportMarkdown = { mdExportLauncher.launch("MarkScene_Records_${System.currentTimeMillis()}.md") },
+                    onDeleteTagCorrection = { original -> scope.launch { database.tagCorrectionDao().delete(original) } },
+                    externalMessage = backupStatusMessage,
+                    onMessageShown = { backupStatusMessage = null },
+                    onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
+                    onBack = { navController.popBackStack() }
+                )
             }
             composable(PRIVACY_ROUTE) {
                 PrivacyNoticeScreen(onBack = { navController.popBackStack() })

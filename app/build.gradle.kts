@@ -16,8 +16,8 @@ android {
         applicationId = "com.markscene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 202
-        versionName = "2.0.2"
+        versionCode = libs.versions.projectVersionCode.get().toInt()
+        versionName = libs.versions.projectVersionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,19 +43,25 @@ android {
                 if (propertiesFile.exists()) {
                     val properties = Properties()
                     propertiesFile.inputStream().use { properties.load(it) }
-                    storeFile = file(properties.getProperty("RELEASE_STORE_FILE", ""))
-                    storePassword = properties.getProperty("RELEASE_STORE_PASSWORD", "")
-                    keyAlias = properties.getProperty("RELEASE_KEY_ALIAS", "")
-                    keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD", "")
+                    val storeFilePath = properties.getProperty("RELEASE_STORE_FILE")
+                    if (!storeFilePath.isNullOrEmpty()) {
+                        storeFile = file(storeFilePath)
+                        storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
+                        keyAlias = properties.getProperty("RELEASE_KEY_ALIAS")
+                        keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD")
+                    }
                 }
             }
         }
         getByName("debug") {
-            // 프로젝트 내 고정 디버그 키스토어 사용 (CI와 로컬 동일한 서명)
-            storeFile = rootProject.file("keystore/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            // 프로젝트 내 고정 디버그 키스토어 사용 시도, 없으면 기본값 사용
+            val debugKeystore = rootProject.file("keystore/debug.keystore")
+            if (debugKeystore.exists()) {
+                storeFile = debugKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
         }
     }
 
