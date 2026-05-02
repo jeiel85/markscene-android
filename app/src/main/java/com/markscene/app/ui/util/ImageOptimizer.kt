@@ -31,14 +31,14 @@ object ImageOptimizer {
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
             // 2. Decode with scaling
-            val options = BitmapFactory.Options()
+            val options = android.graphics.BitmapFactory.Options()
             options.inJustDecodeSize = true
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
             
             options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight)
             options.inJustDecodeSize = false
             
-            var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return@withContext null
+            var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return@withContext null
 
             // 3. Rotate if needed
             bitmap = rotateBitmap(bitmap, orientation)
@@ -63,7 +63,7 @@ object ImageOptimizer {
         }
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(options: android.graphics.BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         val height = options.outHeight
         val width = options.outWidth
         var inSampleSize = 1
