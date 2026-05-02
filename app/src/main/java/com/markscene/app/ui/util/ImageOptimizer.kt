@@ -31,7 +31,8 @@ object ImageOptimizer {
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
             // 2. Decode with scaling
-            val options = BitmapFactory.Options().apply { inJustDecodeSize = true }
+            val options = BitmapFactory.Options()
+            options.inJustDecodeSize = true
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
             
             options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight)
@@ -63,12 +64,13 @@ object ImageOptimizer {
     }
 
     private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-        val (height: Int, width: Int) = options.outHeight to options.outWidth
+        val height = options.outHeight
+        val width = options.outWidth
         var inSampleSize = 1
 
         if (height > reqHeight || width > reqWidth) {
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
+            val halfHeight = height / 2
+            val halfWidth = width / 2
             while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
                 inSampleSize *= 2
             }
