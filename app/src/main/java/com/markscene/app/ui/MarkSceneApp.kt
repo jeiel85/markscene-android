@@ -2,14 +2,18 @@ package com.markscene.app.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,14 +35,7 @@ import com.markscene.app.data.backup.BackupManager
 import com.markscene.app.data.backup.DataExporter
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
-import com.markscene.app.ui.screen.CreateRecordScreen
-import com.markscene.app.ui.screen.HomeScreen
-import com.markscene.app.ui.screen.PrivacyNoticeScreen
-import com.markscene.app.ui.screen.RecordDetailScreen
-import com.markscene.app.ui.screen.RecordListScreen
-import com.markscene.app.ui.screen.SettingsScreen
-import com.markscene.app.ui.screen.SpaceTimelineScreen
-import com.markscene.app.ui.screen.CompareScreen
+import com.markscene.app.ui.screen.*
 import androidx.fragment.app.FragmentActivity
 import com.markscene.app.data.settings.SecurityStore
 import com.markscene.app.ui.security.BiometricAuthenticator
@@ -199,7 +196,8 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
         uri?.let {
             scope.launch {
                 try {
-                    val csvData = DataExporter.toCsv(repository.observeRecords().first())
+                    val records = repository.observeRecords().first()
+                    val csvData = DataExporter.toCsv(records)
                     context.contentResolver.openOutputStream(it)?.use { out -> out.write(csvData.toByteArray()) }
                     backupStatusMessage = "CSV 내보내기가 완료되었습니다."
                 } catch (e: Exception) {
@@ -215,7 +213,8 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
         uri?.let {
             scope.launch {
                 try {
-                    val mdData = DataExporter.toMarkdownList(repository.observeRecords().first())
+                    val records = repository.observeRecords().first()
+                    val mdData = DataExporter.toMarkdownList(records)
                     context.contentResolver.openOutputStream(it)?.use { out -> out.write(mdData.toByteArray()) }
                     backupStatusMessage = "Markdown 내보내기가 완료되었습니다."
                 } catch (e: Exception) {
@@ -229,50 +228,50 @@ fun MarkSceneApp(sharedImageUri: android.net.Uri? = null) {
 
     if (isAppLocked) {
         // Simple Lock Screen Overlay
-        androidx.compose.foundation.layout.Box(
-            modifier = androidx.compose.ui.Modifier
+        Box(
+            modifier = Modifier
                 .fillMaxSize()
-                .androidx.compose.foundation.background(androidx.compose.material3.MaterialTheme.colorScheme.background),
-            contentAlignment = androidx.compose.ui.Alignment.Center
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
         ) {
-            androidx.compose.foundation.layout.Column(
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(24.dp)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                androidx.compose.material3.Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.Lock,
+                Icon(
+                    imageVector = Icons.Default.Lock,
                     contentDescription = null,
-                    modifier = androidx.compose.ui.Modifier.androidx.compose.foundation.layout.size(80.dp),
-                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(80.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
-                androidx.compose.material3.Text(
+                Text(
                     text = "앱이 잠겨 있습니다",
-                    style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
-                androidx.compose.material3.Button(
+                Button(
                     onClick = {
                         authenticator.authenticate(
                             onSuccess = { isAppLocked = false },
                             onError = { backupStatusMessage = it }
                         )
                     },
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 32.dp, vertical = 12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)
                 ) {
-                    androidx.compose.material3.Text("인증하여 해제")
+                    Text("인증하여 해제")
                 }
             }
 
             // Message Display for Authentication Errors
             backupStatusMessage?.let {
-                androidx.compose.material3.Snackbar(
-                    modifier = androidx.compose.ui.Modifier.androidx.compose.foundation.layout.padding(paddingValues = androidx.compose.foundation.layout.PaddingValues(16.dp)).androidx.compose.ui.Alignment.BottomCenter,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                Snackbar(
+                    modifier = Modifier.padding(16.dp).align(Alignment.BottomCenter),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    androidx.compose.material3.Text(it)
+                    Text(it)
                 }
-                androidx.compose.runtime.LaunchedEffect(it) {
+                LaunchedEffect(it) {
                     kotlinx.coroutines.delay(3000)
                     backupStatusMessage = null
                 }

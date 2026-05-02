@@ -1,6 +1,7 @@
 package com.markscene.app.ui.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -8,10 +9,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.DriveFileMove
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +36,7 @@ import coil.compose.AsyncImage
 import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RecordListScreen(
     records: List<PhotoRecord>,
@@ -169,7 +175,7 @@ fun RecordListScreen(
                             query = it
                             onSearch(it)
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().semantics { contentDescription = "기록 검색 입력창" },
                         placeholder = { Text(stringResource(R.string.list_search_placeholder)) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         colors = TextFieldDefaults.colors(
@@ -276,7 +282,7 @@ fun RecordListScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showMoveSpaceDialog = false }) { Text("취oc") }
+                TextButton(onClick = { showMoveSpaceDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -291,13 +297,24 @@ private fun GalleryItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
+    val spaceLabel = stringResource(R.string.create_field_space)
+    val tagsLabel = stringResource(R.string.create_field_tags)
+    val a11yDesc = buildString {
+        append(record.title ?: stringResource(R.string.list_untitled))
+        record.space?.let { append(", $spaceLabel: $it") }
+        if (record.tags.isNotEmpty()) {
+            append(", $tagsLabel: ${record.tags.joinToString { it.name }}")
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
-            ),
+            )
+            .semantics { contentDescription = a11yDesc },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 2.dp),
         colors = CardDefaults.cardColors(
