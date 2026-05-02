@@ -1,8 +1,7 @@
 package com.markscene.app.ui.util
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Matrix
+import android.graphics.*
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import kotlinx.coroutines.Dispatchers
@@ -28,14 +27,14 @@ object ImageOptimizer {
             val exif = ExifInterface(bytes.inputStream())
             val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
 
-            val opts = android.graphics.BitmapFactory.Options()
-            opts.inJustDecodeSize = true
-            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+            val options = BitmapFactory.Options()
+            options.inJustDecodeSize = true
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
             
-            opts.inSampleSize = calculateInSampleSize(opts, maxWidth, maxHeight)
-            opts.inJustDecodeSize = false
+            options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight)
+            options.inJustDecodeSize = false
             
-            var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return@withContext null
+            var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return@withContext null
 
             bitmap = rotateBitmap(bitmap, orientation)
 
@@ -59,14 +58,14 @@ object ImageOptimizer {
         }
     }
 
-    private fun calculateInSampleSize(options: android.graphics.BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-        val height = options.outHeight
-        val width = options.outWidth
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val h = options.outHeight
+        val w = options.outWidth
         var inSampleSize = 1
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight = height / 2
-            val halfWidth = width / 2
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+        if (h > reqHeight || w > reqWidth) {
+            val halfH = h / 2
+            val halfW = w / 2
+            while (halfH / inSampleSize >= reqHeight && halfW / inSampleSize >= reqWidth) {
                 inSampleSize *= 2
             }
         }
