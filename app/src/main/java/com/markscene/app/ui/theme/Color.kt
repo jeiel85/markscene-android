@@ -20,3 +20,8 @@ val DarkBackground = Color(0xFF020617) // Slate 950
 val DarkSurface = Color(0xFF0F172A) // Slate 900
 val DarkOnSurface = Color(0xFFF1F5F9) // Slate 100
 val DarkOnSurfaceVariant = Color(0xFF94A3B8) // Slate 400
+
+// OLED True Black Palette
+val TrueBlackBackground = Color(0xFF000000) // Pure Black
+val TrueBlackSurface = Color(0xFF0D0D0D) // Near Black
+val TrueBlackSurfaceVariant = Color(0xFF1A1A1A) // Slightly lighter for cards

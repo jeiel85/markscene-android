@@ -33,6 +33,7 @@ import com.markscene.app.data.backup.DataExporter
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.data.settings.SecurityStore
+import com.markscene.app.data.settings.UserPreferences
 import com.markscene.app.ui.screen.*
 import com.markscene.app.ui.security.BiometricAuthenticator
 import kotlinx.coroutines.flow.first
@@ -53,6 +54,7 @@ private const val COMPARE_ROUTE = "compare"
 private const val COMPARE_ID1_ARG = "id1"
 private const val COMPARE_ID2_ARG = "id2"
 private const val PRIVACY_ROUTE = "privacy_notice"
+private const val ONBOARDING_ROUTE = "onboarding"
 
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
@@ -118,14 +120,18 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
+    val userPrefs = remember { UserPreferences(context.applicationContext) }
     val backupManager = remember { BackupManager(context.applicationContext, repository) }
     val authenticator = remember { activity?.let { BiometricAuthenticator(it) } }
 
     var searchQuery by remember { mutableStateOf("") }
+    var showOnboarding by remember { mutableStateOf(!userPrefs.isOnboardingCompleted()) }
     var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
-    var isBiometricLockEnabled by remember { 
-        mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false }) 
+    var isBiometricLockEnabled by remember {
+        mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false })
     }
+    var isTrueBlackEnabled by remember { mutableStateOf(userPrefs.useTrueBlackDarkMode()) }
+    var isDynamicColorsEnabled by remember { mutableStateOf(userPrefs.useDynamicColors()) }
     var isAppLocked by remember { mutableStateOf(isBiometricLockEnabled) }
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
 
@@ -183,7 +189,15 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
 
     val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
 
-    if (isAppLocked) {
+    // Show onboarding for first-time users
+    if (showOnboarding) {
+        OnboardingScreen(
+            onComplete = {
+                userPrefs.setOnboardingCompleted(true)
+                showOnboarding = false
+            }
+        )
+    } else if (isAppLocked) {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
                 Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.primary)
@@ -247,6 +261,8 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                 SettingsScreen(
                     hasApiKey = hasApiKey,
                     isBiometricLockEnabled = isBiometricLockEnabled,
+                    isTrueBlackEnabled = isTrueBlackEnabled,
+                    isDynamicColorsEnabled = isDynamicColorsEnabled,
                     tagCorrections = corrections,
                     onToggleBiometricLock = { enabled ->
                         if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
@@ -258,6 +274,16 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                             isBiometricLockEnabled = saved && enabled
                             backupStatusMessage = if (saved) null else "생체 잠금 설정 저장에 실패했습니다."
                         }
+                    },
+                    onToggleTrueBlack = { enabled ->
+                        userPrefs.setTrueBlackDarkMode(enabled)
+                        isTrueBlackEnabled = enabled
+                        backupStatusMessage = if (enabled) "True Black 모드가 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "True Black 모드가 비활성화되었습니다."
+                    },
+                    onToggleDynamicColors = { enabled ->
+                        userPrefs.setDynamicColors(enabled)
+                        isDynamicColorsEnabled = enabled
+                        backupStatusMessage = if (enabled) "Material You 동적 색상이 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "Material You 동적 색상이 비활성화되었습니다."
                     },
                     onSaveApiKey = { key ->
                         val saved = apiKeyStore.saveGeminiApiKey(key)

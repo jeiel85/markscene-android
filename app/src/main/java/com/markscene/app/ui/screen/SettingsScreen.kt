@@ -31,8 +31,12 @@ import com.markscene.app.core.database.TagCorrectionEntity
 fun SettingsScreen(
     hasApiKey: Boolean,
     isBiometricLockEnabled: Boolean,
+    isTrueBlackEnabled: Boolean = false,
+    isDynamicColorsEnabled: Boolean = false,
     tagCorrections: List<TagCorrectionEntity> = emptyList(),
     onToggleBiometricLock: (Boolean) -> Unit,
+    onToggleTrueBlack: (Boolean) -> Unit = {},
+    onToggleDynamicColors: (Boolean) -> Unit = {},
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
@@ -245,7 +249,26 @@ fun SettingsScreen(
                         description = stringResource(R.string.settings_privacy_policy_desc),
                         onClick = onOpenPrivacyNotice
                     )
-                    
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.RestartAlt, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_restart_onboarding), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_restart_onboarding_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(12.dp)
@@ -261,6 +284,61 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 18.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Appearance Section
+            SettingsSection(title = stringResource(R.string.settings_appearance)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Dynamic Colors Toggle
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_dynamic_colors), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_dynamic_colors_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isDynamicColorsEnabled,
+                                onCheckedChange = onToggleDynamicColors,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary)
+                            )
+                        }
+                    }
+
+                    // True Black Toggle
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.Contrast, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_true_black), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_true_black_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isTrueBlackEnabled,
+                                onCheckedChange = onToggleTrueBlack,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary)
                             )
                         }
                     }
