@@ -104,6 +104,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
+    implementation(libs.play.review)
+    implementation(libs.play.review.ktx)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.android.material)

@@ -1,0 +1,22 @@
+# MarkScene Baseline Profile
+# Generated for app startup and common user journeys optimization
+
+# MainActivity and core components
+HSPLcom/markscene/app/MainActivity;-><init>()V
+HSPLcom/markscene/app/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/markscene/app/ui/MarkSceneAppKt;->MarkSceneApp(Landroid/net/Uri;)V
+
+# Database initialization
+HSPLcom/markscene/app/core/database/MarkSceneDatabase;-><clinit>()V
+HSPLcom/markscene/app/data/record/RoomRecordRepository;-><init>(...)V
+
+# Image loading (Coil)
+HSPLcoil/compose/AsyncImageKt;->AsyncImage(Ljava/lang/Object;...)
+
+# Compose Material components
+HSPLandroidx/compose/material3/ScaffoldKt;->Scaffold(Landroidx/compose/ui/Modifier;...)
+HSPLandroidx/compose/material3/CardKt;->Card(Landroidx/compose/ui/Modifier;...)
+
+# Lazy lists for performance
+HSPLandroidx/compose/foundation/lazy/LazyListKt;->LazyColumn(Landroidx/compose/ui/Modifier;...)
+HSPLandroidx/compose/foundation/lazy/grid/LazyGridKt;->LazyVerticalGrid(Landroidx/compose/ui/Modifier;...)

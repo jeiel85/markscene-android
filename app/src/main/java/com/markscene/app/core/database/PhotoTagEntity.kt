@@ -15,7 +15,10 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["recordId"])]
+    indices = [
+        Index(value = ["recordId"]),
+        Index(value = ["name"])
+    ]
 )
 data class PhotoTagEntity(
     @PrimaryKey val id: String,
