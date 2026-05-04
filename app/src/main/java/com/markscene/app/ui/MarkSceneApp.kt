@@ -227,7 +227,25 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                 CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navController.navigate(SEARCH_ROUTE) { popUpTo(HOME_ROUTE) } } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onBack = { navController.popBackStack() })
             }
             composable(SEARCH_ROUTE) {
-                RecordListScreen(records = visibleRecords, onSearch = { searchQuery = it }, onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } }, onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } }, onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") }, onBack = { navController.popBackStack() })
+                val allTags = remember(visibleRecords) {
+                    visibleRecords.flatMap { it.tags }.map { it.name }.distinct()
+                }
+                val recentSearches = remember { userPrefs.getRecentSearches() }
+                RecordListScreen(
+                    records = visibleRecords,
+                    recentSearches = recentSearches,
+                    allTags = allTags,
+                    onSearch = { query ->
+                        searchQuery = query
+                        if (query.isNotBlank()) {
+                            userPrefs.addRecentSearch(query)
+                        }
+                    },
+                    onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } },
+                    onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
+                    onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
+                    onBack = { navController.popBackStack() }
+                )
             }
             composable(
                 route = "$DETAIL_ROUTE/{$DETAIL_ID_ARG}",

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.*
@@ -19,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +40,8 @@ import com.markscene.app.ui.component.EmptyStateView
 @Composable
 fun RecordListScreen(
     records: List<PhotoRecord>,
+    recentSearches: List<String> = emptyList(),
+    allTags: List<String> = emptyList(),
     onSearch: (String) -> Unit,
     onDeleteRecords: (List<String>) -> Unit,
     onMoveToSpace: (List<String>, String) -> Unit,
@@ -45,25 +50,37 @@ fun RecordListScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var selectedSpace by remember { mutableStateOf<String?>(null) }
+    var isSearchFocused by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
-    
+
     val selectedIds = remember { mutableStateListOf<String>() }
     val isSelectMode = selectedIds.isNotEmpty()
     var showMoveSpaceDialog by remember { mutableStateOf(false) }
-    
-    val spaces = remember(records) { 
-        (records.mapNotNull { it.space } + listOf("책상", "주방", "창고", "아이방", "사무실", "거실")).distinct() 
+
+    val spaces = remember(records) {
+        (records.mapNotNull { it.space } + listOf("책상", "주방", "창고", "아이방", "사무실", "거실")).distinct()
     }
-    
+
     val filteredRecords = remember(records, query, selectedSpace) {
         records.filter { record ->
-            val matchesQuery = query.isBlank() || 
+            val matchesQuery = query.isBlank() ||
                 record.title?.contains(query, ignoreCase = true) == true ||
                 record.memo?.contains(query, ignoreCase = true) == true ||
                 record.ocrText?.contains(query, ignoreCase = true) == true ||
                 record.tags.any { it.name.contains(query, ignoreCase = true) }
             val matchesSpace = selectedSpace == null || record.space == selectedSpace
             matchesQuery && matchesSpace
+        }
+    }
+
+    // Autocomplete suggestions
+    val suggestions = remember(query, allTags, recentSearches) {
+        if (query.isBlank()) {
+            recentSearches
+        } else {
+            (allTags + recentSearches).distinct()
+                .filter { it.contains(query, ignoreCase = true) && !it.equals(query, ignoreCase = true) }
+                .take(5)
         }
     }
 
@@ -115,9 +132,93 @@ fun RecordListScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (!isSelectMode) {
-                Surface(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp), shadowElevation = 1.dp) {
-                    TextField(value = query, onValueChange = { query = it; onSearch(it) }, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "기록 검색 입력창" }, placeholder = { Text(stringResource(R.string.list_search_placeholder)) }, leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }, colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent), singleLine = true)
+                // Search Field with Suggestions
+                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Column {
+                            TextField(
+                                value = query,
+                                onValueChange = { query = it; onSearch(it) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { focusState: FocusState -> isSearchFocused = focusState.isFocused }
+                                    .semantics { contentDescription = "기록 검색 입력창" },
+                                placeholder = { Text(stringResource(R.string.list_search_placeholder)) },
+                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                                trailingIcon = {
+                                    if (query.isNotBlank()) {
+                                        IconButton(onClick = { query = ""; onSearch("") }) {
+                                            Icon(Icons.Default.Clear, contentDescription = "검색어 지우기")
+                                        }
+                                    }
+                                },
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                singleLine = true
+                            )
+
+                            // Suggestions dropdown
+                            if (isSearchFocused && suggestions.isNotEmpty()) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                                    if (query.isBlank() && recentSearches.isNotEmpty()) {
+                                        Text(
+                                            text = "최근 검색",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                    suggestions.forEach { suggestion ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    query = suggestion
+                                                    onSearch(suggestion)
+                                                    isSearchFocused = false
+                                                }
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = if (recentSearches.contains(suggestion)) Icons.Default.History else Icons.Default.Tag,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                text = suggestion,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                    if (query.isBlank() && recentSearches.isNotEmpty()) {
+                                        TextButton(
+                                            onClick = { /* clear recent searches - handled by parent */ },
+                                            modifier = Modifier.align(Alignment.End)
+                                        ) {
+                                            Text("최근 검색 지우기", style = MaterialTheme.typography.labelSmall)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+
                 LazyRow(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item { FilterChip(selected = selectedSpace == null, onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); selectedSpace = null }, label = { Text(stringResource(R.string.list_all_spaces)) }, shape = RoundedCornerShape(12.dp)) }
                     items(spaces) { space -> FilterChip(selected = selectedSpace == space, onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); selectedSpace = if (selectedSpace == space) null else space }, label = { Text(space) }, shape = RoundedCornerShape(12.dp)) }
