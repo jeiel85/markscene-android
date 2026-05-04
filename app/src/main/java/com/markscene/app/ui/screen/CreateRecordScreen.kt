@@ -13,6 +13,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -58,6 +59,50 @@ import java.io.File
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
+/**
+ * Draggable Tag Flow Component
+ * Allows reordering tags via long-press and drag
+ */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@Composable
+private fun DraggableTagFlow(
+    tags: List<String>,
+    onTagsReordered: (List<String>) -> Unit,
+    onTagRemoved: (String) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffset by remember { mutableStateOf(0f) }
+
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        tags.forEachIndexed { index, tag ->
+            val isDragging = draggedIndex == index
+
+            InputChip(
+                selected = true,
+                onClick = { onTagRemoved(tag) },
+                label = { Text(tag) },
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                },
+                modifier = if (isDragging) {
+                    Modifier.padding(start = dragOffset.dp)
+                } else {
+                    Modifier
+                }
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -335,27 +380,35 @@ fun CreateRecordScreen(
                 )
             }
 
-            // Tags Section
+            // Tags Section with Drag & Drop
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.create_field_tags), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                
-                FlowRow(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    editableTags.forEach { tag ->
-                        InputChip(
-                            selected = true,
-                            onClick = { 
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                editableTags.remove(tag) 
-                            },
-                            label = { Text(tag) },
-                            trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                    Text(stringResource(R.string.create_field_tags), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    if (editableTags.size > 1) {
+                        Text(
+                            text = "길게 눌러 순서 변경",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
+
+                // Draggable Tags Flow
+                DraggableTagFlow(
+                    tags = editableTags.toList(),
+                    onTagsReordered = { newOrder ->
+                        editableTags.clear()
+                        editableTags.addAll(newOrder)
+                    },
+                    onTagRemoved = { tag ->
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        editableTags.remove(tag)
+                    }
+                )
 
                 OutlinedTextField(
                     value = customTag,

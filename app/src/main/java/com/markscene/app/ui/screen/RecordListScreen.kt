@@ -38,21 +38,26 @@ import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.ui.component.EmptyStateView
 
+enum class LayoutType { GRID_2, GRID_3, LIST }
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun RecordListScreen(
     records: List<PhotoRecord>,
     recentSearches: List<String> = emptyList(),
     allTags: List<String> = emptyList(),
+    currentLayout: LayoutType = LayoutType.GRID_2,
     onSearch: (String) -> Unit,
     onDeleteRecords: (List<String>) -> Unit,
     onMoveToSpace: (List<String>, String) -> Unit,
     onOpenDetail: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLayoutChange: ((LayoutType) -> Unit)? = null
 ) {
     var query by remember { mutableStateOf("") }
     var selectedSpace by remember { mutableStateOf<String?>(null) }
     var isSearchFocused by remember { mutableStateOf(false) }
+    var layoutType by remember { mutableStateOf(currentLayout) }
     val haptic = LocalHapticFeedback.current
 
     val selectedIds = remember { mutableStateListOf<String>() }
@@ -221,9 +226,70 @@ fun RecordListScreen(
                     }
                 }
 
-                LazyRow(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { FilterChip(selected = selectedSpace == null, onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); selectedSpace = null }, label = { Text(stringResource(R.string.list_all_spaces)) }, shape = RoundedCornerShape(12.dp)) }
-                    items(spaces) { space -> FilterChip(selected = selectedSpace == space, onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); selectedSpace = if (selectedSpace == space) null else space }, label = { Text(space) }, shape = RoundedCornerShape(12.dp)) }
+                // Space filter chips and layout selector
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    LazyRow(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item { FilterChip(selected = selectedSpace == null, onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); selectedSpace = null }, label = { Text(stringResource(R.string.list_all_spaces)) }, shape = RoundedCornerShape(12.dp)) }
+                        items(spaces) { space -> FilterChip(selected = selectedSpace == space, onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); selectedSpace = if (selectedSpace == space) null else space }, label = { Text(space) }, shape = RoundedCornerShape(12.dp)) }
+                    }
+
+                    // Layout selector
+                    if (!isSelectMode) {
+                        Row(
+                            modifier = Modifier.padding(end = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    layoutType = LayoutType.GRID_2
+                                    onLayoutChange?.invoke(layoutType)
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GridView,
+                                    contentDescription = "2열 그리드",
+                                    tint = if (layoutType == LayoutType.GRID_2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    layoutType = LayoutType.GRID_3
+                                    onLayoutChange?.invoke(layoutType)
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ViewModule,
+                                    contentDescription = "3열 그리드",
+                                    tint = if (layoutType == LayoutType.GRID_3) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    layoutType = LayoutType.LIST
+                                    onLayoutChange?.invoke(layoutType)
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ViewList,
+                                    contentDescription = "목록 보기",
+                                    tint = if (layoutType == LayoutType.LIST) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -259,39 +325,81 @@ fun RecordListScreen(
                     }
                 }
             } else {
-                LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2), modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalItemSpacing = 12.dp) {
-                    items(filteredRecords, key = { it.id }) { record ->
-                        val isSelected = selectedIds.contains(record.id)
-                        if (!isSelectMode) {
-                            // Swipe to delete when not in select mode
-                            SwipeableGalleryItem(
-                                record = record,
-                                isSelected = isSelected,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onOpenDetail(record.id)
-                                },
-                                onLongClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    selectedIds.add(record.id)
-                                },
-                                onDelete = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onDeleteRecords(listOf(record.id))
+                when (layoutType) {
+                    LayoutType.LIST -> {
+                        androidx.compose.foundation.lazy.LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(filteredRecords, key = { it.id }) { record ->
+                                val isSelected = selectedIds.contains(record.id)
+                                ListGalleryItem(
+                                    record = record,
+                                    isSelected = isSelected,
+                                    isSelectMode = isSelectMode,
+                                    onClick = {
+                                        if (isSelectMode) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            if (isSelected) selectedIds.remove(record.id) else selectedIds.add(record.id)
+                                        } else {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onOpenDetail(record.id)
+                                        }
+                                    },
+                                    onLongClick = {
+                                        if (!isSelectMode) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedIds.add(record.id)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        val columns = if (layoutType == LayoutType.GRID_3) 3 else 2
+                        LazyVerticalStaggeredGrid(
+                            columns = StaggeredGridCells.Fixed(columns),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalItemSpacing = 12.dp
+                        ) {
+                            items(filteredRecords, key = { it.id }) { record ->
+                                val isSelected = selectedIds.contains(record.id)
+                                if (!isSelectMode) {
+                                    // Swipe to delete when not in select mode
+                                    SwipeableGalleryItem(
+                                        record = record,
+                                        isSelected = isSelected,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onOpenDetail(record.id)
+                                        },
+                                        onLongClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            selectedIds.add(record.id)
+                                        },
+                                        onDelete = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onDeleteRecords(listOf(record.id))
+                                        }
+                                    )
+                                } else {
+                                    // Normal item in select mode
+                                    GalleryItem(
+                                        record = record,
+                                        isSelected = isSelected,
+                                        isSelectMode = isSelectMode,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            if (isSelected) selectedIds.remove(record.id) else selectedIds.add(record.id)
+                                        },
+                                        onLongClick = { }
+                                    )
                                 }
-                            )
-                        } else {
-                            // Normal item in select mode
-                            GalleryItem(
-                                record = record,
-                                isSelected = isSelected,
-                                isSelectMode = isSelectMode,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    if (isSelected) selectedIds.remove(record.id) else selectedIds.add(record.id)
-                                },
-                                onLongClick = { }
-                            )
+                            }
                         }
                     }
                 }
@@ -347,6 +455,64 @@ private fun SwipeableGalleryItem(
         onClick = onClick,
         onLongClick = onLongClick
     )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ListGalleryItem(
+    record: PhotoRecord,
+    isSelected: Boolean,
+    isSelectMode: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
+) {
+    val a11yDesc = buildString { append(record.title ?: stringResource(R.string.list_untitled)); record.space?.let { append(", 공간: $it") } }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .semantics { contentDescription = a11yDesc },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 2.dp),
+        colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = record.imageUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                if (record.space != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Icon(Icons.Default.Place, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.secondary)
+                        Text(text = record.space, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    }
+                }
+                if (!record.title.isNullOrBlank()) {
+                    Text(text = record.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
+                }
+                if (record.tags.isNotEmpty()) {
+                    Text(
+                        text = record.tags.take(3).joinToString(" ") { "#${it.name}" },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
+            }
+            if (isSelectMode) {
+                Checkbox(checked = isSelected, onCheckedChange = null)
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

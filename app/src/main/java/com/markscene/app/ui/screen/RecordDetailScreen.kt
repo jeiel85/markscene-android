@@ -214,6 +214,11 @@ fun RecordDetailScreen(
                     fontWeight = FontWeight.Bold
                 )
 
+                // Prompt Templates
+                PromptTemplates { selectedPrompt ->
+                    questionInput = selectedPrompt
+                }
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
@@ -350,6 +355,36 @@ fun RecordDetailScreen(
             },
             shape = RoundedCornerShape(24.dp)
         )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PromptTemplates(onTemplateSelected: (String) -> Unit) {
+    val templates = listOf(
+        "이 사진에서 레시피 추출해줘" to Icons.Default.MenuBook,
+        "이 영수증의 총액과 날짜 정리해줘" to Icons.Default.Receipt,
+        "사진 속 물건들의 위치 설명해줘" to Icons.Default.Place,
+        "이 물건의 용도나 특징 알려줘" to Icons.Default.Help,
+        "사진 속 텍스트 요약해줘" to Icons.Default.Summarize,
+        "이 장면의 분위기 설명해줘" to Icons.Default.Mood
+    )
+
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp)
+    ) {
+        items(templates) { (prompt, icon) ->
+            AssistChip(
+                onClick = { onTemplateSelected(prompt) },
+                label = { Text(prompt, maxLines = 1) },
+                leadingIcon = { Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        }
     }
 }
 
