@@ -1,5 +1,20 @@
 # HISTORY.md
 
+## 2026-05-04
+
+- 작업: GitHub 이슈 #10 외부 공유(Receive Intent) 기능 구현 완료 검증
+- 확인 사항:
+  - `AndroidManifest.xml`에 SEND Intent 필터가 이미 등록되어 있음 (`image/*`)
+  - `MainActivity.kt`에서 `handleSendImage()`로 공유된 이미지 URI 처리 중
+  - `MarkSceneApp.kt`에서 생체 인증 완료 후 `CreateRecordScreen`으로 네비게이션
+  - 외부 앱(갤러리 등)에서 '공유하기' 선택 시 MarkScene이 목록에 표시됨
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin` 성공
+- 결과: 외부 공유 기능은 이미 구현 완료되어 정상 동작 확인
+- 후속 작업:
+  - GitHub 이슈 #10 완료 처리
+  - Epic 문서 구현 상태 동기화
+
 ## 2026-05-02
 
 - 작업: 릴리즈 APK 실행 실패 원인 조사 및 암호화 저장소 안전장치 보강
