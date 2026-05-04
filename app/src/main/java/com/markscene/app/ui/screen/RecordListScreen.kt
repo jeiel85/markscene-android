@@ -13,9 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -260,7 +262,37 @@ fun RecordListScreen(
                 LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2), modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalItemSpacing = 12.dp) {
                     items(filteredRecords, key = { it.id }) { record ->
                         val isSelected = selectedIds.contains(record.id)
-                        GalleryItem(record = record, isSelected = isSelected, isSelectMode = isSelectMode, onClick = { if (isSelectMode) { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); if (isSelected) selectedIds.remove(record.id) else selectedIds.add(record.id) } else { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onOpenDetail(record.id) } }, onLongClick = { if (!isSelectMode) { haptic.performHapticFeedback(HapticFeedbackType.LongPress); selectedIds.add(record.id) } })
+                        if (!isSelectMode) {
+                            // Swipe to delete when not in select mode
+                            SwipeableGalleryItem(
+                                record = record,
+                                isSelected = isSelected,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onOpenDetail(record.id)
+                                },
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    selectedIds.add(record.id)
+                                },
+                                onDelete = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onDeleteRecords(listOf(record.id))
+                                }
+                            )
+                        } else {
+                            // Normal item in select mode
+                            GalleryItem(
+                                record = record,
+                                isSelected = isSelected,
+                                isSelectMode = isSelectMode,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    if (isSelected) selectedIds.remove(record.id) else selectedIds.add(record.id)
+                                },
+                                onLongClick = { }
+                            )
+                        }
                     }
                 }
             }
@@ -270,6 +302,51 @@ fun RecordListScreen(
     if (showMoveSpaceDialog) {
         AlertDialog(onDismissRequest = { showMoveSpaceDialog = false }, title = { Text("공간 일괄 이동") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { Text("선택한 ${selectedIds.size}개의 기록을 어디로 이동할까요?"); FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { spaces.forEach { space -> SuggestionChip(onClick = { onMoveToSpace(selectedIds.toList(), space); selectedIds.clear(); showMoveSpaceDialog = false }, label = { Text(space) }) } } } }, confirmButton = { TextButton(onClick = { showMoveSpaceDialog = false }) { Text(stringResource(R.string.cancel)) } })
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SwipeableGalleryItem(
+    record: PhotoRecord,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("기록 삭제") },
+            text = { Text("'${record.title ?: "제목 없는 기록"}'을(를) 삭제하시겠습니까?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete()
+                        showDeleteConfirm = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("삭제")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
+
+    GalleryItem(
+        record = record,
+        isSelected = isSelected,
+        isSelectMode = false,
+        onClick = onClick,
+        onLongClick = onLongClick
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
