@@ -62,7 +62,7 @@
     <string name="create_field_tags">태그</string>
     <string name="create_tag_placeholder">태그 직접 입력 후 추가</string>
     <string name="create_image_area">사진 선택 또는 촬영 영역</string>
-    <string name="create_camera_permission">카메라 권한이 필요합니다.</string>
+    <string name="create_camera_permission">칙\\uB77C 권한이 필요합니다.</string>
     <string name="create_save_failed">이미지 처리 실패</string>
 
     <!-- Detail Screen -->
@@ -139,4 +139,7 @@
     <string name="restore_failed">복구 실패: %1$s</string>
     <string name="export_csv_success">CSV 내보내기가 완료되었습니다.</string>
     <string name="export_md_success">Markdown 내보내기가 완료되었습니다.</string>
+
+    <!-- Widget -->
+    <string name="widget_description">MarkScene 빠른 기록 위젯</string>
 </resources>
