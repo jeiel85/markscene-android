@@ -137,4 +137,10 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // Android instrumentation test (app launch smoke test)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:core-ktx:1.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
