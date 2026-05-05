@@ -24,7 +24,13 @@ object ImageCropper {
 
         val outFile = File(context.cacheDir, "crop_${UUID.randomUUID()}.webp")
         FileOutputStream(outFile).use { output ->
-            cropped.compress(Bitmap.CompressFormat.WEBP_LOSSY, 90, output)
+            @Suppress("DEPRECATION")
+            val format = if (android.os.Build.VERSION.SDK_INT >= 30) {
+                Bitmap.CompressFormat.WEBP_LOSSY
+            } else {
+                Bitmap.CompressFormat.WEBP
+            }
+            cropped.compress(format, 90, output)
         }
 
         if (cropped != bitmap) bitmap.recycle()
