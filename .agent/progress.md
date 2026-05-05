@@ -1,5 +1,15 @@
 # Agent Progress
 
+## 2026-05-05 (Iteration 3.0 - v2.0.5 버전 상향 및 CI 확인)
+
+작업 내용:
+- 중앙 버전 관리 파일 `gradle/libs.versions.toml`의 앱 버전을 `2.0.5` / `205`로 상향했습니다.
+- `CHANGELOG.md`, `docs/RELEASE_CHECKLIST.md`, `HISTORY.md`에 최신 버전 기준과 검증 계획을 반영했습니다.
+
+검증:
+- 로컬: `./gradlew test`, `./gradlew lint`, `./gradlew assembleDebug` 성공
+- CI: 커밋/푸시 후 `Android CI` 성공 여부 확인 예정
+
 ## 2026-04-30 (Iteration 2.9 - Pages 루트/릴리즈 APK 자동화)
 
 작업 내용:

@@ -1,5 +1,21 @@
 # HISTORY.md
 
+## 2026-05-05
+
+- 작업: 앱 버전 `2.0.5` / `205` 상향 및 GitHub Actions 성공 모니터링 준비
+- 변경 파일:
+  - `gradle/libs.versions.toml`: 중앙 버전 값을 `2.0.5` / `205`로 상향
+  - `CHANGELOG.md`: `v2.0.5` 버전 항목 추가
+  - `docs/RELEASE_CHECKLIST.md`: 현재 버전 표기와 릴리즈 체크리스트 동기화
+- 검증:
+-  - 로컬: `./gradlew test` 성공
+-  - 로컬: `./gradlew lint` 성공
+-  - 로컬: `./gradlew assembleDebug` 성공
+-  - CI: 커밋 푸시 후 `Android CI` 결과 확인 예정
+- 결과: 버전 표기 위치를 단일 기준에 맞춰 상향했고 로컬 품질 게이트를 모두 통과
+- 후속 작업:
+  - GitHub Actions `Android CI` 성공 확인
+
 ## 2026-05-04
 
 - 작업: GitHub 이슈 #10 외부 공유(Receive Intent) 기능 구현 완료 검증
