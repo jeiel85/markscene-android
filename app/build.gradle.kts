@@ -23,6 +23,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        // APK 용량 다이어트: 주요 ABI만 포함 (arm64-v8a, armeabi-v7a)
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+        }
+        // 불필요한 언어 리소스 제거 (한국어, 영어만 포함)
+        resConfigs("ko", "en")
     }
 
     signingConfigs {

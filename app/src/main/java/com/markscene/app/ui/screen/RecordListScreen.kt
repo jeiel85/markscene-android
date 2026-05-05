@@ -466,7 +466,21 @@ private fun ListGalleryItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    val a11yDesc = buildString { append(record.title ?: stringResource(R.string.list_untitled)); record.space?.let { append(", 공간: $it") } }
+    // Performance: cache expensive computations
+    val untitledText = stringResource(R.string.list_untitled)
+    val a11yDesc = remember(record.title, record.space, untitledText) {
+        buildString {
+            append(record.title ?: untitledText)
+            record.space?.let { append(", 공간: $it") }
+        }
+    }
+    
+    val tagsText = remember(record.tags) {
+        if (record.tags.isNotEmpty()) {
+            record.tags.take(3).joinToString(" ") { "#${it.name}" }
+        } else null
+    }
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -499,9 +513,9 @@ private fun ListGalleryItem(
                 if (!record.title.isNullOrBlank()) {
                     Text(text = record.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
                 }
-                if (record.tags.isNotEmpty()) {
+                if (tagsText != null) {
                     Text(
-                        text = record.tags.take(3).joinToString(" ") { "#${it.name}" },
+                        text = tagsText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
@@ -518,17 +532,76 @@ private fun ListGalleryItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun GalleryItem(record: PhotoRecord, isSelected: Boolean, isSelectMode: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
-    val a11yDesc = buildString { append(record.title ?: stringResource(R.string.list_untitled)); record.space?.let { append(", 공간: $it") } }
-    Card(modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).semantics { contentDescription = a11yDesc }, shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 2.dp), colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
+    // Performance: cache expensive computations
+    val untitledText = stringResource(R.string.list_untitled)
+    val a11yDesc = remember(record.title, record.space, untitledText) {
+        buildString {
+            append(record.title ?: untitledText)
+            record.space?.let { append(", 공간: $it") }
+        }
+    }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .semantics { contentDescription = a11yDesc },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+        )
+    ) {
         Box {
             Column {
-                AsyncImage(model = record.imageUri, contentDescription = null, modifier = Modifier.fillMaxWidth().wrapContentHeight().clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)), contentScale = ContentScale.FillWidth)
-                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (record.space != null) { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Default.Place, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.secondary); Text(text = record.space, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold) } }
-                    if (!record.title.isNullOrBlank()) { Text(text = record.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1) }
+                AsyncImage(
+                    model = record.imageUri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    contentScale = ContentScale.FillWidth
+                )
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    if (record.space != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Place,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                            Text(
+                                text = record.space,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    if (!record.title.isNullOrBlank()) {
+                        Text(
+                            text = record.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
-            if (isSelectMode) { Checkbox(checked = isSelected, onCheckedChange = null, modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) }
+            if (isSelectMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = null,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+                )
+            }
         }
     }
 }
