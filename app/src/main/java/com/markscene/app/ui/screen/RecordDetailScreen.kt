@@ -1,5 +1,7 @@
 package com.markscene.app.ui.screen
 
+import android.media.MediaPlayer
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -39,6 +41,8 @@ import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.ChatMessage
 import com.markscene.app.core.model.PhotoRecord
+import com.markscene.app.ui.util.GalleryHideHelper
+import com.markscene.app.ui.util.SecureScreenEffect
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -56,6 +60,8 @@ fun RecordDetailScreen(
     onOpenOtherRecord: (String) -> Unit,
     onBack: () -> Unit
 ) {
+    SecureScreenEffect()
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -67,6 +73,15 @@ fun RecordDetailScreen(
 
     var questionInput by remember { mutableStateOf("") }
     var isSendingQuestion by remember { mutableStateOf(false) }
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    var isPlayingAudio by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -152,6 +167,21 @@ fun RecordDetailScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
+
+                        if (record.analysisStatus.name == "LocalComplete") {
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = "로컬 처리 완료",
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                         
                         record.space?.let { space ->
                             Surface(
@@ -186,6 +216,53 @@ fun RecordDetailScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 24.sp
                             )
+                        }
+
+                        if (!record.audioMemoUri.isNullOrBlank()) {
+                            OutlinedButton(
+                                onClick = {
+                                    try {
+                                        if (isPlayingAudio) {
+                                            mediaPlayer?.pause()
+                                            isPlayingAudio = false
+                                        } else {
+                                            if (mediaPlayer == null) {
+                                                mediaPlayer = MediaPlayer().apply {
+                                                    setDataSource(context, Uri.parse(record.audioMemoUri))
+                                                    prepare()
+                                                }
+                                            }
+                                            mediaPlayer?.start()
+                                            isPlayingAudio = true
+                                            mediaPlayer?.setOnCompletionListener {
+                                                isPlayingAudio = false
+                                            }
+                                        }
+                                    } catch (_: Exception) {
+                                        statusMessage = "오디오 메모 재생에 실패했습니다."
+                                    }
+                                },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (isPlayingAudio) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(if (isPlayingAudio) "오디오 일시정지" else "오디오 재생")
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                val hidden = GalleryHideHelper.ensureNoMediaForImageUri(record.imageUri)
+                                statusMessage = if (hidden) "갤러리 숨김(.nomedia) 적용 완료" else "갤러리 숨김 적용 실패"
+                            },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.VisibilityOff, contentDescription = null)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("갤러리 숨김 적용")
                         }
 
                         FlowRow(

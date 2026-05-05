@@ -53,7 +53,10 @@ import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
+import com.markscene.app.ui.util.ImageCropper
+import com.markscene.app.ui.util.GalleryHideHelper
 import com.markscene.app.ui.util.ImageOptimizer
+import com.markscene.app.ui.util.SecureScreenEffect
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -115,6 +118,8 @@ fun CreateRecordScreen(
     onLearnTagCorrection: (original: String, corrected: String) -> Unit = { _, _ -> },
     onBack: () -> Unit
 ) {
+    SecureScreenEffect()
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
@@ -124,11 +129,14 @@ fun CreateRecordScreen(
     var title by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
     var selectedSpace by remember { mutableStateOf<String?>(null) }
+    var audioMemoUri by remember { mutableStateOf<Uri?>(null) }
     var ocrText by remember { mutableStateOf<String?>(null) }
     var customTag by remember { mutableStateOf("") }
     var statusText by remember { mutableStateOf("") }
     var isAnalyzing by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
+    var showCameraRationale by remember { mutableStateOf(false) }
+    var showAudioNotice by remember { mutableStateOf(false) }
     
     val editableTags = remember { mutableStateListOf<String>() }
     val originalAiSuggestions = remember { mutableStateListOf<String>() }
@@ -144,6 +152,16 @@ fun CreateRecordScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (!granted) statusText = context.getString(R.string.create_camera_permission)
+    }
+
+    val audioPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        audioMemoUri = uri
+        if (uri != null) {
+            statusText = "오디오 메모가 첨부되었습니다."
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
     }
 
     val analyzingMsg = stringResource(R.string.create_analyzing)
@@ -206,6 +224,7 @@ fun CreateRecordScreen(
                                 )
                                 
                                 if (optimizedFile != null) {
+                                    GalleryHideHelper.ensureNoMediaForRecordsDir(context)
                                     val tags = editableTags.map { tagName ->
                                         PhotoTag(
                                             id = UUID.randomUUID().toString(),
@@ -222,6 +241,7 @@ fun CreateRecordScreen(
                                         PhotoRecord(
                                             id = recordId,
                                             imageUri = Uri.fromFile(optimizedFile).toString(),
+                                            audioMemoUri = audioMemoUri?.toString(),
                                             title = title.ifBlank { null },
                                             memo = memo.ifBlank { null },
                                             space = selectedSpace,
@@ -276,6 +296,26 @@ fun CreateRecordScreen(
                         contentScale = ContentScale.Crop
                     )
                     IconButton(
+                        onClick = {
+                            val currentUri = imageUri ?: return@IconButton
+                            val croppedFile = ImageCropper.cropCenterSquare(context, currentUri)
+                            if (croppedFile != null) {
+                                imageUri = Uri.fromFile(croppedFile)
+                                statusText = "이미지를 정사각형으로 크롭했습니다."
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            } else {
+                                statusText = context.getString(R.string.create_save_failed)
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(12.dp)
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .semantics { contentDescription = "이미지 크롭" }
+                    ) {
+                        Icon(Icons.Default.Crop, contentDescription = null, tint = Color.White)
+                    }
+                    IconButton(
                         onClick = { 
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             imageUri = null 
@@ -301,7 +341,7 @@ fun CreateRecordScreen(
                             )
                         } else {
                             Button(
-                                onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+                                onClick = { showCameraRationale = true },
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(stringResource(R.string.create_camera_permission))
@@ -321,6 +361,71 @@ fun CreateRecordScreen(
                         }
                     }
                 }
+            }
+
+            // Audio memo attachment
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.Mic, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text(
+                            text = if (audioMemoUri != null) "오디오 메모 첨부됨" else "오디오 메모 첨부",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { showAudioNotice = true }) {
+                            Text(if (audioMemoUri != null) "변경" else "첨부")
+                        }
+                        if (audioMemoUri != null) {
+                            TextButton(onClick = { audioMemoUri = null }) { Text("삭제") }
+                        }
+                    }
+                }
+            }
+
+            if (showCameraRationale) {
+                AlertDialog(
+                    onDismissRequest = { showCameraRationale = false },
+                    title = { Text("카메라 권한 안내") },
+                    text = { Text("촬영 기능을 위해 카메라 권한이 필요합니다. 촬영된 이미지는 사용자가 저장할 때만 기록됩니다.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showCameraRationale = false
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }) { Text("권한 요청") }
+                    },
+                    dismissButton = { TextButton(onClick = { showCameraRationale = false }) { Text("취소") } }
+                )
+            }
+
+            if (showAudioNotice) {
+                AlertDialog(
+                    onDismissRequest = { showAudioNotice = false },
+                    title = { Text("오디오 메모 첨부 안내") },
+                    text = { Text("선택한 오디오 파일은 이 기록에만 연결되며 외부 서버로 자동 전송되지 않습니다.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showAudioNotice = false
+                            audioPickerLauncher.launch(arrayOf("audio/*"))
+                        }) { Text("확인") }
+                    },
+                    dismissButton = { TextButton(onClick = { showAudioNotice = false }) { Text("취소") } }
+                )
             }
 
             if (statusText.isNotBlank()) {

@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class PhotoRecord(
     val id: String,
     val imageUri: String,
+    val audioMemoUri: String? = null,
     val title: String?,
     val memo: String?,
     val createdAt: Long,

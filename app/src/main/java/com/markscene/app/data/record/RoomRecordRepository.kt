@@ -62,6 +62,7 @@ class RoomRecordRepository(
             PhotoRecordEntity(
                 id = record.id,
                 imageUri = record.imageUri,
+                audioMemoUri = record.audioMemoUri,
                 title = record.title,
                 memo = record.memo,
                 createdAt = record.createdAt,
@@ -124,6 +125,7 @@ private fun PhotoRecordWithTags.toModel(): PhotoRecord =
     PhotoRecord(
         id = record.id,
         imageUri = record.imageUri,
+        audioMemoUri = record.audioMemoUri,
         title = record.title,
         memo = record.memo,
         createdAt = record.createdAt,

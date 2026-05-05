@@ -1,6 +1,7 @@
 package com.markscene.app.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -25,8 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.markscene.app.R
 import com.markscene.app.core.database.TagCorrectionEntity
+import com.markscene.app.ui.util.SecureScreenEffect
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     hasApiKey: Boolean,
@@ -34,6 +36,8 @@ fun SettingsScreen(
     isTrueBlackEnabled: Boolean = false,
     isDynamicColorsEnabled: Boolean = false,
     tagCorrections: List<TagCorrectionEntity> = emptyList(),
+    weeklyRecap: String? = null,
+    achievementBadges: List<String> = emptyList(),
     onToggleBiometricLock: (Boolean) -> Unit,
     onToggleTrueBlack: (Boolean) -> Unit = {},
     onToggleDynamicColors: (Boolean) -> Unit = {},
@@ -48,8 +52,11 @@ fun SettingsScreen(
     externalMessage: String? = null,
     onMessageShown: () -> Unit,
     onOpenPrivacyNotice: () -> Unit,
+    onOpenTutorial: () -> Unit = {},
     onBack: () -> Unit
 ) {
+    SecureScreenEffect()
+
     val context = LocalContext.current
     var apiKeyInput by rememberSaveable { mutableStateOf("") }
     var resultMessage by rememberSaveable { mutableStateOf<String?>(null) }
@@ -77,6 +84,50 @@ fun SettingsScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            if (!weeklyRecap.isNullOrBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("주간 회고", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(weeklyRecap, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+
+            if (achievementBadges.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("업적 배지", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            achievementBadges.forEach { badge ->
+                                SuggestionChip(onClick = {}, label = { Text(badge) })
+                            }
+                        }
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("튜토리얼/가이드", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    TextButton(onClick = onOpenTutorial) { Text("열기") }
+                }
+            }
+
             // API Key Section
             SettingsSection(title = stringResource(R.string.settings_ai_engine)) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

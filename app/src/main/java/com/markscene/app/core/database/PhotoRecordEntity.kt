@@ -17,6 +17,7 @@ import androidx.room.PrimaryKey
 data class PhotoRecordEntity(
     @PrimaryKey val id: String,
     val imageUri: String,
+    val audioMemoUri: String?,
     val title: String?,
     val memo: String?,
     val createdAt: Long,

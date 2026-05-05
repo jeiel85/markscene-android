@@ -1,5 +1,7 @@
 package com.markscene.app.ui.screen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +45,7 @@ import kotlinx.coroutines.launch
 fun OnboardingScreen(
     onComplete: () -> Unit
 ) {
+    val context = LocalContext.current
     val pagerState = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
@@ -189,6 +193,16 @@ fun OnboardingScreen(
                             modifier = Modifier.size(20.dp)
                         )
                     }
+                }
+
+                TextButton(
+                    onClick = {
+                        val tutorialUri = Uri.parse("https://github.com/jeiel85/markscene-android#-%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5")
+                        context.startActivity(Intent(Intent.ACTION_VIEW, tutorialUri))
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text("튜토리얼 보기")
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.markscene.app.ui
 
 import android.net.Uri
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -89,6 +90,18 @@ private val MIGRATION_5_6 = object : Migration(5, 6) {
     }
 }
 
+private val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS smart_albums (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, coverImageUri TEXT, albumType TEXT NOT NULL, createdAt INTEGER NOT NULL)")
+    }
+}
+
+private val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE photo_records ADD COLUMN audioMemoUri TEXT")
+    }
+}
+
 @Composable
 fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val context = LocalContext.current
@@ -106,7 +119,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val database = remember {
         try {
             Room.databaseBuilder(context.applicationContext, MarkSceneDatabase::class.java, "markscene.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                 .fallbackToDestructiveMigration()
                 .build()
         } catch (e: Exception) {
@@ -187,6 +200,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
         }}
     }
 
+    val allRecords by repository.observeRecords().collectAsState(initial = emptyList())
     val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
 
     // Show onboarding for first-time users
@@ -276,12 +290,30 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
             }
             composable(SETTINGS_ROUTE) {
                 val corrections by database.tagCorrectionDao().getAllCorrections().collectAsState(initial = emptyList())
+                val weeklyCount = remember(allRecords) {
+                    val oneWeekAgo = System.currentTimeMillis() - 7L * 24L * 60L * 60L * 1000L
+                    allRecords.count { it.createdAt >= oneWeekAgo }
+                }
+                val weeklyTagCount = remember(allRecords) {
+                    allRecords.flatMap { it.tags }.map { it.name }.distinct().size
+                }
+                val achievementBadges = remember(allRecords) {
+                    buildList {
+                        if (allRecords.size >= 1) add("첫 기록 작성")
+                        if (allRecords.size >= 10) add("정리 습관가 (10+) ")
+                        if (allRecords.size >= 50) add("기록 마스터 (50+)")
+                        val tagged = allRecords.count { it.tags.isNotEmpty() }
+                        if (tagged >= 20) add("태그 장인 (20+)")
+                    }
+                }
                 SettingsScreen(
                     hasApiKey = hasApiKey,
                     isBiometricLockEnabled = isBiometricLockEnabled,
                     isTrueBlackEnabled = isTrueBlackEnabled,
                     isDynamicColorsEnabled = isDynamicColorsEnabled,
                     tagCorrections = corrections,
+                    weeklyRecap = "최근 7일: ${weeklyCount}개 기록, ${weeklyTagCount}개 고유 태그",
+                    achievementBadges = achievementBadges,
                     onToggleBiometricLock = { enabled ->
                         if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
                             backupStatusMessage = if (authenticator == null) "시스템 오류로 인증 기능을 사용할 수 없습니다." else "이 기기는 생체 인식을 지원하지 않습니다."
@@ -327,6 +359,11 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                     externalMessage = backupStatusMessage,
                     onMessageShown = { backupStatusMessage = null },
                     onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
+                    onOpenTutorial = {
+                        val tutorialUri = Uri.parse("https://github.com/jeiel85/markscene-android#-%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5")
+                        val intent = Intent(Intent.ACTION_VIEW, tutorialUri)
+                        context.startActivity(intent)
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }

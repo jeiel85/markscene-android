@@ -513,6 +513,19 @@ private fun ListGalleryItem(
                 if (!record.title.isNullOrBlank()) {
                     Text(text = record.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
                 }
+                if (record.analysisStatus.name == "LocalComplete") {
+                    Surface(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = "로컬 처리",
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
                 if (tagsText != null) {
                     Text(
                         text = tagsText,
@@ -592,6 +605,19 @@ private fun GalleryItem(record: PhotoRecord, isSelected: Boolean, isSelectMode: 
                             fontWeight = FontWeight.Bold,
                             maxLines = 1
                         )
+                    }
+                    if (record.analysisStatus.name == "LocalComplete") {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "로컬 처리",
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
                     }
                 }
             }

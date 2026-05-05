@@ -55,3 +55,13 @@ This checklist is not legal advice. Verify current Google Play, Android, and AI 
 - [ ] Accessibility basics checked.
 - [ ] No private data in logs.
 
+## ASO (App Store Optimization)
+
+- [ ] 앱 이름에 핵심 가치 키워드 포함 (예: 사진 메모, 태그 검색)
+- [ ] 짧은 설명(80자)에 문제 해결 문장 포함
+- [ ] 긴 설명 첫 3줄에 핵심 기능/차별점 배치
+- [ ] 주요 검색 키워드(사진 정리, 태그 검색, 비주얼 메모) 자연 포함
+- [ ] 스크린샷 1~2장에 핵심 플로우(촬영→태그→검색) 강조
+- [ ] 개인정보/로컬 처리 메시지 명확히 표기
+- [ ] 릴리즈 노트에 사용자 체감 개선점 중심으로 작성
+
