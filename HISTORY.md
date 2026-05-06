@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-06
+
+- 작업: GitHub Actions CI 상태 점검 및 최근 실패 원인 분석
+- 확인 사항:
+  - 최근 실행(ID: 25410487127)이 `success`로 완료됨을 확인 (Kotlin 로컬 캐시 관련 커밋)
+  - 과거 실패(ID: 25376082806) 원인: `connectedDebugAndroidTest` 실행 중 에뮬레이터 호환 장치 연결 실패 (No compatible devices connected)
+  - 현재 CI 파이프라인(Unit Test, Lint, Build APK, Instrumentation Test)이 정상 작동 중임을 확인
+  - GitHub Actions 캐시 서비스 일시적 장애(400 Error/Service Unavailable)가 발생했으나 빌드 성공에는 영향을 주지 않음
+- 검증:
+  - CI: 현재 상태 모니터링 및 재검증 트리거
+- 결과: CI 파이프라인 정상화 확인 및 모니터링 완료
+- 후속 작업:
+  - 지속적인 빌드 안정성 유지
+
 ## 2026-05-05
 
 - 작업: 앱 버전 `2.0.5` / `205` 상향 및 GitHub Actions 성공 모니터링 준비
