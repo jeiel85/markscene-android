@@ -2,6 +2,19 @@
 
 ## 2026-05-06
 
+- 작업: 앱 버전 `2.0.8` / `208` 상향 및 태그 배포 실행
+- 변경 파일:
+  - `gradle/libs.versions.toml`: 중앙 버전 값을 `2.0.8` / `208`로 상향
+  - `CHANGELOG.md`: `v2.0.8` 버전 항목 추가
+  - `docs/RELEASE_CHECKLIST.md`: 현재 버전 표기 업데이트
+- 검증:
+  - 로컬: Android SDK 경로 미설정 환경으로 무거운 로컬 빌드 검증 생략
+  - CI: 커밋 푸시 후 `Android CI` 확인 예정
+  - Release: `v2.0.8` 태그 푸시 후 `release-apk.yml` 확인 예정
+- 결과: 버전 상향 및 배포 트리거 준비 완료
+- 후속 작업:
+  - GitHub Actions `Android CI` / 릴리즈 워크플로우 성공 확인
+
 - 작업: 앱 버전 `2.0.7` / `207` 상향 및 GitHub Actions 성공 모니터링
 - 변경 파일:
   - `gradle/libs.versions.toml`: 중앙 버전 값을 `2.0.7` / `207`로 상향
