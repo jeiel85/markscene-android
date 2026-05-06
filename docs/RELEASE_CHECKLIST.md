@@ -34,13 +34,13 @@
 - [ ] Contact email works.
 - [x] Release signing configured outside repository (Secrets based automation).
 - [x] No debug logs expose private data (verified in `PRIVACY_AND_SECURITY.md`).
-- [x] Version name and code set (`versionName "2.0.5"`, `versionCode 205`).
+- [x] Version name and code set (`versionName "2.0.7"`, `versionCode 207`).
 
 ## Current Implementation Status
 
 | Component | Status |
 |-----------|--------|
-| Version | v2.0.5 (2026-05-05) |
+| Version | v2.0.7 (2026-05-06) |
 | CameraX Capture | ✅ Implemented |
 | Photo Picker Import | ✅ Implemented |
 | ML Kit Local Tagging | ✅ Implemented (fallback to mock) |

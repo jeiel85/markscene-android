@@ -2,6 +2,31 @@
 
 ## 2026-05-06
 
+- 작업: 앱 버전 `2.0.7` / `207` 상향 및 GitHub Actions 성공 모니터링
+- 변경 파일:
+  - `gradle/libs.versions.toml`: 중앙 버전 값을 `2.0.7` / `207`로 상향
+  - `CHANGELOG.md`: `v2.0.7` 버전 항목 추가
+  - `docs/RELEASE_CHECKLIST.md`: 현재 버전 표기 업데이트
+- 검증:
+  - 로컬: `./gradlew test` 실패 (환경 이슈: `SDK location not found`)
+  - 로컬: `./gradlew lint` 실패 (환경 이슈: `SDK location not found`)
+  - 로컬: `./gradlew assembleDebug` 실패 (환경 이슈: `SDK location not found`)
+  - CI: 커밋 푸시 후 `Android CI` 성공 여부 확인 예정
+- 결과: 버전업 변경 반영 완료, 로컬 SDK 경로 누락으로 로컬 빌드는 실패
+- 후속 작업:
+  - GitHub Actions `Android CI` 최종 성공 확인
+
+- 작업: 앱 버전 `2.0.6` / `206` 상향 및 CI 안정화 재검증
+- 변경 파일:
+  - `gradle/libs.versions.toml`: 중앙 버전 값을 `2.0.6` / `206`으로 상향
+  - `CHANGELOG.md`: `v2.0.6` 버전 항목 추가 및 CI 점검 내역 기록
+  - `docs/RELEASE_CHECKLIST.md`: 현재 버전 표기 업데이트
+- 검증:
+  - CI: 커밋 푸시 후 `Android CI` 결과 확인 예정
+- 결과: CI 파이프라인의 에뮬레이터 이슈 분석을 마치고 정식 버전 상향 빌드 수행
+- 후속 작업:
+  - GitHub Actions `Android CI` 최종 성공 확인
+
 - 작업: GitHub Actions CI 상태 점검 및 최근 실패 원인 분석
 - 확인 사항:
   - 최근 실행(ID: 25410487127)이 `success`로 완료됨을 확인 (Kotlin 로컬 캐시 관련 커밋)

@@ -7,6 +7,18 @@
 ### Added
 - **외부 공유로 기록하기**: 갤러리, 브라우저 등 다른 앱에서 '공유하기'를 선택하면 MarkScene이 표시되어 즉시 기록 생성 화면으로 이동할 수 있습니다. (GitHub Issue #10)
 
+## v2.0.7 - 2026-05-06
+
+### Build / CI
+- 앱 버전을 `v2.0.7` (versionCode 207)으로 업데이트했습니다.
+- 버전업 커밋 기준으로 GitHub Actions `Android CI` 빌드 성공 여부를 모니터링합니다.
+
+## v2.0.6 - 2026-05-06
+
+### Build / CI
+- 앱 버전을 `v2.0.6` (versionCode 206)으로 업데이트했습니다.
+- GitHub Actions CI 파이프라인의 에뮬레이터 연결 이슈를 분석하고, 전체 자동화 단계(Lint, Unit Test, Build, UI Test)가 정상적으로 성공함을 재검증했습니다.
+
 ## v2.0.5 - 2026-05-05
 
 ### Build / CI
