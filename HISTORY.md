@@ -2,6 +2,20 @@
 
 ## 2026-05-09
 
+- 작업: v2.0.9 버전 상향 및 릴리즈 태그 배포
+- 변경 파일:
+  - `gradle/libs.versions.toml`: `projectVersionName 2.0.9 / projectVersionCode 209`로 상향.
+  - `docs/RELEASE_CHECKLIST.md`: 현재 버전 표기 및 체크리스트 항목 동기화.
+  - `CHANGELOG.md`: `v2.0.9` 섹션을 추가하고 갤럭시 S24 startup 종료 증상 수정 내용을 사용자 영향 요약으로 정리.
+- 검증:
+  - 사용자 단말(갤럭시 S24): 디버그 빌드 기준 온보딩 통과 정상 동작 확인 완료(사용자 보고).
+  - 로컬(Lenovo TB320FC, Android 15): 회귀 없음 확인 완료.
+  - CI: `v2.0.9` 태그 푸시 후 `Android CI` 및 `Release APK` 워크플로우 결과 모니터링.
+- 결과: 갤럭시 S24 startup 방어 수정을 정식 릴리즈로 묶어 태그 배포.
+- 후속 작업:
+  - GitHub Actions `Release APK` 산출물 첨부 확인.
+  - 릴리즈 노트가 `CHANGELOG.md`와 일치하는지 확인.
+
 - 작업: 갤럭시 S24에서 보고된 "온보딩 표시 직후 앱 종료" 증상 방어 수정
 - 변경 파일:
   - `app/src/main/java/com/markscene/app/ai/provider/MlKitTextRecognizer.kt`: 한국어 OCR 클라이언트(`TextRecognition.getClient(KoreanTextRecognizerOptions...)`)를 `by lazy { runCatching { ... }.getOrNull() }`로 지연 초기화하도록 변경. 일부 단말에서 첫 launch에 동기적으로 던질 수 있는 예외가 composition을 깨지 않게 함.
