@@ -1,5 +1,26 @@
 # HISTORY.md
 
+## 2026-05-09
+
+- 작업: 갤럭시 S24에서 보고된 "온보딩 표시 직후 앱 종료" 증상 방어 수정
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ai/provider/MlKitTextRecognizer.kt`: 한국어 OCR 클라이언트(`TextRecognition.getClient(KoreanTextRecognizerOptions...)`)를 `by lazy { runCatching { ... }.getOrNull() }`로 지연 초기화하도록 변경. 일부 단말에서 첫 launch에 동기적으로 던질 수 있는 예외가 composition을 깨지 않게 함.
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`:
+    - `LaunchedEffect(Unit)` 본문을 `runCatching`으로 감싸 BiometricPrompt / `navController.navigate` 등 초기 비동기 호출 실패가 액티비티를 종료시키지 않도록 보호.
+    - 외부 공유로 진입했을 때 `showOnboarding=true` 상태에서 `NavHost`가 트리에 없는 채로 navigate가 호출되어 발생할 수 있는 IllegalStateException을 막기 위해 `!showOnboarding` 가드 추가.
+    - `repository.observeRecords()` / `repository.search()` Flow 구독을 `remember` 안에서 `.catch { emit(emptyList()) }` 로 감싸 Room 비동기 에러가 액티비티를 죽이지 않게 함. (`FlowOperatorInvokedInComposition` lint도 통과)
+  - `CHANGELOG.md`: Unreleased > Fixed 섹션에 사용자 영향 요약 기록.
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin` 성공
+  - 로컬: `./gradlew :app:testDebugUnitTest :app:lintDebug` 성공
+  - 로컬: `./gradlew :app:assembleDebug` 성공
+  - 기기(Lenovo TB320FC, Android 15): 디버그 APK 재설치 + `pm clear` 후 첫 실행 → 온보딩 정상 표시, "걸너뛰기" 후 홈 화면 정상 진입, 프로세스/topResumedActivity 유지 확인. 회귀 없음 확인용이며 갤럭시 S24 재현 단말이 연결되지 않아 최종 검증은 사용자 단말에서 필요.
+  - CI: 푸시 후 `Android CI` 결과 확인 예정.
+- 결과: 추정되는 갤럭시 S24 startup 종료 경로(ML Kit eager init 동기 예외 / `LaunchedEffect` 비동기 예외 / Room Flow 비동기 예외)에 대한 방어 코드 적용.
+- 후속 작업:
+  - 사용자 갤럭시 S24에서 첫 실행 시 종료 증상이 사라졌는지 재확인.
+  - 재발 시 `adb logcat -d -v time *:E` 또는 크래시 스택 확보 후 정확한 원인 추가 분석.
+
 ## 2026-05-06
 
 - 작업: 앱 버전 `2.0.8` / `208` 상향 및 태그 배포 실행

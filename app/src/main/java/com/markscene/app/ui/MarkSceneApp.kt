@@ -37,6 +37,7 @@ import com.markscene.app.data.settings.SecurityStore
 import com.markscene.app.data.settings.UserPreferences
 import com.markscene.app.ui.screen.*
 import com.markscene.app.ui.security.BiometricAuthenticator
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -149,18 +150,24 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        if (isBiometricLockEnabled && authenticator != null) {
-            authenticator.authenticate(
-                onSuccess = { 
-                    isAppLocked = false
-                    if (sharedImageUri != null) {
-                        navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT?uri=${Uri.encode(sharedImageUri.toString())}")
-                    }
-                },
-                onError = { message -> backupStatusMessage = "인증 실패: $message" }
-            )
-        } else if (sharedImageUri != null) {
-            navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT?uri=${Uri.encode(sharedImageUri.toString())}")
+        // 일부 단말(예: 갤럭시 + Knox/BiometricPrompt 환경)에서 초기 인증/네비게이션 시점에
+        // 던지는 예외가 액티비티를 즉시 종료시키지 않도록 방어 처리.
+        runCatching {
+            if (isBiometricLockEnabled && authenticator != null) {
+                authenticator.authenticate(
+                    onSuccess = {
+                        isAppLocked = false
+                        if (sharedImageUri != null && !showOnboarding) {
+                            navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT?uri=${Uri.encode(sharedImageUri.toString())}")
+                        }
+                    },
+                    onError = { message -> backupStatusMessage = "인증 실패: $message" }
+                )
+            } else if (sharedImageUri != null && !showOnboarding) {
+                navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT?uri=${Uri.encode(sharedImageUri.toString())}")
+            }
+        }.onFailure { e ->
+            backupStatusMessage = "초기화 중 오류: ${e.message}"
         }
     }
 
@@ -200,8 +207,16 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
         }}
     }
 
-    val allRecords by repository.observeRecords().collectAsState(initial = emptyList())
-    val visibleRecords by repository.search(searchQuery).collectAsState(initial = emptyList())
+    // Room/DB 에러가 비동기로 발생해도 액티비티가 죽지 않도록 .catch로 감싼다.
+    // Flow 연산자는 composition 외부에서 적용해야 lint(FlowOperatorInvokedInComposition)를 통과한다.
+    val allRecordsFlow = remember(repository) {
+        repository.observeRecords().catch { emit(emptyList()) }
+    }
+    val visibleRecordsFlow = remember(repository, searchQuery) {
+        repository.search(searchQuery).catch { emit(emptyList()) }
+    }
+    val allRecords by allRecordsFlow.collectAsState(initial = emptyList())
+    val visibleRecords by visibleRecordsFlow.collectAsState(initial = emptyList())
 
     // Show onboarding for first-time users
     if (showOnboarding) {
