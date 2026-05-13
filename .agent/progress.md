@@ -1,5 +1,30 @@
 # Agent Progress
 
+## 2026-05-13 (Iteration 5.0 - GitHub Issues 기준 문서 동기화)
+
+작업 내용:
+- GitHub Issues를 기준으로 모든 마크다운 문서를 정리하고 동기화했습니다.
+- 누락된 Epic(#19 Core AI, #20 Marketing)을 GitHub Issues로 생성했습니다.
+- `.agent/epic*.md` 파일에 GitHub Issue 링크를 추가했습니다.
+- `.agent/tasks.md`에 Epic Issues 매핑 테이블을 추가했습니다.
+- `docs/ROADMAP.md` Phase 5를 Epic Strategy 테이블로 업데이트했습니다.
+- `AGENTS.md` 필수 문서 읽기 순서에 epic 파일을 추가했습니다.
+- `README.md`에 GitHub Issues 링크와 `.agent/` 디렉토리 epic 파일 구조를 반영했습니다.
+
+변경 파일:
+- `.agent/epic1_ui_ux.md`, `.agent/epic2_core_ai.md`, `.agent/epic3_perf_stab.md`, `.agent/epic4_sec_priv.md`, `.agent/epic5_market.md`
+- `.agent/tasks.md`
+- `.agent/progress.md`
+- `docs/ROADMAP.md`
+- `AGENTS.md`
+- `README.md`
+- `HISTORY.md`
+- `CHANGELOG.md`
+
+GitHub Issues:
+- #19, #20 생성
+- 전체 이슈 매핑: #14, #16, #17, #19, #20 (5개 Epic) + #10 (기능)
+
 ## 2026-05-06 (Iteration 4.0 - CI 성공 모니터링 및 분석 완료)
 
 작업 내용:

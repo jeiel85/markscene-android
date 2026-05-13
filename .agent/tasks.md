@@ -1,5 +1,16 @@
 # Agent Tasks
 
+## Epic Issues
+
+| Epic | GitHub Issue | 파일 |
+|------|-------------|------|
+| UI/UX & Design | [#14](https://github.com/jeiel85/markscene-android/issues/14) | `.agent/epic1_ui_ux.md` |
+| Core Features & AI | [#19](https://github.com/jeiel85/markscene-android/issues/19) | `.agent/epic2_core_ai.md` |
+| Performance & Stability | [#16](https://github.com/jeiel85/markscene-android/issues/16) | `.agent/epic3_perf_stab.md` |
+| Security, Privacy & Trust | [#17](https://github.com/jeiel85/markscene-android/issues/17) | `.agent/epic4_sec_priv.md` |
+| Marketing, Growth & Retention | [#20](https://github.com/jeiel85/markscene-android/issues/20) | `.agent/epic5_market.md` |
+| Receive Intent | [#10](https://github.com/jeiel85/markscene-android/issues/10) | — |
+
 ## Current Priority
 
 Complete remaining issues #2~#6, add test automation, and improve documentation.

@@ -1,3 +1,5 @@
+> GitHub Issue: [#14](https://github.com/jeiel85/markscene-android/issues/14)
+
 ## UI/UX & Design (사용자 경험 및 디자인 개선) 전략
 
 플레이 스토어 Top 10 진입을 위해 앱의 첫인상과 사용성을 극대화하는 10가지 전략입니다.

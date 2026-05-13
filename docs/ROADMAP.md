@@ -71,15 +71,21 @@ Tasks:
 - Privacy notice screen.
 - Play Store checklist.
 
-## Phase 5: Future Differentiators
+## Phase 5: Top 10 Epic Strategy
 
-Possible later features:
+MVP 이후 플레이 스토어 Top 10 진입을 위한 5개 Epic 전략입니다. 각 Epic은 GitHub Issue로 추적합니다.
 
-- Space-based organization: desk, kitchen, storage, child room.
-- Compare records from the same space.
-- "Where was this item?" search experience.
-- User correction dictionary.
-- Export to Markdown or CSV.
-- Local backup/restore.
-- Optional local model support.
+| Epic | Issue |
+|------|-------|
+| UI/UX & Design (사용자 경험 및 디자인 개선) | [#14](https://github.com/jeiel85/markscene-android/issues/14) |
+| Core Features & AI (핵심 기능 및 AI 활용) | [#19](https://github.com/jeiel85/markscene-android/issues/19) |
+| Performance & Stability (성능 및 안정성) | [#16](https://github.com/jeiel85/markscene-android/issues/16) |
+| Security, Privacy & Trust (보안, 프라이버시 및 신뢰) | [#17](https://github.com/jeiel85/markscene-android/issues/17) |
+| Marketing, Growth & Retention (마케팅, 성장 및 리텐션) | [#20](https://github.com/jeiel85/markscene-android/issues/20) |
+
+기타 기능 이슈:
+
+| Feature | Issue |
+|---------|-------|
+| 외부 공유로 기록하기 (Receive Intent) | [#10](https://github.com/jeiel85/markscene-android/issues/10) |
 

@@ -1,3 +1,5 @@
+> GitHub Issue: [#19](https://github.com/jeiel85/markscene-android/issues/19)
+
 ## Core Features & AI (핵심 기능 및 AI 활용) 전략
 
 플레이 스토어 Top 10 진입을 위해 경쟁력을 갖춘 차별화 기능 10가지 전략입니다.

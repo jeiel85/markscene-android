@@ -126,6 +126,11 @@
 │   └── CHANGELOG_GUIDE.md  # 변경 로그 작성 가이드
 └── .agent/
     ├── tasks.md              # 작업 목록
+    ├── epic1_ui_ux.md        # Epic: UI/UX & Design (#14)
+    ├── epic2_core_ai.md      # Epic: Core Features & AI (#19)
+    ├── epic3_perf_stab.md    # Epic: Performance & Stability (#16)
+    ├── epic4_sec_priv.md     # Epic: Security, Privacy & Trust (#17)
+    ├── epic5_market.md       # Epic: Marketing, Growth & Retention (#20)
     ├── progress.md           # 진행 상황 기록
     ├── decisions.md          # 결정 로그
     └── prompts.md           # 에이전트 프롬프트
@@ -188,6 +193,7 @@
 - 📥 [APK 다운로드](https://github.com/jeiel85/markscene-android/releases)
 - 🌐 [브랜딩 페이지](https://jeiel85.github.io/markscene-android/)
 - 💻 [GitHub 저장소](https://github.com/jeiel85/markscene-android)
+- 📋 [GitHub Issues & Epic](https://github.com/jeiel85/markscene-android/issues)
 - 🔒 [개인정보 처리방침](docs/PRIVACY_POLICY.md)
 - 📄 [MIT License](LICENSE)
 

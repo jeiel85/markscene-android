@@ -1,5 +1,21 @@
 # HISTORY.md
 
+## 2026-05-13
+
+- 작업: GitHub Issues 기준 전체 마크다운 문서 정리 및 동기화
+- 변경 파일:
+  - `.agent/epic1_ui_ux.md` ~ `.agent/epic5_market.md`: 각 파일에 GitHub Issue 링크 추가
+  - `.agent/tasks.md`: Epic Issues 매핑 테이블 추가
+  - `docs/ROADMAP.md`: Phase 5를 Top 10 Epic Strategy로 업데이트, 이슈 테이블 추가
+  - `README.md`: GitHub Issues 링크 추가
+- GitHub Issues:
+  - `#19` [Epic] Core Features & AI 생성
+  - `#20` [Epic] Marketing, Growth & Retention 생성
+- 검증:
+  - GitHub Issues 목록과 로컬 `.agent/epic*.md` 파일 정합성 확인 완료
+  - 누락된 Epic 파일 없음, 총 5개 Epic + 1개 기능 이슈로 통일
+- 결과: 모든 Epic이 GitHub Issue로 추적되며, 로컬 문서와 이슈가 1:1로 매핑됨
+
 ## 2026-05-09
 
 - 작업: v2.0.9 버전 상향 및 릴리즈 태그 배포

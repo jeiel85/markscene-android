@@ -1,3 +1,5 @@
+> GitHub Issue: [#17](https://github.com/jeiel85/markscene-android/issues/17)
+
 ## Security, Privacy & Trust (보안, 프라이버시 및 신뢰) 전략
 
 플레이 스토어 Top 10 진입을 위해 사용자의 민감한 데이터를 보호하고 신뢰를 구축하는 10가지 전략입니다.

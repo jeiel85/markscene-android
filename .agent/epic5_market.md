@@ -1,3 +1,5 @@
+> GitHub Issue: [#20](https://github.com/jeiel85/markscene-android/issues/20)
+
 ## Marketing, Growth & Retention (마케팅, 성장 및 리텐션) 전략
 
 플레이 스토어 Top 10 진입을 위해 바이럴을 유도하고 사용자 이탈을 막는 10가지 전략입니다.

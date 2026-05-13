@@ -7,6 +7,11 @@
 ### Added
 - **외부 공유로 기록하기**: 갤러리, 브라우저 등 다른 앱에서 '공유하기'를 선택하면 MarkScene이 표시되어 즉시 기록 생성 화면으로 이동할 수 있습니다. (GitHub Issue #10)
 
+### Documentation
+- 모든 Epic을 GitHub Issues(#14, #16, #17, #19, #20)와 1:1 매핑했습니다.
+- `.agent/epic*.md` 각 파일에 GitHub Issue 링크를 추가했습니다.
+- `.agent/tasks.md`, `docs/ROADMAP.md`, `AGENTS.md`에 Epic 이슈 참조를 동기화했습니다.
+
 ## v2.0.9 - 2026-05-09
 
 ### Fixed

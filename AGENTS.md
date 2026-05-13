@@ -78,10 +78,15 @@ CI System: GitHub Actions
 11. `docs/DATA_MODEL.md`
 12. `docs/ROADMAP.md`
 13. `.agent/tasks.md`
-14. `.agent/progress.md`
-15. `.agent/decisions.md`
-16. `HISTORY.md`
-17. `CHANGELOG.md`
+14. `.agent/epic1_ui_ux.md`
+15. `.agent/epic2_core_ai.md`
+16. `.agent/epic3_perf_stab.md`
+17. `.agent/epic4_sec_priv.md`
+18. `.agent/epic5_market.md`
+19. `.agent/progress.md`
+20. `.agent/decisions.md`
+21. `HISTORY.md`
+22. `CHANGELOG.md`
 
 
 ---

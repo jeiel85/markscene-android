@@ -1,3 +1,5 @@
+> GitHub Issue: [#16](https://github.com/jeiel85/markscene-android/issues/16)
+
 ## Performance & Stability (성능 및 안정성) 전략
 
 플레이 스토어 Top 10 진입을 위해 쾌적한 사용성과 앱 안정성을 확보하는 10가지 전략입니다.
