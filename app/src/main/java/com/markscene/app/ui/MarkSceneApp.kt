@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
@@ -59,6 +60,8 @@ import com.markscene.app.core.database.TagCorrectionEntity
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.ChatMessage
+import com.markscene.app.core.model.MemoryContext
+import com.markscene.app.core.model.MemorySource
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
@@ -72,6 +75,7 @@ import com.markscene.app.ui.screen.CompareScreen
 import com.markscene.app.ui.screen.CreateRecordScreen
 import com.markscene.app.ui.screen.OnboardingScreen
 import com.markscene.app.ui.screen.PrivacyNoticeScreen
+import com.markscene.app.ui.screen.RecallScreen
 import com.markscene.app.ui.screen.RecordDetailScreen
 import com.markscene.app.ui.screen.RecordListScreen
 import com.markscene.app.ui.screen.SettingsScreen
@@ -88,6 +92,7 @@ private const val TODAY_ROUTE = "today"
 private const val CREATE_RECORD_ROUTE = "create_record"
 private const val CREATE_RECORD_SOURCE_ARG = "source"
 private const val SEARCH_ROUTE = "search"
+private const val RECALL_ROUTE = "recall"
 private const val SETTINGS_ROUTE = "settings"
 private const val DETAIL_ROUTE = "detail"
 private const val DETAIL_ID_ARG = "recordId"
@@ -102,7 +107,19 @@ private const val ONBOARDING_ROUTE = "onboarding"
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
 
-private val BOTTOM_NAV_ROUTES = setOf(TODAY_ROUTE, SEARCH_ROUTE, SETTINGS_ROUTE)
+private val BOTTOM_NAV_ROUTES = setOf(TODAY_ROUTE, SEARCH_ROUTE, RECALL_ROUTE, SETTINGS_ROUTE)
+
+private val RECALL_KEYWORDS = listOf("나중에", "확인", "만들기", "사야 함", "정리", "TODO")
+
+private fun computeRecallRecords(allRecords: List<PhotoRecord>): List<PhotoRecord> {
+    val keywordLower = RECALL_KEYWORDS.map { it.lowercase() }
+    return allRecords.filter { record ->
+        val memoContains = record.memo?.let { memo ->
+            keywordLower.any { memo.lowercase().contains(it) }
+        } ?: false
+        memoContains
+    }.sortedByDescending { it.createdAt }
+}
 
 private val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -146,6 +163,19 @@ private val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+private val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS memory_contexts (id TEXT NOT NULL PRIMARY KEY, recordId TEXT NOT NULL UNIQUE, primaryMemoryType TEXT, mood TEXT, energy INTEGER, contextType TEXT, isWorthRecalling INTEGER NOT NULL DEFAULT 0, recallReason TEXT, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, FOREIGN KEY(recordId) REFERENCES photo_records(id) ON DELETE CASCADE)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_mc_recordId ON memory_contexts(recordId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_mc_primaryMemoryType ON memory_contexts(primaryMemoryType)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_mc_isWorthRecalling ON memory_contexts(isWorthRecalling)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_mc_createdAt ON memory_contexts(createdAt)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS record_memory_types (recordId TEXT NOT NULL, memoryType TEXT NOT NULL, source TEXT NOT NULL, userConfirmed INTEGER NOT NULL DEFAULT 0, createdAt INTEGER NOT NULL, PRIMARY KEY(recordId, memoryType))")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_rmt_recordId ON record_memory_types(recordId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_rmt_memoryType ON record_memory_types(memoryType)")
+    }
+}
+
 @Composable
 fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val context = LocalContext.current
@@ -163,7 +193,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val database = remember {
         try {
             Room.databaseBuilder(context.applicationContext, MarkSceneDatabase::class.java, "markscene.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                 .fallbackToDestructiveMigration()
                 .build()
         } catch (e: Exception) {
@@ -173,7 +203,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
     val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
     val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
-    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao()) }
+    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao(), database.memoryContextDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
     val userPrefs = remember { UserPreferences(context.applicationContext) }
@@ -326,6 +356,20 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                             }
                         )
                         NavigationBarItem(
+                            icon = { Icon(Icons.Default.BookmarkBorder, contentDescription = stringResource(R.string.nav_recall)) },
+                            label = { Text(stringResource(R.string.nav_recall)) },
+                            selected = currentRoute == RECALL_ROUTE,
+                            onClick = {
+                                if (currentRoute != RECALL_ROUTE) {
+                                    navController.navigate(RECALL_ROUTE) {
+                                        popUpTo(TODAY_ROUTE) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        )
+                        NavigationBarItem(
                             icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings)) },
                             label = { Text(stringResource(R.string.nav_settings)) },
                             selected = currentRoute == SETTINGS_ROUTE,
@@ -364,7 +408,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                 ) { backStackEntry ->
                     val source = backStackEntry.arguments?.getString(CREATE_RECORD_SOURCE_ARG).orEmpty()
                     val initialUri = backStackEntry.arguments?.getString(DETAIL_ID_ARG)?.let { Uri.parse(it) }
-                    CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navController.navigate(SEARCH_ROUTE) { popUpTo(TODAY_ROUTE) } } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onBack = { navController.popBackStack() })
+                    CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navController.navigate(SEARCH_ROUTE) { popUpTo(TODAY_ROUTE) } } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onSaveMemoryTypes = { recordId, memoryTypes, isWorthRecalling -> scope.launch { val now = System.currentTimeMillis(); val primaryType = memoryTypes.firstOrNull(); repository.saveMemoryContext(MemoryContext(id = UUID.randomUUID().toString(), recordId = recordId, primaryMemoryType = primaryType, mood = null, energy = null, contextType = null, isWorthRecalling = isWorthRecalling, recallReason = if (isWorthRecalling) "사용자 지정" else null, createdAt = now, updatedAt = now)); repository.saveMemoryTypes(recordId, memoryTypes, MemorySource.User, true) } }, onBack = { navController.popBackStack() })
                 }
                 composable(SEARCH_ROUTE) {
                     val allTags = remember(visibleRecords) {
@@ -387,6 +431,13 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         onBack = { navController.popBackStack() }
                     )
                 }
+                composable(RECALL_ROUTE) {
+                    val recallRecords = remember(allRecords) { computeRecallRecords(allRecords) }
+                    RecallScreen(
+                        recallRecords = recallRecords,
+                        onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") }
+                    )
+                }
                 composable(
                     route = "$DETAIL_ROUTE/{$DETAIL_ID_ARG}",
                     arguments = listOf(navArgument(DETAIL_ID_ARG) { type = NavType.StringType })
@@ -397,9 +448,11 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                     val firstTagName = record?.tags?.firstOrNull()?.name
                     val historyRecords by (firstTagName?.let { repository.observeRecordsByTag(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
                     val chatMessages by (recordId?.let { repository.observeMessages(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
+                    val memoryContext by (recordId?.let { repository.observeMemoryContext(it) } ?: flowOf(null)).collectAsState(initial = null)
+                    val recordMemoryTypes by (recordId?.let { repository.observeMemoryTypes(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
 
                     if (record != null) {
-                        RecordDetailScreen(record = record, latestAnalysis = latestAnalysis, historyRecords = historyRecords, chatMessages = chatMessages, onRunAdvancedAnalysis = { targetRecord -> val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isBlank()) error("API key missing"); geminiProvider.analyze(targetRecord, apiKey).getOrThrow() }, onApplyAdvancedAnalysis = { result -> scope.launch { val now = System.currentTimeMillis(); val advancedTags = result.suggestedTags.map { tagName -> PhotoTag(id = UUID.randomUUID().toString(), recordId = record.id, name = tagName.lowercase(), rawName = null, source = TagSource.AdvancedAi, confidence = null, userConfirmed = false, createdAt = now) }; val mergedTags = (record.tags + advancedTags).distinctBy { it.name }; val updatedRecord = record.copy(updatedAt = now, analysisStatus = AnalysisStatus.AdvancedComplete, tags = mergedTags); repository.saveRecord(updatedRecord); repository.saveAdvancedAnalysis(AdvancedAnalysis(id = UUID.randomUUID().toString(), recordId = record.id, provider = if (apiKeyStore.getGeminiApiKey() != null) "gemini" else "mock", sceneSummary = result.sceneSummary, createdAt = now)) } }, onSendQuestion = { question -> scope.launch { val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isNotBlank()) { repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis())); val response = geminiProvider.askQuestion(record, question, apiKey); val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다."); repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis())) } else { backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다." } } }, onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } }, onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") }, onBack = { navController.popBackStack() })
+                        RecordDetailScreen(record = record, latestAnalysis = latestAnalysis, historyRecords = historyRecords, chatMessages = chatMessages, memoryContext = memoryContext, memoryTypes = recordMemoryTypes, onRunAdvancedAnalysis = { targetRecord -> val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isBlank()) error("API key missing"); geminiProvider.analyze(targetRecord, apiKey).getOrThrow() }, onApplyAdvancedAnalysis = { result -> scope.launch { val now = System.currentTimeMillis(); val advancedTags = result.suggestedTags.map { tagName -> PhotoTag(id = UUID.randomUUID().toString(), recordId = record.id, name = tagName.lowercase(), rawName = null, source = TagSource.AdvancedAi, confidence = null, userConfirmed = false, createdAt = now) }; val mergedTags = (record.tags + advancedTags).distinctBy { it.name }; val updatedRecord = record.copy(updatedAt = now, analysisStatus = AnalysisStatus.AdvancedComplete, tags = mergedTags); repository.saveRecord(updatedRecord); repository.saveAdvancedAnalysis(AdvancedAnalysis(id = UUID.randomUUID().toString(), recordId = record.id, provider = if (apiKeyStore.getGeminiApiKey() != null) "gemini" else "mock", sceneSummary = result.sceneSummary, createdAt = now)); if (result.memoryTypes.isNotEmpty() || result.recallCandidate) { val existingContext = repository.getMemoryContext(record.id); val primaryType = result.memoryTypes.firstOrNull() ?: existingContext?.primaryMemoryType; repository.saveMemoryContext(MemoryContext(id = existingContext?.id ?: UUID.randomUUID().toString(), recordId = record.id, primaryMemoryType = primaryType, mood = result.moodSuggestion ?: existingContext?.mood, energy = existingContext?.energy, contextType = result.contextType ?: existingContext?.contextType, isWorthRecalling = result.recallCandidate || (existingContext?.isWorthRecalling == true), recallReason = result.recallReason ?: existingContext?.recallReason, createdAt = existingContext?.createdAt ?: now, updatedAt = now)); if (result.memoryTypes.isNotEmpty()) { repository.saveMemoryTypes(record.id, result.memoryTypes, MemorySource.AdvancedAi, false) } } } }, onSendQuestion = { question -> scope.launch { val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isNotBlank()) { repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis())); val response = geminiProvider.askQuestion(record, question, apiKey); val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다."); repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis())) } else { backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다." } } }, onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } }, onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") }, onBack = { navController.popBackStack() })
                     }
                 }
                 composable(route = "$SPACE_TIMELINE_ROUTE/{$SPACE_NAME_ARG}", arguments = listOf(navArgument(SPACE_NAME_ARG) { type = NavType.StringType })) { backStackEntry ->

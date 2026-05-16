@@ -4,23 +4,30 @@ import com.markscene.app.core.database.AdvancedAnalysisDao
 import com.markscene.app.core.database.AdvancedAnalysisEntity
 import com.markscene.app.core.database.ChatMessageDao
 import com.markscene.app.core.database.ChatMessageEntity
+import com.markscene.app.core.database.MemoryContextDao
+import com.markscene.app.core.database.MemoryContextEntity
 import com.markscene.app.core.database.PhotoRecordEntity
 import com.markscene.app.core.database.PhotoRecordWithTags
 import com.markscene.app.core.database.PhotoTagEntity
 import com.markscene.app.core.database.RecordDao
+import com.markscene.app.core.database.RecordMemoryTypeCrossRef
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
 import com.markscene.app.core.model.ChatMessage
+import com.markscene.app.core.model.MemoryContext
+import com.markscene.app.core.model.MemorySource
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 class RoomRecordRepository(
     private val recordDao: RecordDao,
     private val analysisDao: AdvancedAnalysisDao,
-    private val chatMessageDao: ChatMessageDao
+    private val chatMessageDao: ChatMessageDao,
+    private val memoryContextDao: MemoryContextDao
 ) {
     fun observeRecords(): Flow<List<PhotoRecord>> =
         recordDao.observeAllRecords().map { rows -> rows.map { it.toModel() } }
@@ -101,16 +108,94 @@ class RoomRecordRepository(
         )
     }
 
+    suspend fun saveMemoryContext(context: MemoryContext) {
+        memoryContextDao.upsert(
+            MemoryContextEntity(
+                id = context.id,
+                recordId = context.recordId,
+                primaryMemoryType = context.primaryMemoryType,
+                mood = context.mood,
+                energy = context.energy,
+                contextType = context.contextType,
+                isWorthRecalling = context.isWorthRecalling,
+                recallReason = context.recallReason,
+                createdAt = context.createdAt,
+                updatedAt = context.updatedAt
+            )
+        )
+    }
+
+    suspend fun saveMemoryTypes(recordId: String, memoryTypes: List<String>, source: MemorySource, userConfirmed: Boolean) {
+        memoryContextDao.deleteMemoryTypesByRecordId(recordId)
+        val now = System.currentTimeMillis()
+        val crossRefs = memoryTypes.map { type ->
+            RecordMemoryTypeCrossRef(
+                recordId = recordId,
+                memoryType = type,
+                source = source.name,
+                userConfirmed = userConfirmed,
+                createdAt = now
+            )
+        }
+        memoryContextDao.upsertMemoryTypes(crossRefs)
+    }
+
+    fun observeMemoryContext(recordId: String): Flow<MemoryContext?> =
+        memoryContextDao.observeByRecordId(recordId).map { entity ->
+            entity?.let {
+                MemoryContext(
+                    id = it.id,
+                    recordId = it.recordId,
+                    primaryMemoryType = it.primaryMemoryType,
+                    mood = it.mood,
+                    energy = it.energy,
+                    contextType = it.contextType,
+                    isWorthRecalling = it.isWorthRecalling,
+                    recallReason = it.recallReason,
+                    createdAt = it.createdAt,
+                    updatedAt = it.updatedAt
+                )
+            }
+        }
+
+    fun observeMemoryTypes(recordId: String): Flow<List<String>> =
+        memoryContextDao.observeMemoryTypesByRecordId(recordId).map { entities ->
+            entities.map { it.memoryType }
+        }
+
+    suspend fun getMemoryContext(recordId: String): MemoryContext? =
+        memoryContextDao.getByRecordId(recordId)?.let { entity ->
+            MemoryContext(
+                id = entity.id,
+                recordId = entity.recordId,
+                primaryMemoryType = entity.primaryMemoryType,
+                mood = entity.mood,
+                energy = entity.energy,
+                contextType = entity.contextType,
+                isWorthRecalling = entity.isWorthRecalling,
+                recallReason = entity.recallReason,
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt
+            )
+        }
+
+    suspend fun getMemoryTypes(recordId: String): List<String> =
+        memoryContextDao.getMemoryTypesByRecordId(recordId).map { it.memoryType }
+
     suspend fun deleteRecord(recordId: String) {
         analysisDao.deleteForRecord(recordId)
         chatMessageDao.deleteMessagesForRecord(recordId)
+        memoryContextDao.deleteByRecordId(recordId)
+        memoryContextDao.deleteMemoryTypesByRecordId(recordId)
         recordDao.deleteRecord(recordId)
     }
 
     suspend fun deleteRecords(recordIds: List<String>) {
-        recordIds.forEach { 
-            analysisDao.deleteForRecord(it) 
+        recordIds.forEach {
+            analysisDao.deleteForRecord(it)
             chatMessageDao.deleteMessagesForRecord(it)
+            memoryContextDao.deleteByRecordId(it)
+            memoryContextDao.deleteMemoryTypesByRecordId(it)
         }
         recordDao.deleteRecords(recordIds)
         recordDao.deleteTagsForRecords(recordIds)

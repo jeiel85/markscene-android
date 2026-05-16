@@ -5,14 +5,16 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [
-        PhotoRecordEntity::class, 
-        PhotoTagEntity::class, 
+        PhotoRecordEntity::class,
+        PhotoTagEntity::class,
         AdvancedAnalysisEntity::class,
         TagCorrectionEntity::class,
         ChatMessageEntity::class,
-        SmartAlbumEntity::class
+        SmartAlbumEntity::class,
+        MemoryContextEntity::class,
+        RecordMemoryTypeCrossRef::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class MarkSceneDatabase : RoomDatabase() {
@@ -21,4 +23,5 @@ abstract class MarkSceneDatabase : RoomDatabase() {
     abstract fun tagCorrectionDao(): TagCorrectionDao
     abstract fun chatMessageDao(): ChatMessageDao
     abstract fun smartAlbumDao(): SmartAlbumDao
+    abstract fun memoryContextDao(): MemoryContextDao
 }

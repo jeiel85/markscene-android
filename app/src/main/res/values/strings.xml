@@ -156,6 +156,7 @@
     <!-- Bottom Navigation -->
     <string name="nav_today">오늘</string>
     <string name="nav_search">검색</string>
+    <string name="nav_recall">다시 보기</string>
     <string name="nav_settings">설정</string>
 
     <!-- FAB -->

@@ -226,6 +226,36 @@ fun RecordListScreen(
                     }
                 }
 
+                // Search filter chips
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val quickFilters = listOf(
+                        "오늘" to "오늘",
+                        "이번 주" to "이번 주",
+                        "아이디어" to "아이디어",
+                        "영수증" to "영수증",
+                        "나중에 보기" to "나중에 보기",
+                        "가족" to "가족",
+                        "업무" to "업무"
+                    )
+                    items(quickFilters) { (label, value) ->
+                        FilterChip(
+                            selected = query.contains(value),
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                val newQuery = if (query.contains(value)) query.replace(value, "").trim() else value
+                                onSearch(newQuery)
+                                query = newQuery
+                            },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+                }
+
                 // Space filter chips and layout selector
                 Row(
                     modifier = Modifier.fillMaxWidth(),

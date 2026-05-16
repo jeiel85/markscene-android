@@ -5,16 +5,24 @@
 ## Unreleased
 
 ### Added
-- **Scene Timeline (Phase 1)**: 기존 홈 화면을 '오늘의 장면' 타임라인으로 교체했습니다. 기록이 날짜별로 그룹화되어 표시됩니다.
-- **Bottom Navigation**: 하단 탐색 바(오늘, 검색, 설정)가 추가되었습니다.
+- **Scene Memory 확장 (전체 Phase)**: MarkScene이 기존 비주얼 메모 앱에서 장면 기반 개인 기억 저장소로 확장되었습니다.
+  - **Phase 1 - Scene Timeline**: 기존 홈 화면을 '오늘의 장면' 타임라인으로 교체. 기록이 날짜별로 그룹화되어 표시됩니다.
+  - **Phase 2 - Memory Context 데이터 모델**: MemoryType, MoodType, ContextType enum 및 MemoryContextEntity, RecordMemoryTypeCrossRef 테이블 추가. Room DB v9 마이그레이션.
+  - **Phase 3 - Memory Tags**: 기록 생성 시 Memory Type(아이디어, 업무, 가족, 영수증 등 14종)을 선택할 수 있습니다. 상세 화면에서 확인 가능.
+  - **Phase 4 - Recall Box**: '다시 보기' 하단 탭 추가. 다시 볼 가치가 있는 기록을 별도 관리. 저장 시 Recall 토글 제공.
+  - **Phase 5 - Daily Scene Recap**: 오늘 화면에 일일 요약 카드(기록 수, 많이 나온 태그) 추가.
+  - **Phase 6 - Search 확장**: 검색 화면에 필터 칩(오늘, 이번 주, 아이디어, 영수증 등) 추가.
+  - **Phase 7 - BYOK AI Scene Memory**: 고급 AI 분석 결과에 Memory Type, Recall 추천이 포함됩니다.
+- **Bottom Navigation**: 하단 탐색 바(오늘, 검색, 다시 보기, 설정)가 추가되었습니다.
 - **SceneCard 컴포넌트**: 썸네일, 시간, 제목/메모, 상위 태그가 표시되는 장면 카드 컴포넌트가 추가되었습니다.
-- 빈 상태에서 촬영/가져오기 버튼이 표시됩니다.
+- **DailyRecapCard 컴포넌트**: 오늘의 장면 요약 카드가 추가되었습니다.
 
 ### Changed
-- 홈 화면이 TodayScreen으로 교체되었습니다. 기존 HomeScreen은 유지되지만 탐색 경로가 변경되었습니다.
+- 홈 화면이 TodayScreen으로 교체되었습니다.
 - FAB(촬영/가져오기)가 TodayScreen에 배치되었습니다.
-- 검색 및 설정이 하단 탭으로 이동했습니다.
+- 검색, 설정, 다시 보기가 하단 탭으로 이동했습니다.
 - 기록 저장 후 검색 화면 대신 Today 화면으로 이동하도록 변경되었습니다.
+- Room DB가 v8에서 v9으로 마이그레이션 (memory_contexts, record_memory_types 테이블 추가)
 
 ### Documentation
 - `docs/renew/` 폴더에 Scene Memory 확장 설계 문서 세트를 추가했습니다.

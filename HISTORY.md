@@ -2,7 +2,24 @@
 
 ## 2026-05-16
 
-- 작업: Scene Memory Phase 1 — Today Screen / Scene Timeline 구현
+- 작업: Scene Memory 전체 Phase(1~7) 구현 완료
+- 변경 파일:
+  - **Phase 2**: `core/model/MemoryType.kt`, `MoodType.kt`, `ContextType.kt`, `MemorySource.kt`, `MemoryContext.kt`, `core/database/MemoryContextEntity.kt`, `RecordMemoryTypeCrossRef.kt`, `MemoryContextDao.kt`, `MarkSceneDatabase.kt` (v9로 업데이트)
+  - **Phase 3**: `ui/component/MemoryTypeChip.kt`, `CreateRecordScreen.kt` (Memory Type 선택), `RecordDetailScreen.kt` (Memory Type 표시)
+  - **Phase 4**: `ui/screen/RecallScreen.kt`, `CreateRecordScreen.kt` (Recall 토글), `MarkSceneApp.kt` (Recall 탭, recall 로직)
+  - **Phase 5**: `ui/component/DailyRecapCard.kt`, `TodayScreen.kt` (요약 카드)
+  - **Phase 6**: `ui/util/SearchQueryParser.kt`, `RecordListScreen.kt` (필터 칩)
+  - **Phase 7**: `ai/provider/MockAdvancedVisionProvider.kt` (Memory Type/Recall 필드 추가), `MarkSceneApp.kt` (AI 분석 시 Memory Context 저장)
+  - `RoomRecordRepository.kt`: MemoryContext/MemoryType CRUD 추가
+  - `strings.xml`: Recall,MemoryType 관련 문자열 추가
+  - `CHANGELOG.md`, `HISTORY.md` 업데이트
+- 검증:
+  - 각 Phase별 `assembleDebug` 성공
+  - 최종 `testDebugUnitTest` 성공
+  - Room DB v8→v9 마이그레이션 포함
+- 결과: 7개 Phase 모두 구현 완료. MarkScene이 장면 기반 개인 기억 저장소로 확장됨.
+
+## 2026-05-16 (Phase 1)
 - 변경 파일:
   - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: 홈 라우트를 Today 라우트로 교체, Bottom Navigation 추가, Scaffold 구조 변경
   - `app/src/main/java/com/markscene/app/ui/screen/TodayScreen.kt`: 신규 — 날짜별 그룹 타임라인 화면

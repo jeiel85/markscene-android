@@ -34,6 +34,7 @@ import com.markscene.app.R
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.ui.component.EmptyStateView
 import com.markscene.app.ui.component.SceneCard
+import com.markscene.app.ui.component.DailyRecapCard
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -58,6 +59,14 @@ fun TodayScreen(
     val todayCount = remember(records) {
         val todayStart = startOfDay(System.currentTimeMillis())
         records.count { it.createdAt >= todayStart }
+    }
+    val recapTopTags = remember(records) {
+        val todayStart = startOfDay(System.currentTimeMillis())
+        val todayRecords = records.filter { it.createdAt >= todayStart }
+        todayRecords.flatMap { it.tags }.map { it.name }
+            .groupingBy { it }.eachCount()
+            .entries.sortedByDescending { it.value }.take(5)
+            .map { it.key }
     }
 
     Scaffold(
@@ -132,6 +141,14 @@ fun TodayScreen(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                item(key = "daily_recap") {
+                    DailyRecapCard(
+                        recordCount = todayCount,
+                        topTags = recapTopTags,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
                 dateGroups.forEach { group ->
                     item(key = "header_${group.label}") {
                         Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {

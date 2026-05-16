@@ -40,6 +40,8 @@ import com.markscene.app.ai.provider.MockAdvancedVisionProvider
 import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.ChatMessage
+import com.markscene.app.core.model.MemoryContext
+import com.markscene.app.core.model.MemoryType
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.ui.util.GalleryHideHelper
 import com.markscene.app.ui.util.SecureScreenEffect
@@ -58,6 +60,8 @@ fun RecordDetailScreen(
     onSendQuestion: (String) -> Unit,
     onDeleteRecord: (String) -> Unit,
     onOpenOtherRecord: (String) -> Unit,
+    memoryContext: MemoryContext? = null,
+    memoryTypes: List<String> = emptyList(),
     onBack: () -> Unit
 ) {
     SecureScreenEffect()
@@ -279,6 +283,34 @@ fun RecordDetailScreen(
                                     ),
                                     border = null
                                 )
+                            }
+                        }
+
+                        if (memoryTypes.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "기억 유형",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                memoryTypes.forEach { typeName ->
+                                    val type = MemoryType.fromString(typeName)
+                                    SuggestionChip(
+                                        onClick = {},
+                                        label = { Text(type?.koreanName ?: typeName) },
+                                        colors = SuggestionChipDefaults.suggestionChipColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                                            labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                        ),
+                                        border = null
+                                    )
+                                }
                             }
                         }
                     }

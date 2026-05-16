@@ -50,13 +50,15 @@ import com.markscene.app.R
 import com.markscene.app.ai.provider.LocalImageTagger
 import com.markscene.app.ai.provider.TextRecognizer
 import com.markscene.app.core.model.AnalysisStatus
+import com.markscene.app.core.model.MemoryType
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.core.model.PhotoTag
 import com.markscene.app.core.model.TagSource
-import com.markscene.app.ui.util.ImageCropper
 import com.markscene.app.ui.util.GalleryHideHelper
+import com.markscene.app.ui.util.ImageCropper
 import com.markscene.app.ui.util.ImageOptimizer
 import com.markscene.app.ui.util.SecureScreenEffect
+import com.markscene.app.ui.component.MemoryTypeChipSection
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -116,6 +118,7 @@ fun CreateRecordScreen(
     textRecognizer: TextRecognizer,
     onSave: (PhotoRecord) -> Unit,
     onLearnTagCorrection: (original: String, corrected: String) -> Unit = { _, _ -> },
+    onSaveMemoryTypes: (recordId: String, memoryTypes: List<String>, isWorthRecalling: Boolean) -> Unit = { _, _, _ -> },
     onBack: () -> Unit
 ) {
     SecureScreenEffect()
@@ -140,6 +143,8 @@ fun CreateRecordScreen(
     
     val editableTags = remember { mutableStateListOf<String>() }
     val originalAiSuggestions = remember { mutableStateListOf<String>() }
+    val selectedMemoryTypes = remember { mutableStateListOf<MemoryType>() }
+    var isWorthRecalling by remember { mutableStateOf(false) }
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -237,7 +242,10 @@ fun CreateRecordScreen(
                                             createdAt = now
                                         )
                                     }
-                                    onSave(
+                                    if (selectedMemoryTypes.isNotEmpty() || isWorthRecalling) {
+                                                        onSaveMemoryTypes(recordId, selectedMemoryTypes.map { it.name }, isWorthRecalling)
+                                                    }
+                                                    onSave(
                                         PhotoRecord(
                                             id = recordId,
                                             imageUri = Uri.fromFile(optimizedFile).toString(),
@@ -534,6 +542,48 @@ fun CreateRecordScreen(
                         }
                     },
                     singleLine = true
+                )
+            }
+
+            // Memory Type Section
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "이 장면은 어떤 기억인가요?",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                MemoryTypeChipSection(
+                    selectedTypes = selectedMemoryTypes,
+                    onToggle = { type ->
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        if (type in selectedMemoryTypes) {
+                            selectedMemoryTypes.remove(type)
+                        } else {
+                            selectedMemoryTypes.add(type)
+                        }
+                    }
+                )
+            }
+
+            // Recall Toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "다시 볼 기록으로 저장",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Switch(
+                    checked = isWorthRecalling,
+                    onCheckedChange = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        isWorthRecalling = it
+                    }
                 )
             }
         }
