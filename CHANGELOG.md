@@ -2,7 +2,7 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
-## Unreleased
+## v2.1.0 - 2026-05-16
 
 ### Added
 - **Scene Memory 확장 (전체 Phase)**: MarkScene이 기존 비주얼 메모 앱에서 장면 기반 개인 기억 저장소로 확장되었습니다.
@@ -29,6 +29,11 @@
 
 ### External Sharing
 - 갤러리, 브라우저 등 다른 앱에서 '공유하기'를 선택하면 MarkScene이 표시되어 즉시 기록 생성 화면으로 이동할 수 있습니다. (GitHub Issue #10)
+
+### Verification
+- 로컬: `./gradlew :app:assembleDebug :app:testDebugUnitTest :app:bundleRelease` 성공.
+- AAB: `app-release.aab` 생성됨, 서명 적용됨 (릴리즈 키스토어).
+- CI: 푸시 후 `Android CI` / `Release APK` 결과 확인.
 
 ## v2.0.9 - 2026-05-09
 

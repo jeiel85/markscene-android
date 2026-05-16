@@ -1,37 +1,20 @@
 # HISTORY.md
 
-## 2026-05-16
+## 2026-05-16 — v2.1.0 릴리즈
 
-- 작업: Scene Memory 전체 Phase(1~7) 구현 완료
+- 작업: Scene Memory 전체 Phase(1~7) 구현 완료 및 v2.1.0 릴리즈
 - 변경 파일:
-  - **Phase 2**: `core/model/MemoryType.kt`, `MoodType.kt`, `ContextType.kt`, `MemorySource.kt`, `MemoryContext.kt`, `core/database/MemoryContextEntity.kt`, `RecordMemoryTypeCrossRef.kt`, `MemoryContextDao.kt`, `MarkSceneDatabase.kt` (v9로 업데이트)
-  - **Phase 3**: `ui/component/MemoryTypeChip.kt`, `CreateRecordScreen.kt` (Memory Type 선택), `RecordDetailScreen.kt` (Memory Type 표시)
-  - **Phase 4**: `ui/screen/RecallScreen.kt`, `CreateRecordScreen.kt` (Recall 토글), `MarkSceneApp.kt` (Recall 탭, recall 로직)
-  - **Phase 5**: `ui/component/DailyRecapCard.kt`, `TodayScreen.kt` (요약 카드)
-  - **Phase 6**: `ui/util/SearchQueryParser.kt`, `RecordListScreen.kt` (필터 칩)
-  - **Phase 7**: `ai/provider/MockAdvancedVisionProvider.kt` (Memory Type/Recall 필드 추가), `MarkSceneApp.kt` (AI 분석 시 Memory Context 저장)
-  - `RoomRecordRepository.kt`: MemoryContext/MemoryType CRUD 추가
-  - `strings.xml`: Recall,MemoryType 관련 문자열 추가
-  - `CHANGELOG.md`, `HISTORY.md` 업데이트
+  - 신규 12개 파일: MemoryType.kt, MoodType.kt, ContextType.kt, MemorySource.kt, MemoryContext.kt, MemoryContextEntity.kt, RecordMemoryTypeCrossRef.kt, MemoryContextDao.kt, MemoryTypeChip.kt, RecallScreen.kt, DailyRecapCard.kt, SearchQueryParser.kt
+  - 수정: MarkSceneApp.kt (Bottom Navigation 4탭, Recall/Scene Memory 통합), CreateRecordScreen.kt (Memory Type, Recall 토글), RecordDetailScreen.kt (Memory Type 표시), RecordListScreen.kt (필터 칩), RoomRecordRepository.kt (MemoryContext CRUD), MarkSceneDatabase.kt (v9), MockAdvancedVisionProvider.kt (Memory/Recall 필드), TodayScreen.kt (DailyRecapCard), strings.xml
+  - 문서: README.md (제품 포지션 업데이트), CHANGELOG.md (v2.1.0), HISTORY.md, docs/renew/ (설계 문서)
+  - 버전: libs.versions.toml (2.0.9→2.1.0, 209→210)
+  - 빌드: 릴리즈 키스토어(keystore/release.keystore) 생성, local.properties 서명 설정
 - 검증:
-  - 각 Phase별 `assembleDebug` 성공
-  - 최종 `testDebugUnitTest` 성공
+  - 코드 로직 10개 항목 전체 검증 PASS
+  - `assembleDebug` 성공, `testDebugUnitTest` 성공
+  - `bundleRelease` 성공 → 바탕화면 MarkScene_v2.1.0.aab 생성
   - Room DB v8→v9 마이그레이션 포함
-- 결과: 7개 Phase 모두 구현 완료. MarkScene이 장면 기반 개인 기억 저장소로 확장됨.
-
-## 2026-05-16 (Phase 1)
-- 변경 파일:
-  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: 홈 라우트를 Today 라우트로 교체, Bottom Navigation 추가, Scaffold 구조 변경
-  - `app/src/main/java/com/markscene/app/ui/screen/TodayScreen.kt`: 신규 — 날짜별 그룹 타임라인 화면
-  - `app/src/main/java/com/markscene/app/ui/component/SceneCard.kt`: 신규 — 썸네일+시간+제목+태그 카드 컴포넌트
-  - `app/src/main/res/values/strings.xml`: Today/SceneCard/Bottom Nav 문자열 리소스 추가
-  - `CHANGELOG.md`: Unreleased 섹션 업데이트
-  - `docs/renew/`: Scene Memory 확장 설계 문서 세트 추가
-- 검증:
-  - `gradlew :app:assembleDebug` 성공
-  - `gradlew :app:testDebugUnitTest` 성공
-  - 기존 capture/import/search/settings 흐름 정상 동작 확인
-- 결과: 홈 화면이 날짜별 Scene Timeline으로 교체되고, Bottom Navigation(오늘/검색/설정)이 추가됨
+- 결과: MarkScene이 장면 기반 개인 기억 저장소로 확장 완료. v2.1.0 AAB 서명 빌드 완료.
 
 ## 2026-05-13
 

@@ -21,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.markscene.app.R
-import com.markscene.app.core.model.MemoryType
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.ui.component.SceneCard
 

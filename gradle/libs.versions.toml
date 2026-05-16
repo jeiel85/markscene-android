@@ -1,6 +1,6 @@
 [versions]
-projectVersionName = "2.0.9"
-projectVersionCode = "209"
+projectVersionName = "2.1.0"
+projectVersionCode = "210"
 agp = "8.6.1"
 kotlin = "2.0.20"
 kotlinxSerialization = "1.7.1"
