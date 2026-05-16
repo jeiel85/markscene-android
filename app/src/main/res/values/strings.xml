@@ -142,4 +142,23 @@
 
     <!-- Widget -->
     <string name="widget_description">MarkScene 빠른 기록 위젯</string>
+
+    <!-- Today Screen / Scene Timeline -->
+    <string name="today_title">오늘의 장면</string>
+    <string name="today_empty_title">아직 오늘 남긴 장면이 없습니다</string>
+    <string name="today_empty_description">사진을 찍거나 가져와서 첫 번째 기억을 남겨보세요.</string>
+    <string name="today_date_today">오늘</string>
+    <string name="today_date_yesterday">어제</string>
+    <string name="today_record_count">%1$d개의 장면</string>
+    <string name="scene_card_untitled">제목 없는 장면</string>
+    <string name="scene_card_more_tags">+%1$d</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_today">오늘</string>
+    <string name="nav_search">검색</string>
+    <string name="nav_settings">설정</string>
+
+    <!-- FAB -->
+    <string name="fab_capture">촬영</string>
+    <string name="fab_import">가져오기</string>
 </resources>

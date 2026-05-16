@@ -5,37 +5,78 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.markscene.app.ai.provider.*
+import com.markscene.app.R
+import com.markscene.app.ai.provider.GeminiAdvancedVisionProvider
+import com.markscene.app.ai.provider.MlKitLocalImageTagger
+import com.markscene.app.ai.provider.MlKitTextRecognizer
 import com.markscene.app.core.database.MarkSceneDatabase
 import com.markscene.app.core.database.TagCorrectionEntity
-import com.markscene.app.core.model.*
+import com.markscene.app.core.model.AdvancedAnalysis
+import com.markscene.app.core.model.AnalysisStatus
+import com.markscene.app.core.model.ChatMessage
+import com.markscene.app.core.model.PhotoRecord
+import com.markscene.app.core.model.PhotoTag
+import com.markscene.app.core.model.TagSource
 import com.markscene.app.data.backup.BackupManager
 import com.markscene.app.data.backup.DataExporter
 import com.markscene.app.data.record.RoomRecordRepository
 import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.data.settings.SecurityStore
 import com.markscene.app.data.settings.UserPreferences
-import com.markscene.app.ui.screen.*
+import com.markscene.app.ui.screen.CompareScreen
+import com.markscene.app.ui.screen.CreateRecordScreen
+import com.markscene.app.ui.screen.OnboardingScreen
+import com.markscene.app.ui.screen.PrivacyNoticeScreen
+import com.markscene.app.ui.screen.RecordDetailScreen
+import com.markscene.app.ui.screen.RecordListScreen
+import com.markscene.app.ui.screen.SettingsScreen
+import com.markscene.app.ui.screen.SpaceTimelineScreen
+import com.markscene.app.ui.screen.TodayScreen
 import com.markscene.app.ui.security.BiometricAuthenticator
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -43,7 +84,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-private const val HOME_ROUTE = "home"
+private const val TODAY_ROUTE = "today"
 private const val CREATE_RECORD_ROUTE = "create_record"
 private const val CREATE_RECORD_SOURCE_ARG = "source"
 private const val SEARCH_ROUTE = "search"
@@ -60,6 +101,8 @@ private const val ONBOARDING_ROUTE = "onboarding"
 
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
+
+private val BOTTOM_NAV_ROUTES = setOf(TODAY_ROUTE, SEARCH_ROUTE, SETTINGS_ROUTE)
 
 private val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -124,7 +167,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                 .fallbackToDestructiveMigration()
                 .build()
         } catch (e: Exception) {
-            // Re-throw or handle (Room.databaseBuilder itself shouldn't throw, but build() might)
             throw e
         }
     }
@@ -150,8 +192,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        // 일부 단말(예: 갤럭시 + Knox/BiometricPrompt 환경)에서 초기 인증/네비게이션 시점에
-        // 던지는 예외가 액티비티를 즉시 종료시키지 않도록 방어 처리.
         runCatching {
             if (isBiometricLockEnabled && authenticator != null) {
                 authenticator.authenticate(
@@ -207,8 +247,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
         }}
     }
 
-    // Room/DB 에러가 비동기로 발생해도 액티비티가 죽지 않도록 .catch로 감싼다.
-    // Flow 연산자는 composition 외부에서 적용해야 lint(FlowOperatorInvokedInComposition)를 통과한다.
     val allRecordsFlow = remember(repository) {
         repository.observeRecords().catch { emit(emptyList()) }
     }
@@ -218,7 +256,19 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val allRecords by allRecordsFlow.collectAsState(initial = emptyList())
     val visibleRecords by visibleRecordsFlow.collectAsState(initial = emptyList())
 
-    // Show onboarding for first-time users
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val showBottomNav = when {
+        currentRoute == null -> true
+        currentRoute.startsWith("create_record") -> false
+        currentRoute.startsWith("detail") -> false
+        currentRoute.startsWith("space_timeline") -> false
+        currentRoute.startsWith("compare") -> false
+        currentRoute.startsWith("privacy_notice") -> false
+        currentRoute == ONBOARDING_ROUTE -> false
+        else -> true
+    }
+
     if (showOnboarding) {
         OnboardingScreen(
             onComplete = {
@@ -227,10 +277,10 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
             }
         )
     } else if (isAppLocked) {
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize().background(androidx.compose.material3.MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.primary)
-                Text("앱이 잠겨 있습니다", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(80.dp), tint = androidx.compose.material3.MaterialTheme.colorScheme.primary)
+                Text("앱이 잠겨 있습니다", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Button(onClick = {
                     authenticator?.authenticate(onSuccess = { isAppLocked = false }, onError = { backupStatusMessage = it })
                 }, shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)) {
@@ -243,147 +293,209 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
             }
         }
     } else {
-        NavHost(navController = navController, startDestination = HOME_ROUTE) {
-            composable(HOME_ROUTE) {
-                HomeScreen(records = visibleRecords, onCapturePhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_CAPTURE") }, onImportPhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT") }, onOpenSettings = { navController.navigate(SETTINGS_ROUTE) }, onOpenSearch = { navController.navigate(SEARCH_ROUTE) }, onOpenSpaceTimeline = { spaceName -> navController.navigate("$SPACE_TIMELINE_ROUTE/$spaceName") })
-            }
-            composable(
-                route = "$CREATE_RECORD_ROUTE/{$CREATE_RECORD_SOURCE_ARG}?uri={$DETAIL_ID_ARG}",
-                arguments = listOf(navArgument(CREATE_RECORD_SOURCE_ARG) { type = NavType.StringType }, navArgument(DETAIL_ID_ARG) { type = NavType.StringType; nullable = true; defaultValue = null })
-            ) { backStackEntry ->
-                val source = backStackEntry.arguments?.getString(CREATE_RECORD_SOURCE_ARG).orEmpty()
-                val initialUri = backStackEntry.arguments?.getString(DETAIL_ID_ARG)?.let { Uri.parse(it) }
-                CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navController.navigate(SEARCH_ROUTE) { popUpTo(HOME_ROUTE) } } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onBack = { navController.popBackStack() })
-            }
-            composable(SEARCH_ROUTE) {
-                val allTags = remember(visibleRecords) {
-                    visibleRecords.flatMap { it.tags }.map { it.name }.distinct()
-                }
-                val recentSearches = remember { userPrefs.getRecentSearches() }
-                RecordListScreen(
-                    records = visibleRecords,
-                    recentSearches = recentSearches,
-                    allTags = allTags,
-                    onSearch = { query ->
-                        searchQuery = query
-                        if (query.isNotBlank()) {
-                            userPrefs.addRecentSearch(query)
-                        }
-                    },
-                    onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } },
-                    onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
-                    onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(
-                route = "$DETAIL_ROUTE/{$DETAIL_ID_ARG}",
-                arguments = listOf(navArgument(DETAIL_ID_ARG) { type = NavType.StringType })
-            ) { backStackEntry ->
-                val recordId = backStackEntry.arguments?.getString(DETAIL_ID_ARG)
-                val record = visibleRecords.firstOrNull { it.id == recordId }
-                val latestAnalysis by (recordId?.let { repository.observeLatestAnalysis(it) } ?: flowOf(null)).collectAsState(initial = null)
-                val firstTagName = record?.tags?.firstOrNull()?.name
-                val historyRecords by (firstTagName?.let { repository.observeRecordsByTag(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
-                val chatMessages by (recordId?.let { repository.observeMessages(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
-
-                if (record != null) {
-                    RecordDetailScreen(record = record, latestAnalysis = latestAnalysis, historyRecords = historyRecords, chatMessages = chatMessages, onRunAdvancedAnalysis = { targetRecord -> val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isBlank()) error("API key missing"); geminiProvider.analyze(targetRecord, apiKey).getOrThrow() }, onApplyAdvancedAnalysis = { result -> scope.launch { val now = System.currentTimeMillis(); val advancedTags = result.suggestedTags.map { tagName -> PhotoTag(id = UUID.randomUUID().toString(), recordId = record.id, name = tagName.lowercase(), rawName = null, source = TagSource.AdvancedAi, confidence = null, userConfirmed = false, createdAt = now) }; val mergedTags = (record.tags + advancedTags).distinctBy { it.name }; val updatedRecord = record.copy(updatedAt = now, analysisStatus = AnalysisStatus.AdvancedComplete, tags = mergedTags); repository.saveRecord(updatedRecord); repository.saveAdvancedAnalysis(AdvancedAnalysis(id = UUID.randomUUID().toString(), recordId = record.id, provider = if (apiKeyStore.getGeminiApiKey() != null) "gemini" else "mock", sceneSummary = result.sceneSummary, createdAt = now)) } }, onSendQuestion = { question -> scope.launch { val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isNotBlank()) { repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis())); val response = geminiProvider.askQuestion(record, question, apiKey); val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다."); repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis())) } else { backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다." } } }, onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } }, onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") }, onBack = { navController.popBackStack() })
-                }
-            }
-            composable(route = "$SPACE_TIMELINE_ROUTE/{$SPACE_NAME_ARG}", arguments = listOf(navArgument(SPACE_NAME_ARG) { type = NavType.StringType })) { backStackEntry ->
-                val spaceName = backStackEntry.arguments?.getString(SPACE_NAME_ARG).orEmpty()
-                val spaceRecords = visibleRecords.filter { it.space == spaceName }
-                SpaceTimelineScreen(spaceName = spaceName, records = spaceRecords, onOpenDetail = { id -> navController.navigate("$DETAIL_ROUTE/$id") }, onCompare = { id1, id2 -> navController.navigate("$COMPARE_ROUTE/$id1/$id2") }, onBack = { navController.popBackStack() })
-            }
-            composable(route = "$COMPARE_ROUTE/{$COMPARE_ID1_ARG}/{$COMPARE_ID2_ARG}", arguments = listOf(navArgument(COMPARE_ID1_ARG) { type = NavType.StringType }, navArgument(COMPARE_ID2_ARG) { type = NavType.StringType })) { backStackEntry ->
-                val id1 = backStackEntry.arguments?.getString(COMPARE_ID1_ARG)
-                val id2 = backStackEntry.arguments?.getString(COMPARE_ID2_ARG)
-                val record1 = visibleRecords.firstOrNull { it.id == id1 }
-                val record2 = visibleRecords.firstOrNull { it.id == id2 }
-                if (record1 != null && record2 != null) { CompareScreen(record1 = record1, record2 = record2, onBack = { navController.popBackStack() }) }
-            }
-            composable(SETTINGS_ROUTE) {
-                val corrections by database.tagCorrectionDao().getAllCorrections().collectAsState(initial = emptyList())
-                val weeklyCount = remember(allRecords) {
-                    val oneWeekAgo = System.currentTimeMillis() - 7L * 24L * 60L * 60L * 1000L
-                    allRecords.count { it.createdAt >= oneWeekAgo }
-                }
-                val weeklyTagCount = remember(allRecords) {
-                    allRecords.flatMap { it.tags }.map { it.name }.distinct().size
-                }
-                val achievementBadges = remember(allRecords) {
-                    buildList {
-                        if (allRecords.size >= 1) add("첫 기록 작성")
-                        if (allRecords.size >= 10) add("정리 습관가 (10+) ")
-                        if (allRecords.size >= 50) add("기록 마스터 (50+)")
-                        val tagged = allRecords.count { it.tags.isNotEmpty() }
-                        if (tagged >= 20) add("태그 장인 (20+)")
+        Scaffold(
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
+            bottomBar = {
+                if (showBottomNav) {
+                    NavigationBar {
+                        NavigationBarItem(
+                            icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.nav_today)) },
+                            label = { Text(stringResource(R.string.nav_today)) },
+                            selected = currentRoute == TODAY_ROUTE,
+                            onClick = {
+                                if (currentRoute != TODAY_ROUTE) {
+                                    navController.navigate(TODAY_ROUTE) {
+                                        popUpTo(TODAY_ROUTE) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
+                        )
+                        NavigationBarItem(
+                            icon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) },
+                            label = { Text(stringResource(R.string.nav_search)) },
+                            selected = currentRoute == SEARCH_ROUTE,
+                            onClick = {
+                                if (currentRoute != SEARCH_ROUTE) {
+                                    navController.navigate(SEARCH_ROUTE) {
+                                        popUpTo(TODAY_ROUTE) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        )
+                        NavigationBarItem(
+                            icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings)) },
+                            label = { Text(stringResource(R.string.nav_settings)) },
+                            selected = currentRoute == SETTINGS_ROUTE,
+                            onClick = {
+                                if (currentRoute != SETTINGS_ROUTE) {
+                                    navController.navigate(SETTINGS_ROUTE) {
+                                        popUpTo(TODAY_ROUTE) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
-                SettingsScreen(
-                    hasApiKey = hasApiKey,
-                    isBiometricLockEnabled = isBiometricLockEnabled,
-                    isTrueBlackEnabled = isTrueBlackEnabled,
-                    isDynamicColorsEnabled = isDynamicColorsEnabled,
-                    tagCorrections = corrections,
-                    weeklyRecap = "최근 7일: ${weeklyCount}개 기록, ${weeklyTagCount}개 고유 태그",
-                    achievementBadges = achievementBadges,
-                    onToggleBiometricLock = { enabled ->
-                        if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
-                            backupStatusMessage = if (authenticator == null) "시스템 오류로 인증 기능을 사용할 수 없습니다." else "이 기기는 생체 인식을 지원하지 않습니다."
-                        } else if (!securityStore.isAvailable()) {
-                            backupStatusMessage = "보안 저장소를 사용할 수 없어 생체 잠금을 저장할 수 없습니다."
-                        } else {
-                            val saved = securityStore.setBiometricLockEnabled(enabled)
-                            isBiometricLockEnabled = saved && enabled
-                            backupStatusMessage = if (saved) null else "생체 잠금 설정 저장에 실패했습니다."
-                        }
-                    },
-                    onToggleTrueBlack = { enabled ->
-                        userPrefs.setTrueBlackDarkMode(enabled)
-                        isTrueBlackEnabled = enabled
-                        backupStatusMessage = if (enabled) "True Black 모드가 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "True Black 모드가 비활성화되었습니다."
-                    },
-                    onToggleDynamicColors = { enabled ->
-                        userPrefs.setDynamicColors(enabled)
-                        isDynamicColorsEnabled = enabled
-                        backupStatusMessage = if (enabled) "Material You 동적 색상이 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "Material You 동적 색상이 비활성화되었습니다."
-                    },
-                    onSaveApiKey = { key ->
-                        val saved = apiKeyStore.saveGeminiApiKey(key)
-                        hasApiKey = saved
-                        backupStatusMessage = if (saved) "API Key를 저장했습니다." else "보안 저장소를 사용할 수 없어 API Key를 저장하지 못했습니다."
-                    },
-                    onDeleteApiKey = {
-                        apiKeyStore.clearGeminiApiKey()
-                        hasApiKey = false
-                    },
-                    onTestConnection = {
-                        if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
-                            "API Key가 없어 테스트할 수 없습니다."
-                        } else {
-                            "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
-                        }
-                    },
-                    onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
-                    onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
-                    onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") },
-                    onExportMarkdown = { mdExportLauncher.launch("MarkScene_Records_${System.currentTimeMillis()}.md") },
-                    onDeleteTagCorrection = { original -> scope.launch { database.tagCorrectionDao().delete(original) } },
-                    externalMessage = backupStatusMessage,
-                    onMessageShown = { backupStatusMessage = null },
-                    onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
-                    onOpenTutorial = {
-                        val tutorialUri = Uri.parse("https://github.com/jeiel85/markscene-android#-%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5")
-                        val intent = Intent(Intent.ACTION_VIEW, tutorialUri)
-                        context.startActivity(intent)
-                    },
-                    onBack = { navController.popBackStack() }
-                )
             }
-            composable(PRIVACY_ROUTE) {
-                PrivacyNoticeScreen(onBack = { navController.popBackStack() })
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = TODAY_ROUTE,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                composable(TODAY_ROUTE) {
+                    TodayScreen(
+                        records = allRecords,
+                        onCapturePhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_CAPTURE") },
+                        onImportPhoto = { navController.navigate("$CREATE_RECORD_ROUTE/$SOURCE_IMPORT") },
+                        onOpenSearch = { navController.navigate(SEARCH_ROUTE) },
+                        onOpenSettings = { navController.navigate(SETTINGS_ROUTE) },
+                        onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") }
+                    )
+                }
+                composable(
+                    route = "$CREATE_RECORD_ROUTE/{$CREATE_RECORD_SOURCE_ARG}?uri={$DETAIL_ID_ARG}",
+                    arguments = listOf(navArgument(CREATE_RECORD_SOURCE_ARG) { type = NavType.StringType }, navArgument(DETAIL_ID_ARG) { type = NavType.StringType; nullable = true; defaultValue = null })
+                ) { backStackEntry ->
+                    val source = backStackEntry.arguments?.getString(CREATE_RECORD_SOURCE_ARG).orEmpty()
+                    val initialUri = backStackEntry.arguments?.getString(DETAIL_ID_ARG)?.let { Uri.parse(it) }
+                    CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navController.navigate(SEARCH_ROUTE) { popUpTo(TODAY_ROUTE) } } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onBack = { navController.popBackStack() })
+                }
+                composable(SEARCH_ROUTE) {
+                    val allTags = remember(visibleRecords) {
+                        visibleRecords.flatMap { it.tags }.map { it.name }.distinct()
+                    }
+                    val recentSearches = remember { userPrefs.getRecentSearches() }
+                    RecordListScreen(
+                        records = visibleRecords,
+                        recentSearches = recentSearches,
+                        allTags = allTags,
+                        onSearch = { query ->
+                            searchQuery = query
+                            if (query.isNotBlank()) {
+                                userPrefs.addRecentSearch(query)
+                            }
+                        },
+                        onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } },
+                        onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
+                        onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "$DETAIL_ROUTE/{$DETAIL_ID_ARG}",
+                    arguments = listOf(navArgument(DETAIL_ID_ARG) { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val recordId = backStackEntry.arguments?.getString(DETAIL_ID_ARG)
+                    val record = allRecords.firstOrNull { it.id == recordId }
+                    val latestAnalysis by (recordId?.let { repository.observeLatestAnalysis(it) } ?: flowOf(null)).collectAsState(initial = null)
+                    val firstTagName = record?.tags?.firstOrNull()?.name
+                    val historyRecords by (firstTagName?.let { repository.observeRecordsByTag(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
+                    val chatMessages by (recordId?.let { repository.observeMessages(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
+
+                    if (record != null) {
+                        RecordDetailScreen(record = record, latestAnalysis = latestAnalysis, historyRecords = historyRecords, chatMessages = chatMessages, onRunAdvancedAnalysis = { targetRecord -> val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isBlank()) error("API key missing"); geminiProvider.analyze(targetRecord, apiKey).getOrThrow() }, onApplyAdvancedAnalysis = { result -> scope.launch { val now = System.currentTimeMillis(); val advancedTags = result.suggestedTags.map { tagName -> PhotoTag(id = UUID.randomUUID().toString(), recordId = record.id, name = tagName.lowercase(), rawName = null, source = TagSource.AdvancedAi, confidence = null, userConfirmed = false, createdAt = now) }; val mergedTags = (record.tags + advancedTags).distinctBy { it.name }; val updatedRecord = record.copy(updatedAt = now, analysisStatus = AnalysisStatus.AdvancedComplete, tags = mergedTags); repository.saveRecord(updatedRecord); repository.saveAdvancedAnalysis(AdvancedAnalysis(id = UUID.randomUUID().toString(), recordId = record.id, provider = if (apiKeyStore.getGeminiApiKey() != null) "gemini" else "mock", sceneSummary = result.sceneSummary, createdAt = now)) } }, onSendQuestion = { question -> scope.launch { val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isNotBlank()) { repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis())); val response = geminiProvider.askQuestion(record, question, apiKey); val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다."); repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis())) } else { backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다." } } }, onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } }, onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") }, onBack = { navController.popBackStack() })
+                    }
+                }
+                composable(route = "$SPACE_TIMELINE_ROUTE/{$SPACE_NAME_ARG}", arguments = listOf(navArgument(SPACE_NAME_ARG) { type = NavType.StringType })) { backStackEntry ->
+                    val spaceName = backStackEntry.arguments?.getString(SPACE_NAME_ARG).orEmpty()
+                    val spaceRecords = allRecords.filter { it.space == spaceName }
+                    SpaceTimelineScreen(spaceName = spaceName, records = spaceRecords, onOpenDetail = { id -> navController.navigate("$DETAIL_ROUTE/$id") }, onCompare = { id1, id2 -> navController.navigate("$COMPARE_ROUTE/$id1/$id2") }, onBack = { navController.popBackStack() })
+                }
+                composable(route = "$COMPARE_ROUTE/{$COMPARE_ID1_ARG}/{$COMPARE_ID2_ARG}", arguments = listOf(navArgument(COMPARE_ID1_ARG) { type = NavType.StringType }, navArgument(COMPARE_ID2_ARG) { type = NavType.StringType })) { backStackEntry ->
+                    val id1 = backStackEntry.arguments?.getString(COMPARE_ID1_ARG)
+                    val id2 = backStackEntry.arguments?.getString(COMPARE_ID2_ARG)
+                    val record1 = allRecords.firstOrNull { it.id == id1 }
+                    val record2 = allRecords.firstOrNull { it.id == id2 }
+                    if (record1 != null && record2 != null) { CompareScreen(record1 = record1, record2 = record2, onBack = { navController.popBackStack() }) }
+                }
+                composable(SETTINGS_ROUTE) {
+                    val corrections by database.tagCorrectionDao().getAllCorrections().collectAsState(initial = emptyList())
+                    val weeklyCount = remember(allRecords) {
+                        val oneWeekAgo = System.currentTimeMillis() - 7L * 24L * 60L * 60L * 1000L
+                        allRecords.count { it.createdAt >= oneWeekAgo }
+                    }
+                    val weeklyTagCount = remember(allRecords) {
+                        allRecords.flatMap { it.tags }.map { it.name }.distinct().size
+                    }
+                    val achievementBadges = remember(allRecords) {
+                        buildList {
+                            if (allRecords.size >= 1) add("첫 기록 작성")
+                            if (allRecords.size >= 10) add("정리 습관가 (10+) ")
+                            if (allRecords.size >= 50) add("기록 마스터 (50+)")
+                            val tagged = allRecords.count { it.tags.isNotEmpty() }
+                            if (tagged >= 20) add("태그 장인 (20+)")
+                        }
+                    }
+                    SettingsScreen(
+                        hasApiKey = hasApiKey,
+                        isBiometricLockEnabled = isBiometricLockEnabled,
+                        isTrueBlackEnabled = isTrueBlackEnabled,
+                        isDynamicColorsEnabled = isDynamicColorsEnabled,
+                        tagCorrections = corrections,
+                        weeklyRecap = "최근 7일: ${weeklyCount}개 기록, ${weeklyTagCount}개 고유 태그",
+                        achievementBadges = achievementBadges,
+                        onToggleBiometricLock = { enabled ->
+                            if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
+                                backupStatusMessage = if (authenticator == null) "시스템 오류로 인증 기능을 사용할 수 없습니다." else "이 기기는 생체 인식을 지원하지 않습니다."
+                            } else if (!securityStore.isAvailable()) {
+                                backupStatusMessage = "보안 저장소를 사용할 수 없어 생체 잠금을 저장할 수 없습니다."
+                            } else {
+                                val saved = securityStore.setBiometricLockEnabled(enabled)
+                                isBiometricLockEnabled = saved && enabled
+                                backupStatusMessage = if (saved) null else "생체 잠금 설정 저장에 실패했습니다."
+                            }
+                        },
+                        onToggleTrueBlack = { enabled ->
+                            userPrefs.setTrueBlackDarkMode(enabled)
+                            isTrueBlackEnabled = enabled
+                            backupStatusMessage = if (enabled) "True Black 모드가 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "True Black 모드가 비활성화되었습니다."
+                        },
+                        onToggleDynamicColors = { enabled ->
+                            userPrefs.setDynamicColors(enabled)
+                            isDynamicColorsEnabled = enabled
+                            backupStatusMessage = if (enabled) "Material You 동적 색상이 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "Material You 동적 색상이 비활성화되었습니다."
+                        },
+                        onSaveApiKey = { key ->
+                            val saved = apiKeyStore.saveGeminiApiKey(key)
+                            hasApiKey = saved
+                            backupStatusMessage = if (saved) "API Key를 저장했습니다." else "보안 저장소를 사용할 수 없어 API Key를 저장하지 못했습니다."
+                        },
+                        onDeleteApiKey = {
+                            apiKeyStore.clearGeminiApiKey()
+                            hasApiKey = false
+                        },
+                        onTestConnection = {
+                            if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
+                                "API Key가 없어 테스트할 수 없습니다."
+                            } else {
+                                "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
+                            }
+                        },
+                        onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
+                        onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
+                        onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") },
+                        onExportMarkdown = { mdExportLauncher.launch("MarkScene_Records_${System.currentTimeMillis()}.md") },
+                        onDeleteTagCorrection = { original -> scope.launch { database.tagCorrectionDao().delete(original) } },
+                        externalMessage = backupStatusMessage,
+                        onMessageShown = { backupStatusMessage = null },
+                        onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
+                        onOpenTutorial = {
+                            val tutorialUri = Uri.parse("https://github.com/jeiel85/markscene-android#-%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5")
+                            val intent = Intent(Intent.ACTION_VIEW, tutorialUri)
+                            context.startActivity(intent)
+                        },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                composable(PRIVACY_ROUTE) {
+                    PrivacyNoticeScreen(onBack = { navController.popBackStack() })
+                }
             }
         }
     }

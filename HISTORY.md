@@ -1,5 +1,21 @@
 # HISTORY.md
 
+## 2026-05-16
+
+- 작업: Scene Memory Phase 1 — Today Screen / Scene Timeline 구현
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: 홈 라우트를 Today 라우트로 교체, Bottom Navigation 추가, Scaffold 구조 변경
+  - `app/src/main/java/com/markscene/app/ui/screen/TodayScreen.kt`: 신규 — 날짜별 그룹 타임라인 화면
+  - `app/src/main/java/com/markscene/app/ui/component/SceneCard.kt`: 신규 — 썸네일+시간+제목+태그 카드 컴포넌트
+  - `app/src/main/res/values/strings.xml`: Today/SceneCard/Bottom Nav 문자열 리소스 추가
+  - `CHANGELOG.md`: Unreleased 섹션 업데이트
+  - `docs/renew/`: Scene Memory 확장 설계 문서 세트 추가
+- 검증:
+  - `gradlew :app:assembleDebug` 성공
+  - `gradlew :app:testDebugUnitTest` 성공
+  - 기존 capture/import/search/settings 흐름 정상 동작 확인
+- 결과: 홈 화면이 날짜별 Scene Timeline으로 교체되고, Bottom Navigation(오늘/검색/설정)이 추가됨
+
 ## 2026-05-13
 
 - 작업: GitHub Issues 기준 전체 마크다운 문서 정리 및 동기화

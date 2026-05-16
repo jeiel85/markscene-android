@@ -5,12 +5,22 @@
 ## Unreleased
 
 ### Added
-- **외부 공유로 기록하기**: 갤러리, 브라우저 등 다른 앱에서 '공유하기'를 선택하면 MarkScene이 표시되어 즉시 기록 생성 화면으로 이동할 수 있습니다. (GitHub Issue #10)
+- **Scene Timeline (Phase 1)**: 기존 홈 화면을 '오늘의 장면' 타임라인으로 교체했습니다. 기록이 날짜별로 그룹화되어 표시됩니다.
+- **Bottom Navigation**: 하단 탐색 바(오늘, 검색, 설정)가 추가되었습니다.
+- **SceneCard 컴포넌트**: 썸네일, 시간, 제목/메모, 상위 태그가 표시되는 장면 카드 컴포넌트가 추가되었습니다.
+- 빈 상태에서 촬영/가져오기 버튼이 표시됩니다.
+
+### Changed
+- 홈 화면이 TodayScreen으로 교체되었습니다. 기존 HomeScreen은 유지되지만 탐색 경로가 변경되었습니다.
+- FAB(촬영/가져오기)가 TodayScreen에 배치되었습니다.
+- 검색 및 설정이 하단 탭으로 이동했습니다.
+- 기록 저장 후 검색 화면 대신 Today 화면으로 이동하도록 변경되었습니다.
 
 ### Documentation
-- 모든 Epic을 GitHub Issues(#14, #16, #17, #19, #20)와 1:1 매핑했습니다.
-- `.agent/epic*.md` 각 파일에 GitHub Issue 링크를 추가했습니다.
-- `.agent/tasks.md`, `docs/ROADMAP.md`, `AGENTS.md`에 Epic 이슈 참조를 동기화했습니다.
+- `docs/renew/` 폴더에 Scene Memory 확장 설계 문서 세트를 추가했습니다.
+
+### External Sharing
+- 갤러리, 브라우저 등 다른 앱에서 '공유하기'를 선택하면 MarkScene이 표시되어 즉시 기록 생성 화면으로 이동할 수 있습니다. (GitHub Issue #10)
 
 ## v2.0.9 - 2026-05-09
 
