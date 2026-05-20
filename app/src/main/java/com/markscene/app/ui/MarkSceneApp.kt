@@ -85,6 +85,8 @@ import com.markscene.app.ui.screen.TodayScreen
 import com.markscene.app.ui.security.BiometricAuthenticator
 import com.markscene.app.ui.util.SecureScreenEffect
 import com.markscene.app.ui.util.StorageCleaner
+import com.markscene.app.ui.util.GalleryHideHelper
+import com.markscene.app.ui.util.ReviewHelper
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -107,6 +109,7 @@ private const val COMPARE_ID2_ARG = "id2"
 private const val PRIVACY_ROUTE = "privacy_notice"
 private const val PRIVACY_DASHBOARD_ROUTE = "privacy_dashboard"
 private const val ONBOARDING_ROUTE = "onboarding"
+private const val SMART_ALBUM_ROUTE = "smart_album"
 
 private const val SOURCE_CAPTURE = "capture"
 private const val SOURCE_IMPORT = "import"
@@ -189,7 +192,7 @@ private val MIGRATION_9_10 = object : Migration(9, 10) {
 }
 
 @Composable
-fun MarkSceneApp(sharedImageUri: Uri? = null) {
+fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) {
     val context = LocalContext.current
     val activity = remember(context) {
         var c = context
@@ -231,6 +234,9 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     var isTrueBlackEnabled by remember { mutableStateOf(userPrefs.useTrueBlackDarkMode()) }
     var isDynamicColorsEnabled by remember { mutableStateOf(userPrefs.useDynamicColors()) }
     var isScreenshotBlockEnabled by remember { mutableStateOf(userPrefs.isScreenshotBlockEnabled()) }
+    var isExifStrippingEnabled by remember { mutableStateOf(userPrefs.isExifStrippingEnabled()) }
+    var isGalleryHidden by remember { mutableStateOf(userPrefs.isGalleryHidden()) }
+    var isAutoLockEnabled by remember { mutableStateOf(userPrefs.isAutoLockEnabled()) }
     var isAppLocked by remember { mutableStateOf(isBiometricLockEnabled) }
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
 
@@ -240,6 +246,18 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     LaunchedEffect(Unit) {
         // Startup: clean old temp/cache files in background
         StorageCleaner.cleanup(context)
+    }
+
+    // Auto-lock: when app returns from background and auto-lock is enabled
+    LaunchedEffect(appBackgrounded) {
+        if (appBackgrounded && isAutoLockEnabled && isBiometricLockEnabled) {
+            isAppLocked = true
+        }
+    }
+    LaunchedEffect(isGalleryHidden) {
+        if (isGalleryHidden) {
+            GalleryHideHelper.ensureNoMediaForRecordsDir(context)
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -307,6 +325,15 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val allRecords by allRecordsFlow.collectAsState(initial = emptyList())
     val visibleRecords by visibleRecordsFlow.collectAsState(initial = emptyList())
 
+    // In-App Review check (after app stabilizes)
+    LaunchedEffect(allRecords.size) {
+        if (allRecords.size >= 5 && activity != null) {
+            if (ReviewHelper.shouldRequestReview(context, allRecords.size)) {
+                ReviewHelper.requestReview(activity, allRecords.size)
+            }
+        }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showBottomNav = when {
@@ -318,6 +345,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
         currentRoute.startsWith("privacy_notice") -> false
         currentRoute.startsWith("privacy_dashboard") -> false
         currentRoute == ONBOARDING_ROUTE -> false
+        currentRoute == SMART_ALBUM_ROUTE -> false
         else -> true
     }
 
@@ -437,10 +465,16 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         visibleRecords.flatMap { it.tags }.map { it.name }.distinct()
                     }
                     val recentSearches = remember { userPrefs.getRecentSearches() }
+                    val savedLayout = remember { userPrefs.getPreferredLayout() }
                     RecordListScreen(
                         records = visibleRecords,
                         recentSearches = recentSearches,
                         allTags = allTags,
+                        currentLayout = when (savedLayout) {
+                            "GRID_3" -> com.markscene.app.ui.screen.LayoutType.GRID_3
+                            "LIST" -> com.markscene.app.ui.screen.LayoutType.LIST
+                            else -> com.markscene.app.ui.screen.LayoutType.GRID_2
+                        },
                         onSearch = { query ->
                             searchQuery = query
                             if (query.isNotBlank()) {
@@ -451,7 +485,10 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
                         onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
                         onBack = { navController.popBackStack() },
-                        onClearRecentSearches = { userPrefs.clearRecentSearches() }
+                        onClearRecentSearches = { userPrefs.clearRecentSearches() },
+                        onLayoutChange = { layout ->
+                            userPrefs.setPreferredLayout(layout.name)
+                        }
                     )
                 }
                 composable(RECALL_ROUTE) {
@@ -501,12 +538,24 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                     }
                     val achievementBadges = remember(allRecords) {
                         buildList {
-                            if (allRecords.size >= 1) add("첫 기록 작성")
-                            if (allRecords.size >= 10) add("정리 습관가 (10+) ")
-                            if (allRecords.size >= 50) add("기록 마스터 (50+)")
+                            if (allRecords.size >= 1) add("🏆 첫 기록 작성")
+                            if (allRecords.size >= 10) add("📝 정리 습관가 (10+)")
+                            if (allRecords.size >= 50) add("👑 기록 마스터 (50+)")
                             val tagged = allRecords.count { it.tags.isNotEmpty() }
-                            if (tagged >= 20) add("태그 장인 (20+)")
+                            if (tagged >= 20) add("🏷 태그 장인 (20+)")
+                            val uniqueTags = allRecords.flatMap { it.tags }.map { it.name }.distinct().size
+                            if (uniqueTags >= 10) add("🔍 탐험가 (10종+ 태그)")
+                            if (hasApiKey && allRecords.any { it.analysisStatus.name == "AdvancedComplete" }) add("🤖 AI 탐험가")
+                            if (!hasApiKey && allRecords.size >= 20) add("📴 오프라인 마스터")
                         }
+                    }
+                    val weeklyTopTags = remember(allRecords) {
+                        val oneWeekAgo = System.currentTimeMillis() - 7L * 24L * 60L * 60L * 1000L
+                        allRecords.filter { it.createdAt >= oneWeekAgo }
+                            .flatMap { it.tags }.map { it.name }
+                            .groupingBy { it }.eachCount()
+                            .entries.sortedByDescending { it.value }.take(3)
+                            .joinToString(", ") { "#${it.key}(${it.value})" }
                     }
                     SettingsScreen(
                         hasApiKey = hasApiKey,
@@ -514,8 +563,12 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         isTrueBlackEnabled = isTrueBlackEnabled,
                         isDynamicColorsEnabled = isDynamicColorsEnabled,
                         isScreenshotBlockEnabled = isScreenshotBlockEnabled,
+                        isExifStrippingEnabled = isExifStrippingEnabled,
+                        isGalleryHidden = isGalleryHidden,
+                        isAutoLockEnabled = isAutoLockEnabled,
                         tagCorrections = corrections,
-                        weeklyRecap = "최근 7일: ${weeklyCount}개 기록, ${weeklyTagCount}개 고유 태그",
+                        weeklyRecap = "최근 7일: ${weeklyCount}개 기록, ${weeklyTagCount}개 고유 태그" +
+                            if (weeklyTopTags.isNotEmpty()) "\n인기 태그: $weeklyTopTags" else "",
                         achievementBadges = achievementBadges,
                         onToggleBiometricLock = { enabled ->
                             if (enabled && (authenticator == null || !authenticator.isBiometricAvailable())) {
@@ -545,6 +598,23 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                                 if (enabled) R.string.settings_screenshot_block_on
                                 else R.string.settings_screenshot_block_off
                             )
+                        },
+                        onToggleExifStripping = { enabled ->
+                            userPrefs.setExifStrippingEnabled(enabled)
+                            isExifStrippingEnabled = enabled
+                        },
+                        onToggleGalleryHide = { enabled ->
+                            userPrefs.setGalleryHidden(enabled)
+                            isGalleryHidden = enabled
+                        },
+                        onToggleAutoLock = { enabled ->
+                            if (enabled && !isBiometricLockEnabled) {
+                                backupStatusMessage = "자동 잠금을 사용하려면 먼저 생체 인식 잠금을 활성화하세요."
+                            } else {
+                                userPrefs.setAutoLockEnabled(enabled)
+                                isAutoLockEnabled = enabled
+                                backupStatusMessage = if (enabled) "백그라운드 전환 시 자동으로 잠깁니다." else "자동 잠금이 비활성화되었습니다."
+                            }
                         },
                         onSaveApiKey = { key ->
                             val saved = apiKeyStore.saveGeminiApiKey(key)

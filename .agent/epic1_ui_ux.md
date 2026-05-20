@@ -4,9 +4,9 @@
 
 플레이 스토어 Top 10 진입을 위해 앱의 첫인상과 사용성을 극대화하는 10가지 전략입니다.
 
-- [x] **[UI] Material You (Dynamic Color) 완벽 적용**: 사용자의 배경화면 색상을 추출해 앱 전체 테마에 자연스럽게 녹여내어 개인화된 경험 제공. (v2.4.0 - 완전한 M3 색상 토큰 + Dynamic Color 검증)
-- [ ] **[UX] 첫 사용자 온보딩(Onboarding) 플로우 도입**: 앱의 핵심 가치(오프라인 태깅, 사진 기반 검색)를 애니메이션과 함께 직관적으로 설명하는 3-4단계 튜토리얼 추가.
-- [x] **[UX] 햅틱 피드백(Haptic Feedback) 강화**: 사진 촬영, 태그 추가/삭제, 저장 등의 주요 액션에 미세한 진동을 추가하여 조작감 향상. (v1.7.0)
+- [x] **[UI] Material You (Dynamic Color) 완벽 적용**: (v2.4.0 - 완전한 M3 색상 토큰)
+- [x] **[UX] 첫 사용자 온보딩(Onboarding) 플로우 도입**: (v1.8.0 - OnboardingScreen, v2.5.0 - Skip/indicator 폴리시)
+- [x] **[UX] 햅틱 피드백(Haptic Feedback) 강화**: (v1.7.0)
 - [ ] **[UI] 매끄러운 화면 전환(Shared Element Transitions)**: 리스트에서 사진을 눌러 상세 화면으로 넘어갈 때 이미지가 자연스럽게 커지는 전환 효과 적용.
 - [x] **[UX] 빈 화면(Empty State) 마이크로 인터랙션**: 저장된 사진이 없을 때, 단순히 '없음' 텍스트 대신 카메라를 가리키는 귀여운 일러스트와 부드러운 애니메이션 적용. (v1.8.0 - EmptyStateView)
 - [x] **[UI] 다크 모드(Dark Mode) 최적화**: 단순 반전이 아닌, OLED 패널의 배터리 절약과 눈의 피로를 최소화하는 True Black 및 부드러운 회색조 테마 세분화. (v2.4.0 - 완전한 M3 Dark/TrueBlack 색상 스킴)

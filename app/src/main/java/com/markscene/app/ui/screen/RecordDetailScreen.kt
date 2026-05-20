@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -45,6 +46,8 @@ import com.markscene.app.core.model.MemoryType
 import com.markscene.app.core.model.PhotoRecord
 import com.markscene.app.ui.util.GalleryHideHelper
 import com.markscene.app.ui.util.SecureScreenEffect
+import com.markscene.app.ui.util.SocialShareHelper
+import com.markscene.app.ui.util.ImageCropper
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -103,6 +106,39 @@ fun RecordDetailScreen(
                     }
                 },
                 actions = {
+                    // Crop & save as new record
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                val croppedFile = ImageCropper.cropCenterSquare(context, Uri.parse(record.imageUri))
+                                if (croppedFile != null) {
+                                    statusMessage = "중앙 크롭 이미지가 저장되었습니다."
+                                } else {
+                                    statusMessage = "크롭 실패"
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                            .semantics { contentDescription = "이미지 크롭" }
+                    ) {
+                        Icon(Icons.Default.Crop, contentDescription = null, tint = Color.White)
+                    }
+                    // Social share
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                SocialShareHelper.shareWithTemplate(context, record)
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                            .semantics { contentDescription = "공유하기" }
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = null, tint = Color.White)
+                    }
                     IconButton(
                         onClick = { onDeleteRecord(record.id) }, 
                         modifier = Modifier
@@ -223,7 +259,36 @@ fun RecordDetailScreen(
                         }
 
                         if (!record.audioMemoUri.isNullOrBlank()) {
-                            OutlinedButton(
+                    // Prompt templates for AI analysis
+                    var selectedTemplate by remember { mutableStateOf<String?>(null) }
+                    if (latestAnalysis == null && analysisResult == null) {
+                        Text("분석 템플릿", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            val templates = listOf(
+                                "이 사진 속 물건 목록" to "이 이미지에 보이는 모든 물건을 나열해주세요.",
+                                "영수증 분석" to "이 영수증의 총액, 날짜, 가게 이름을 정리해주세요.",
+                                "레시피 추출" to "이 사진에서 요리 레시피를 추출해주세요.",
+                                "상세 설명" to "이 장면을 최대한 자세히 설명해주세요.",
+                                "분위기 분석" to "이 사진의 분위기와 느낌을 분석해주세요."
+                            )
+                            templates.forEach { (label, _) ->
+                                FilterChip(
+                                    selected = selectedTemplate == label,
+                                    onClick = {
+                                        selectedTemplate = if (selectedTemplate == label) null else label
+                                        if (selectedTemplate != null) {
+                                            questionInput = templates.find { it.first == label }?.second ?: ""
+                                        }
+                                    },
+                                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    OutlinedButton(
                                 onClick = {
                                     try {
                                         if (isPlayingAudio) {

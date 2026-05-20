@@ -43,6 +43,9 @@ fun SettingsScreen(
     isTrueBlackEnabled: Boolean = false,
     isDynamicColorsEnabled: Boolean = false,
     isScreenshotBlockEnabled: Boolean = false,
+    isExifStrippingEnabled: Boolean = true,
+    isGalleryHidden: Boolean = true,
+    isAutoLockEnabled: Boolean = false,
     tagCorrections: List<TagCorrectionEntity> = emptyList(),
     weeklyRecap: String? = null,
     achievementBadges: List<String> = emptyList(),
@@ -50,6 +53,9 @@ fun SettingsScreen(
     onToggleTrueBlack: (Boolean) -> Unit = {},
     onToggleDynamicColors: (Boolean) -> Unit = {},
     onToggleScreenshotBlock: (Boolean) -> Unit = {},
+    onToggleExifStripping: (Boolean) -> Unit = {},
+    onToggleGalleryHide: (Boolean) -> Unit = {},
+    onToggleAutoLock: (Boolean) -> Unit = {},
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
@@ -343,6 +349,84 @@ fun SettingsScreen(
                                 onCheckedChange = onToggleScreenshotBlock,
                                 colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary),
                                 modifier = Modifier.semantics { contentDescription = context.getString(R.string.settings_screenshot_block) }
+                            )
+                        }
+                    }
+
+                    // Auto-lock on background
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_auto_lock), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_auto_lock_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isAutoLockEnabled,
+                                onCheckedChange = onToggleAutoLock,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.semantics { contentDescription = context.getString(R.string.settings_auto_lock) }
+                            )
+                        }
+                    }
+
+                    // EXIF stripping
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.ImageNotSupported, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_exif_stripping), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_exif_stripping_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isExifStrippingEnabled,
+                                onCheckedChange = onToggleExifStripping,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.semantics { contentDescription = context.getString(R.string.settings_exif_stripping) }
+                            )
+                        }
+                    }
+
+                    // Gallery hide
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.HideImage, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_gallery_hide), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_gallery_hide_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isGalleryHidden,
+                                onCheckedChange = onToggleGalleryHide,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.semantics { contentDescription = context.getString(R.string.settings_gallery_hide) }
                             )
                         }
                     }

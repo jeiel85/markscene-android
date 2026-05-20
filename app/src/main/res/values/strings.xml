@@ -131,6 +131,12 @@
     <string name="lock_unlock">인증하여 해제</string>
     <string name="auth_failed">인증 실패: %1$s</string>
     <string name="biometric_not_available">이 기기는 생체 인식을 지원하지 않습니다.</string>
+    <string name="settings_auto_lock">백그라운드 전환 시 자동 잠금</string>
+    <string name="settings_auto_lock_desc">앱이 백그라운드로 전환되면 재진입 시 생체 인증 요구</string>
+    <string name="settings_exif_stripping">내보내기 시 EXIF 메타데이터 제거</string>
+    <string name="settings_exif_stripping_desc">사진 내보내기 시 위치정보, 카메라 정보 등 민감한 메타데이터를 자동 삭제</string>
+    <string name="settings_gallery_hide">시스템 갤러리에서 MarkScene 사진 숨기기</string>
+    <string name="settings_gallery_hide_desc">기본 갤러리 앱에서 MarkScene 사진이 표시되지 않도록 .nomedia 파일 생성</string>
     
     <!-- Backup/Restore Results -->
     <string name="backup_success">백업이 성공적으로 완료되었습니다.</string>

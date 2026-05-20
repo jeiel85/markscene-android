@@ -1,5 +1,35 @@
 # HISTORY.md
 
+## 2026-05-21 — v2.5.0 릴리즈 (보안 완성 + UX/Core/Marketing 통합)
+
+- 작업: Epic #4(보안) + Epic #1/#2/#3/#5 잔여 항목을 통합 구현 후 v2.5.0 릴리즈.
+- 구현 항목:
+  1. **EXIF 제거 옵션**: UserPreferences/SettingsScreen에 토글 추가. 내보내기 시 ExifStripper로 민감 메타데이터 제거.
+  2. **갤러리 숨김 모드**: GalleryHideHelper를 앱 시작 시 호출. Settings 토글로 .nomedia 생성/삭제 제어.
+  3. **백그라운드 자동 잠금**: MainActivity onStop에서 플래그 설정, MarkSceneApp LaunchedEffect에서 잠금 처리.
+  4. **API Key 저장소 강화**: AndroidManifest allowBackup=false, EncryptedSharedPreferences 확인.
+  5. **소셜 공유**: RecordDetailScreen에 Share 버튼 추가 → SocialShareHelper.shareWithTemplate() 호출.
+  6. **프롬프트 템플릿**: RecordDetailScreen 고급 분석 영역에 5개 템플릿 FilterChip 추가.
+  7. **이미지 크롭**: RecordDetailScreen에 Crop 버튼 추가 → ImageCropper.cropCenterSquare().
+  8. **레이아웃 설정 저장**: RecordListScreen layoutType → UserPreferences 저장, MarkSceneApp에서 복원.
+  9. **In-App Review**: ReviewHelper를 MarkSceneApp에 연결, 조건 충족 시 리뷰 다이얼로그 표시.
+  10. **배지/주간회고 강화**: 이모지 배지 5종 추가, 주간 회고에 인기 태그 TOP3 표시.
+  11. **Gemini 타임아웃**: OkHttpClient에 30초 connect/read/write 타임아웃 설정.
+  12. **CameraX 최적화**: CAPTURE_MODE_MINIMIZE_LATENCY 확인 (기적용됨).
+- 변경 파일:
+  - `UserPreferences.kt`: EXIF/gallery/autoLock/layout 설정 추가
+  - `SettingsScreen.kt`: 보안 섹션에 3개 새 스위치 추가
+  - `MarkSceneApp.kt`: 새 상태 변수, LaunchedEffect, SettingsScreen 콜백, Review 체크, SmartAlbum 라우트
+  - `RecordDetailScreen.kt`: Share/Crop 버튼, 프롬프트 템플릿 칩
+  - `MainActivity.kt`: onStop/onResume 라이프사이클 처리
+  - `GeminiAdvancedVisionProvider.kt`: OkHttp 타임아웃
+  - `AndroidManifest.xml`: allowBackup=false
+  - `strings.xml`: 새 문자열 6개 추가
+  - `CHANGELOG.md`, `HISTORY.md`: v2.5.0 내용
+  - Epic 파일들: 완료 항목 체크
+- 버전: `2.4.0 / 240` → `2.5.0 / 250`
+- 검증: compileDebugKotlin 성공, test + lint 예정.
+
 ## 2026-05-20 — v2.4.0 릴리즈 (성능/안정성 10종 + 테마 완성)
 
 - 작업: Epic #16(성능/안정성) + Epic #1(UI/UX) 우선순위 10개 항목을 구현 후 v2.4.0 릴리즈.

@@ -16,6 +16,9 @@ import com.markscene.app.ui.theme.MarkSceneTheme
 import androidx.fragment.app.FragmentActivity
 
 class MainActivity : FragmentActivity() {
+    // Track if app went to background for auto-lock
+    private var appBackgrounded = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -32,10 +35,23 @@ class MainActivity : FragmentActivity() {
                 useDynamicColors = useDynamicColors
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MarkSceneApp(sharedImageUri = sharedUri)
+                    MarkSceneApp(
+                        sharedImageUri = sharedUri,
+                        appBackgrounded = appBackgrounded
+                    )
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        appBackgrounded = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Reset the flag - MarkSceneApp will handle the lock check
     }
 
     private fun handleSendImage(intent: Intent): Uri? {

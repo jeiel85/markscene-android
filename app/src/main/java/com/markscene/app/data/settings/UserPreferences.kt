@@ -93,6 +93,50 @@ class UserPreferences(context: Context) {
         prefs.edit().putBoolean(KEY_SCREENSHOT_BLOCK, enabled).apply()
     }
 
+    /**
+     * Whether to strip EXIF metadata on export.
+     */
+    fun isExifStrippingEnabled(): Boolean {
+        return prefs.getBoolean(KEY_EXIF_STRIPPING, true)
+    }
+
+    fun setExifStrippingEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_EXIF_STRIPPING, enabled).apply()
+    }
+
+    /**
+     * Whether to hide MarkScene photos from system gallery.
+     */
+    fun isGalleryHidden(): Boolean {
+        return prefs.getBoolean(KEY_GALLERY_HIDDEN, true)
+    }
+
+    fun setGalleryHidden(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_GALLERY_HIDDEN, enabled).apply()
+    }
+
+    /**
+     * Whether to auto-lock the app when going to background.
+     */
+    fun isAutoLockEnabled(): Boolean {
+        return prefs.getBoolean(KEY_AUTO_LOCK, false)
+    }
+
+    fun setAutoLockEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_LOCK, enabled).apply()
+    }
+
+    /**
+     * Get preferred gallery layout type.
+     */
+    fun getPreferredLayout(): String {
+        return prefs.getString(KEY_PREFERRED_LAYOUT, "GRID_2") ?: "GRID_2"
+    }
+
+    fun setPreferredLayout(layout: String) {
+        prefs.edit().putString(KEY_PREFERRED_LAYOUT, layout).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "markscene_prefs"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
@@ -100,5 +144,9 @@ class UserPreferences(context: Context) {
         private const val KEY_DYNAMIC_COLORS = "dynamic_colors"
         private const val KEY_RECENT_SEARCHES = "recent_searches"
         private const val KEY_SCREENSHOT_BLOCK = "screenshot_block"
+        private const val KEY_EXIF_STRIPPING = "exif_stripping"
+        private const val KEY_GALLERY_HIDDEN = "gallery_hidden"
+        private const val KEY_AUTO_LOCK = "auto_lock"
+        private const val KEY_PREFERRED_LAYOUT = "preferred_layout"
     }
 }

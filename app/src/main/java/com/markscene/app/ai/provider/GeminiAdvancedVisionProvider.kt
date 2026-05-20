@@ -15,10 +15,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.util.concurrent.TimeUnit
 
 class GeminiAdvancedVisionProvider(
     private val context: Context,
-    private val client: OkHttpClient = OkHttpClient()
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 ) {
     suspend fun analyze(record: PhotoRecord, apiKey: String): Result<MockAdvancedAnalysisResult> = withContext(Dispatchers.IO) {
         runCatching {
