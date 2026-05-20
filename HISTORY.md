@@ -1,5 +1,21 @@
 # HISTORY.md
 
+## 2026-05-20 — v2.3.0 릴리즈 (Trust/Security 강화 3종)
+
+- 작업: 우선순위 3개(Today 로컬 처리 배지, API Key 입력 보안 강화, 카메라 권한 사전 안내 자동화) 구현 후 v2.3.0 릴리즈.
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ui/screen/TodayScreen.kt`: TopAppBar actions에 `LocalProcessingBadge()` 추가 (방패 아이콘 + "로컬 처리" 라벨, 접근성 contentDescription 포함).
+  - `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`: API Key TextField에 `PasswordVisualTransformation`, `KeyboardType.Password`, `autoCorrect=false`, visibility toggle 아이콘 추가.
+  - `app/src/main/java/com/markscene/app/ui/screen/CreateRecordScreen.kt`: 캡처 화면 진입 시 `LaunchedEffect(source)`로 권한 미부여 상태면 시스템 다이얼로그 전에 사전 안내 다이얼로그 자동 표시. 다이얼로그 문구를 strings.xml 리소스로 전환.
+  - `app/src/main/res/values/strings.xml`: 로컬 처리 배지, API Key 표시/숨김, 카메라 권한 안내 문구 추가.
+  - `gradle/libs.versions.toml`: `2.2.0 / 220` → `2.3.0 / 230` 상향.
+  - `CHANGELOG.md`, `HISTORY.md`, `.agent/progress.md`, `.agent/tasks.md`, `.agent/epic4_sec_priv.md` 갱신.
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin` 성공, `./gradlew :app:testDebugUnitTest` 성공.
+  - CI: 푸시 후 `Android CI` / `Release APK` 워크플로우 결과 모니터링.
+- 결과: 신뢰(로컬 처리 명시)·보안(키 입력 노출 완화)·UX(권한 의도 사전 설명)을 한 번에 강화하는 작은 개선 묶음.
+- 후속 작업: Android CI / Release APK 결과 확인, v2.3.0 태그 푸시 후 산출물 점검.
+
 ## 2026-05-20 — v2.2.0 릴리즈 (UX/보안 강화 3종)
 
 - 작업: 우선순위 3개 작업(스와이프 삭제 실연결, 개인정보 대시보드 통합, 앱 전체 스크린샷 차단 토글) 구현 후 v2.2.0 릴리즈.

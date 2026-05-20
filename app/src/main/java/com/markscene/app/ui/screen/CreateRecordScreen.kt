@@ -159,6 +159,16 @@ fun CreateRecordScreen(
         if (!granted) statusText = context.getString(R.string.create_camera_permission)
     }
 
+    // Auto-show rationale on first entry into capture mode when permission is not granted yet,
+    // so users see a friendly explanation before the system permission dialog appears.
+    LaunchedEffect(source) {
+        if (source == SOURCE_CAPTURE) {
+            val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+            if (!granted) showCameraRationale = true
+        }
+    }
+
     val audioPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -409,15 +419,19 @@ fun CreateRecordScreen(
             if (showCameraRationale) {
                 AlertDialog(
                     onDismissRequest = { showCameraRationale = false },
-                    title = { Text("카메라 권한 안내") },
-                    text = { Text("촬영 기능을 위해 카메라 권한이 필요합니다. 촬영된 이미지는 사용자가 저장할 때만 기록됩니다.") },
+                    title = { Text(stringResource(R.string.camera_rationale_title)) },
+                    text = { Text(stringResource(R.string.camera_rationale_message)) },
                     confirmButton = {
                         TextButton(onClick = {
                             showCameraRationale = false
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }) { Text("권한 요청") }
+                        }) { Text(stringResource(R.string.camera_rationale_continue)) }
                     },
-                    dismissButton = { TextButton(onClick = { showCameraRationale = false }) { Text("취소") } }
+                    dismissButton = {
+                        TextButton(onClick = { showCameraRationale = false }) {
+                            Text(stringResource(R.string.camera_rationale_cancel))
+                        }
+                    }
                 )
             }
 

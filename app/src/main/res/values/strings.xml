@@ -177,4 +177,18 @@
     <string name="settings_screenshot_block_desc">민감한 기록 보호를 위해 앱 화면 캡처/녹화를 시스템 레벨에서 차단합니다 (FLAG_SECURE)</string>
     <string name="settings_screenshot_block_on">스크린샷 차단이 활성화되었습니다. 앱 전체에 적용됩니다.</string>
     <string name="settings_screenshot_block_off">스크린샷 차단이 비활성화되었습니다.</string>
+
+    <!-- Local Processing Badge -->
+    <string name="badge_local_processing">로컬 처리</string>
+    <string name="badge_local_processing_desc">태깅과 OCR이 이 기기에서만 처리됩니다</string>
+
+    <!-- API Key Visibility -->
+    <string name="settings_api_show">API Key 표시</string>
+    <string name="settings_api_hide">API Key 숨김</string>
+
+    <!-- Camera Permission Rationale -->
+    <string name="camera_rationale_title">카메라 권한이 필요합니다</string>
+    <string name="camera_rationale_message">사진 촬영을 위해 카메라 권한이 필요합니다. 사진은 기기 내부에만 저장되며, 사용자가 명시적으로 분석을 요청하기 전까지는 외부로 전송되지 않습니다.</string>
+    <string name="camera_rationale_continue">권한 요청 계속</string>
+    <string name="camera_rationale_cancel">나중에</string>
 </resources>

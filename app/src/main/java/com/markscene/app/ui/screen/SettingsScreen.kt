@@ -22,6 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.markscene.app.R
@@ -62,6 +69,7 @@ fun SettingsScreen(
 
     val context = LocalContext.current
     var apiKeyInput by rememberSaveable { mutableStateOf("") }
+    var apiKeyVisible by rememberSaveable { mutableStateOf(false) }
     var resultMessage by rememberSaveable { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()
 
@@ -146,10 +154,27 @@ fun SettingsScreen(
                         label = { Text(stringResource(R.string.settings_api_label)) },
                         placeholder = { Text(stringResource(R.string.settings_api_placeholder)) },
                         shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        visualTransformation = if (apiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done,
+                            autoCorrect = false
+                        ),
                         trailingIcon = {
-                            if (apiKeyInput.isNotBlank()) {
-                                IconButton(onClick = { apiKeyInput = "" }) {
-                                    Icon(Icons.Default.Clear, contentDescription = null)
+                            Row {
+                                IconButton(onClick = { apiKeyVisible = !apiKeyVisible }) {
+                                    Icon(
+                                        imageVector = if (apiKeyVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                        contentDescription = stringResource(
+                                            if (apiKeyVisible) R.string.settings_api_hide else R.string.settings_api_show
+                                        )
+                                    )
+                                }
+                                if (apiKeyInput.isNotBlank()) {
+                                    IconButton(onClick = { apiKeyInput = "" }) {
+                                        Icon(Icons.Default.Clear, contentDescription = null)
+                                    }
                                 }
                             }
                         }

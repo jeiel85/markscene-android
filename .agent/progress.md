@@ -1,5 +1,26 @@
 # Agent Progress
 
+## 2026-05-20 (Iteration 6.1 - v2.3.0: Trust/Security 3종)
+
+작업 내용:
+- 우선순위 3개를 추가 구현하고 v2.3.0으로 릴리즈했습니다.
+  1. **Today 화면 로컬 처리 배지**: TopAppBar 액션에 방패 아이콘 + "로컬 처리" 라벨을 추가. 사용자가 모든 태깅/OCR이 기기 내부에서만 처리됨을 매 진입마다 확인.
+  2. **API Key 입력 보안 강화**: 비밀번호 마스킹, 자동완성/자동수정/추천 비활성화, 표시/숨김 토글. 어깨너머 노출 및 입력기 스누핑 위험 완화.
+  3. **카메라 권한 사전 안내 자동화**: 캡처 모드 진입 시 권한이 없으면 시스템 다이얼로그 전에 사전 안내 모달을 자동 노출. 다이얼로그 문구를 strings.xml로 정리해 다국어 대응을 준비.
+- 버전 `2.2.0 / 220` → `2.3.0 / 230` 상향, CHANGELOG/HISTORY/Epic 갱신.
+
+변경 파일:
+- `app/src/main/java/com/markscene/app/ui/screen/TodayScreen.kt`
+- `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`
+- `app/src/main/java/com/markscene/app/ui/screen/CreateRecordScreen.kt`
+- `app/src/main/res/values/strings.xml`
+- `gradle/libs.versions.toml`
+- `CHANGELOG.md`, `HISTORY.md`, `.agent/progress.md`, `.agent/tasks.md`, `.agent/epic4_sec_priv.md`
+
+검증:
+- 로컬: `./gradlew :app:compileDebugKotlin` 성공, `./gradlew :app:testDebugUnitTest` 성공.
+- CI: 푸시 후 결과 모니터링 예정.
+
 ## 2026-05-20 (Iteration 6.0 - v2.2.0: 우선순위 UX/보안 3종 통합)
 
 작업 내용:
