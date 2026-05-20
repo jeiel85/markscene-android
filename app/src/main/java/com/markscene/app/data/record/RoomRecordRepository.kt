@@ -10,6 +10,8 @@ import com.markscene.app.core.database.PhotoRecordEntity
 import com.markscene.app.core.database.PhotoRecordWithTags
 import com.markscene.app.core.database.PhotoTagEntity
 import com.markscene.app.core.database.RecordDao
+import com.markscene.app.core.database.RecordFtsDao
+import com.markscene.app.core.database.RecordFtsEntity
 import com.markscene.app.core.database.RecordMemoryTypeCrossRef
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.AnalysisStatus
@@ -27,7 +29,8 @@ class RoomRecordRepository(
     private val recordDao: RecordDao,
     private val analysisDao: AdvancedAnalysisDao,
     private val chatMessageDao: ChatMessageDao,
-    private val memoryContextDao: MemoryContextDao
+    private val memoryContextDao: MemoryContextDao,
+    private val ftsDao: RecordFtsDao
 ) {
     fun observeRecords(): Flow<List<PhotoRecord>> =
         recordDao.observeAllRecords().map { rows -> rows.map { it.toModel() } }
@@ -93,6 +96,16 @@ class RoomRecordRepository(
                     createdAt = tag.createdAt
                 )
             }
+        )
+        // FTS 인덱스 동기화
+        ftsDao.insert(
+            RecordFtsEntity(
+                recordId = record.id,
+                title = record.title.orEmpty(),
+                memo = record.memo.orEmpty(),
+                ocrText = record.ocrText.orEmpty(),
+                tagsText = record.tags.joinToString(" ") { it.name }
+            )
         )
     }
 
@@ -199,6 +212,7 @@ class RoomRecordRepository(
         }
         recordDao.deleteRecords(recordIds)
         recordDao.deleteTagsForRecords(recordIds)
+        ftsDao.deleteByRecordIds(recordIds)
     }
 
     suspend fun updateRecordsSpace(recordIds: List<String>, newSpace: String?) {

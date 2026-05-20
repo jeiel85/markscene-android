@@ -1,5 +1,43 @@
 # HISTORY.md
 
+## 2026-05-20 — v2.4.0 릴리즈 (성능/안정성 10종 + 테마 완성)
+
+- 작업: Epic #16(성능/안정성) + Epic #1(UI/UX) 우선순위 10개 항목을 구현 후 v2.4.0 릴리즈.
+- 구현 항목:
+  1. **ImageOptimizer 버그 수정 + OOM 방어**: `inJustDecodeSize`(오타) → `inJustDecodeBounds`로 수정. 적응형 inSampleSize 계산, RGB_565 컬러, 추가 스케일 다운으로 OOM 위험 감소.
+  2. **Coil ImageLoaderConfig 전역 연결**: `MarkSceneApplication`(ImageLoaderFactory 구현) 생성. AndroidManifest에 등록. 15% 메모리 캐시, RGB_565, 하드웨어 비트맵 적용.
+  3. **Room FTS4 인덱스 추가**: `RecordFtsEntity`, `RecordFtsDao` 생성. DB v9→v10 마이그레이션. 저장/삭제 시 FTS 인덱스 동기화.
+  4. **리스트 스크롤 Jank 개선**: Kotlin 2.0 Compose Strong Skipping 모드(`enableStrongSkippingMode = true`) 활성화. `PhotoRecord`에 `@Immutable` 추가.
+  5. **Baseline Profile**: `profileinstaller` 의존성 추가. `baseline-prof.txt`에 MainActivity/MarkSceneApp/TodayScreen 등 주요 시작 경로 프로파일 규칙 작성.
+  6. **저장공간 자동 관리**: `StorageCleaner` 유틸 생성. 앱 시작 시 7일 이상 임시 파일 + 300MB 초과 캐시 정리.
+  7. **Material You Dynamic Color**: Theme.kt 색상 스킴 완성도 향상. 모든 M3 토큰(primary/secondary/tertiary/error + container/on) 정의.
+  8. **Dark Mode / True Black 폴리시**: Dark/TrueBlack 색상 스킴에 완전한 M3 토큰 세트 적용.
+  9. **검색어 자동완성 완성**: RecordListScreen "최근 검색 지우기" 버튼에 `onClearRecentSearches` 연결. MarkSceneApp에서 `userPrefs.clearRecentSearches()` 호출.
+  10. **APK 용량 다이어트**: Release 빌드 `isMinifyEnabled = true`, `isShrinkResources = true`. ProGuard 규칙 작성(Kotlin Serialization, Room, Coil, ML Kit, CameraX, OkHttp, Coroutines). Release 빌드에서 디버그 로그 자동 제거.
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ui/util/ImageOptimizer.kt`: OOM-safe 재작성
+  - `app/src/main/java/com/markscene/app/ui/util/ImageLoaderConfig.kt`: (기존)
+  - `app/src/main/java/com/markscene/app/MarkSceneApplication.kt`: 신규 (ImageLoaderFactory)
+  - `app/src/main/AndroidManifest.xml`: application name 추가
+  - `app/src/main/java/com/markscene/app/core/database/RecordFtsEntity.kt`: 신규 (FTS4)
+  - `app/src/main/java/com/markscene/app/core/database/RecordFtsDao.kt`: 신규
+  - `app/src/main/java/com/markscene/app/core/database/RecordDao.kt`: `observeRecordsByIds` 추가
+  - `app/src/main/java/com/markscene/app/core/database/MarkSceneDatabase.kt`: v10, FTS 엔티티/DAO 추가
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: FTS 마이그레이션, StorageCleaner 호출, repository 생성자 업데이트, onClearRecentSearches 연결
+  - `app/src/main/java/com/markscene/app/data/record/RoomRecordRepository.kt`: FTS 동기화, ftsDao 파라미터 추가
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`: onClearRecentSearches 추가
+  - `app/src/main/java/com/markscene/app/ui/util/StorageCleaner.kt`: 신규
+  - `app/src/main/java/com/markscene/app/ui/theme/Color.kt`: 완전한 M3 팔레트
+  - `app/src/main/java/com/markscene/app/ui/theme/Theme.kt`: 완전한 M3 colorScheme
+  - `app/src/main/java/com/markscene/app/core/model/PhotoRecord.kt`: @Immutable 추가
+  - `app/src/main/assets/baseline-prof.txt`: 업데이트
+  - `app/build.gradle.kts`: strong skipping, profileinstaller, R8 활성화
+  - `app/proguard-rules.pro`: 포괄적 규칙 작성
+  - `gradle/libs.versions.toml`: v2.4.0, profileInstaller 의존성
+  - `CHANGELOG.md`, `HISTORY.md`: v2.4.0 내용 추가
+- 버전: `2.3.0 / 230` → `2.4.0 / 240`
+- 검증: `./gradlew :app:compileDebugKotlin`, `./gradlew :app:testDebugUnitTest`, `./gradlew :app:lintDebug` 실행 예정.
+
 ## 2026-05-20 — v2.3.0 릴리즈 (Trust/Security 강화 3종)
 
 - 작업: 우선순위 3개(Today 로컬 처리 배지, API Key 입력 보안 강화, 카메라 권한 사전 안내 자동화) 구현 후 v2.3.0 릴리즈.

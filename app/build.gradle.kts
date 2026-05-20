@@ -75,7 +75,8 @@ android {
         // debug: 기본 Android debug.keystore 사용 (~/.android/debug.keystore)
         debug {}
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -92,6 +93,9 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    composeCompiler {
+        enableStrongSkippingMode = true
     }
     packaging {
         resources {
@@ -130,6 +134,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation(libs.profile.installer)
 
     // Test dependencies
     testImplementation("junit:junit:4.13.2")

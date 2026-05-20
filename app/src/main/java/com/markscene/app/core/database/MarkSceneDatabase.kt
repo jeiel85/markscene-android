@@ -12,9 +12,10 @@ import androidx.room.RoomDatabase
         ChatMessageEntity::class,
         SmartAlbumEntity::class,
         MemoryContextEntity::class,
-        RecordMemoryTypeCrossRef::class
+        RecordMemoryTypeCrossRef::class,
+        RecordFtsEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class MarkSceneDatabase : RoomDatabase() {
@@ -24,4 +25,5 @@ abstract class MarkSceneDatabase : RoomDatabase() {
     abstract fun chatMessageDao(): ChatMessageDao
     abstract fun smartAlbumDao(): SmartAlbumDao
     abstract fun memoryContextDao(): MemoryContextDao
+    abstract fun recordFtsDao(): RecordFtsDao
 }

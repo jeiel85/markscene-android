@@ -1,22 +1,24 @@
-# MarkScene Baseline Profile
-# Generated for app startup and common user journeys optimization
+HSPLandroidx/compose/runtime/ComposerImpl;->updateValue(Ljava/lang/Object;)V
+HSPLandroidx/compose/runtime/ComposerImpl;->updatedNodeCount(I)I
+HSPLandroidx/compose/runtime/ComposerImpl;->nextSlot()Ljava/lang/Object;
+HSPLandroidx/compose/runtime/ComposerImpl;->createNode(F)V
+HPLandroidx/compose/runtime/ComposerImpl$CompositionContextImpl;->createComposer()Landroidx/compose/runtime/Composer;
+HSPLandroidx/compose/runtime/ComposerImpl;->startRoot()V
+HSPLandroidx/compose/runtime/ComposerImpl;->endRoot()V
+HSPLandroidx/compose/runtime/ComposerImpl;->startGroup(I)V
+HSPLandroidx/compose/runtime/ComposerImpl;->endGroup()V
+HSPLandroidx/compose/runtime/ComposerImpl;->skipCurrentGroup()V
+HSPLandroidx/compose/runtime/ComposerImpl;->startDefaults()V
+HSPLandroidx/compose/runtime/ComposerImpl;->endDefaults()V
+HSPLandroidx/compose/runtime/ComposerImpl;->startReusableNode()V
+HSPLandroidx/compose/runtime/ComposerImpl;->endReusableNode()V
 
-# MainActivity and core components
+# MarkScene Cold Start Profile
 HSPLcom/markscene/app/MainActivity;-><init>()V
 HSPLcom/markscene/app/MainActivity;->onCreate(Landroid/os/Bundle;)V
-HSPLcom/markscene/app/ui/MarkSceneAppKt;->MarkSceneApp(Landroid/net/Uri;)V
-
-# Database initialization
-HSPLcom/markscene/app/core/database/MarkSceneDatabase;-><clinit>()V
-HSPLcom/markscene/app/data/record/RoomRecordRepository;-><init>(...)V
-
-# Image loading (Coil)
-HSPLcoil/compose/AsyncImageKt;->AsyncImage(Ljava/lang/Object;...)
-
-# Compose Material components
-HSPLandroidx/compose/material3/ScaffoldKt;->Scaffold(Landroidx/compose/ui/Modifier;...)
-HSPLandroidx/compose/material3/CardKt;->Card(Landroidx/compose/ui/Modifier;...)
-
-# Lazy lists for performance
-HSPLandroidx/compose/foundation/lazy/LazyListKt;->LazyColumn(Landroidx/compose/ui/Modifier;...)
-HSPLandroidx/compose/foundation/lazy/grid/LazyGridKt;->LazyVerticalGrid(Landroidx/compose/ui/Modifier;...)
+HSPLcom/markscene/app/ui/MarkSceneAppKt;->MarkSceneApp(Landroid/net/Uri;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/markscene/app/ui/theme/ThemeKt;->MarkSceneTheme(ZZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/markscene/app/ui/screen/TodayScreenKt;->TodayScreen(Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/markscene/app/core/database/MarkSceneDatabase_Impl;-><init>()V
+HSPLcom/markscene/app/data/settings/UserPreferences;-><init>(Landroid/content/Context;)V
+HSPLandroidx/room/RoomDatabase;-><init>()V

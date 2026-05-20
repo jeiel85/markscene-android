@@ -2,6 +2,28 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## v2.4.0 - 2026-05-20
+
+### Performance
+- **이미지 최적화 파이프라인 개선**: 메모리 효율적인 비트맵 디코딩(inJustDecodeBounds)과 적응형 다운샘플링으로 OOM(Out of Memory) 위험을 대폭 낮췄습니다. 이미지 저장 시 RGB_565 컬러 포맷을 사용해 메모리 사용량을 절반으로 줄입니다.
+- **Coil 이미지 로더 최적화**: 맞춤형 ImageLoader를 전역 적용하여 메모리 캐시(15%), RGB_565 비트맵, 하드웨어 비트맵으로 이미지 로딩 성능과 메모리 안정성을 개선했습니다.
+- **검색 성능 최적화 (FTS 인덱스)**: Room FTS4(Full Text Search) 가상 테이블을 도입하여 레코드 수가 늘어나도 빠른 검색이 가능합니다. 기존 LIKE+JOIN 쿼리와 함께 동작하며 점진적 전환을 지원합니다.
+- **리스트 스크롤 성능 개선**: Compose Strong Skipping 모드 활성화 및 `@Immutable` 어노테이션을 적용하여 LazyColumn/StaggeredGrid의 불필요한 리컴포지션을 최소화했습니다.
+- **Baseline Profile 적용**: `profileinstaller`를 통해 앱 시작 속도를 개선하는 AOT 컴파일 힌트를 제공합니다. 주요 시작 경로(MainActivity, MarkSceneApp, TodayScreen)가 프로파일링됩니다.
+- **저장공간 자동 관리**: 앱 시작 시 7일 이상 된 임시 파일과 과도한 이미지 캐시(300MB 초과)를 자동 정리합니다.
+
+### Changed
+- **테마 색상 완성도 향상**: Material 3의 모든 색상 토큰(primary, secondary, tertiary, error 및 각각의 container/on 컬러)을 완전하게 정의했습니다. 다크 모드와 True Black 모드에서도 색상 일관성이 개선되었습니다.
+- **검색 자동완성 개선**: "최근 검색 지우기" 버튼이 실제로 동작하도록 연결했습니다.
+
+### Build / CI
+- **APK 용량 다이어트**: Release 빌드에 R8 코드 축소(`isMinifyEnabled`)와 리소스 축소(`isShrinkResources`)를 활성화했습니다. ProGuard 규칙을 Kotlin Serialization, Room, Coil, ML Kit, CameraX 등에 맞게 최적화했습니다.
+- Release 빌드에서 디버그 로그(`Log.d`, `Log.v`, `Log.i`)가 자동 제거됩니다.
+
+### Verification
+- 로컬: `./gradlew :app:compileDebugKotlin`, `./gradlew :app:testDebugUnitTest`, `./gradlew :app:lintDebug` 실행 예정.
+- CI: 푸시 후 `Android CI` / `Release APK` 결과 확인 예정.
+
 ## v2.3.0 - 2026-05-20
 
 ### Added

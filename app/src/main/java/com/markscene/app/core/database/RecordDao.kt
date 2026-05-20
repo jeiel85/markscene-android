@@ -59,4 +59,18 @@ interface RecordDao {
         """
     )
     fun observeRecordsByTag(tagName: String): Flow<List<PhotoRecordWithTags>>
+
+    /**
+     * FTS 기반 빠른 검색 - recordIds 목록을 받아 레코드를 조회합니다.
+     * 빈 리스트가 전달되면 모든 레코드를 반환합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM photo_records
+        WHERE id IN (:recordIds)
+        ORDER BY createdAt DESC
+        """
+    )
+    fun observeRecordsByIds(recordIds: List<String>): Flow<List<PhotoRecordWithTags>>
 }

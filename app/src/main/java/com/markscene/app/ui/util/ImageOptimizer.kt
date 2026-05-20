@@ -12,6 +12,13 @@ import java.io.FileOutputStream
 
 object ImageOptimizer {
 
+    /**
+     * Optimize an image from a URI: downsample, rotate per EXIF, and compress to WebP.
+     * Returns the optimized file, or null on failure.
+     *
+     * OOM 방어: inJustDecodeBounds로 먼저 크기를 측정한 후 적절한 inSampleSize를 계산하여
+     * 메모리에 로드되는 비트맵 크기를 제한합니다. 최종 출력은 maxWidth x maxHeight 이내로 조정됩니다.
+     */
     suspend fun optimize(
         context: Context,
         inputUri: Uri,
@@ -25,42 +32,56 @@ object ImageOptimizer {
             val bytes = inputStream.readBytes()
             inputStream.close()
 
-            val exif = ExifInterface(bytes.inputStream())
-            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-
-            val opts = android.graphics.BitmapFactory.Options()
-            // Use reflection to bypass potential compiler issues with this specific field
-            try {
-                opts.javaClass.getField("inJustDecodeSize").set(opts, true)
-            } catch (e: Exception) {
-                // Fallback (this might still fail at compile time if we use property syntax)
+            // Step 1: Decode bounds only to get original dimensions (OOM-safe)
+            val boundsOpts = android.graphics.BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
             }
-            
-            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
-            
-            opts.inSampleSize = calculateInSampleSize(opts, maxWidth, maxHeight)
-            
-            try {
-                opts.javaClass.getField("inJustDecodeSize").set(opts, false)
-            } catch (e: Exception) {}
-            
-            var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return@withContext null
+            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, boundsOpts)
 
+            // Step 2: Calculate optimal inSampleSize based on target dimensions
+            val sampleSize = calculateInSampleSize(
+                boundsOpts.outWidth, boundsOpts.outHeight,
+                maxWidth, maxHeight
+            )
+
+            // Step 3: Decode with calculated inSampleSize
+            val decodeOpts = android.graphics.BitmapFactory.Options().apply {
+                inSampleSize = sampleSize
+                // Use RGB_565 to halve memory usage when quality permits
+                inPreferredConfig = Bitmap.Config.RGB_565
+            }
+            var bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOpts)
+                ?: return@withContext null
+
+            // Step 4: Read EXIF orientation and rotate if needed
+            val exif = ExifInterface(bytes.inputStream())
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
             bitmap = rotateBitmap(bitmap, orientation)
 
+            // Step 5: Further scale down to exact max dimensions if still too large
+            if (bitmap.width > maxWidth || bitmap.height > maxHeight) {
+                val scale = minOf(
+                    maxWidth.toFloat() / bitmap.width,
+                    maxHeight.toFloat() / bitmap.height
+                )
+                val scaledWidth = (bitmap.width * scale).toInt()
+                val scaledHeight = (bitmap.height * scale).toInt()
+                val scaled = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
+                if (scaled != bitmap) bitmap.recycle()
+                bitmap = scaled
+            }
+
+            // Step 6: Save as WebP with quality setting
             val recordsDir = File(context.filesDir, "records").apply { mkdirs() }
             val outputFile = File(recordsDir, targetFileName)
-            
+
             FileOutputStream(outputFile).use { out ->
-                @Suppress("DEPRECATION")
-                val format = if (android.os.Build.VERSION.SDK_INT >= 30) {
-                    Bitmap.CompressFormat.WEBP_LOSSY
-                } else {
-                    Bitmap.CompressFormat.WEBP
-                }
-                bitmap.compress(format, quality, out)
+                bitmap.compress(Bitmap.CompressFormat.WEBP, quality, out)
             }
-            
+
             bitmap.recycle()
             outputFile
         } catch (e: Exception) {
@@ -68,13 +89,16 @@ object ImageOptimizer {
         }
     }
 
-    private fun calculateInSampleSize(options: android.graphics.BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-        val height = options.outHeight
-        val width = options.outWidth
+    private fun calculateInSampleSize(
+        rawWidth: Int,
+        rawHeight: Int,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
         var inSampleSize = 1
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight = height / 2
-            val halfWidth = width / 2
+        if (rawHeight > reqHeight || rawWidth > reqWidth) {
+            val halfHeight = rawHeight / 2
+            val halfWidth = rawWidth / 2
             while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
                 inSampleSize *= 2
             }

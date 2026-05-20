@@ -84,6 +84,7 @@ import com.markscene.app.ui.screen.SpaceTimelineScreen
 import com.markscene.app.ui.screen.TodayScreen
 import com.markscene.app.ui.security.BiometricAuthenticator
 import com.markscene.app.ui.util.SecureScreenEffect
+import com.markscene.app.ui.util.StorageCleaner
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -179,6 +180,14 @@ private val MIGRATION_8_9 = object : Migration(8, 9) {
     }
 }
 
+private val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS records_fts USING fts4(recordId TEXT, title TEXT, memo TEXT, ocrText TEXT, tagsText TEXT, tokenize=unicode61)")
+        // 기존 데이터를 FTS 인덱스로 마이그레이션
+        db.execSQL("INSERT INTO records_fts(recordId, title, memo, ocrText, tagsText) SELECT r.id, COALESCE(r.title, ''), COALESCE(r.memo, ''), COALESCE(r.ocrText, ''), COALESCE((SELECT GROUP_CONCAT(t.name, ' ') FROM photo_tags t WHERE t.recordId = r.id), '') FROM photo_records r")
+    }
+}
+
 @Composable
 fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val context = LocalContext.current
@@ -196,7 +205,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val database = remember {
         try {
             Room.databaseBuilder(context.applicationContext, MarkSceneDatabase::class.java, "markscene.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                 .fallbackToDestructiveMigration()
                 .build()
         } catch (e: Exception) {
@@ -206,7 +215,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
     val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
     val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
-    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao(), database.memoryContextDao()) }
+    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao(), database.memoryContextDao(), database.recordFtsDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
     val userPrefs = remember { UserPreferences(context.applicationContext) }
@@ -227,6 +236,11 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
 
     // Apply global FLAG_SECURE when user opts in.
     SecureScreenEffect(enabled = isScreenshotBlockEnabled)
+
+    LaunchedEffect(Unit) {
+        // Startup: clean old temp/cache files in background
+        StorageCleaner.cleanup(context)
+    }
 
     LaunchedEffect(Unit) {
         runCatching {
@@ -436,7 +450,8 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } },
                         onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
                         onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        onClearRecentSearches = { userPrefs.clearRecentSearches() }
                     )
                 }
                 composable(RECALL_ROUTE) {

@@ -53,7 +53,8 @@ fun RecordListScreen(
     onMoveToSpace: (List<String>, String) -> Unit,
     onOpenDetail: (String) -> Unit,
     onBack: () -> Unit,
-    onLayoutChange: ((LayoutType) -> Unit)? = null
+    onLayoutChange: ((LayoutType) -> Unit)? = null,
+    onClearRecentSearches: (() -> Unit)? = null
 ) {
     var query by remember { mutableStateOf("") }
     var selectedSpace by remember { mutableStateOf<String?>(null) }
@@ -215,7 +216,7 @@ fun RecordListScreen(
                                     }
                                     if (query.isBlank() && recentSearches.isNotEmpty()) {
                                         TextButton(
-                                            onClick = { /* clear recent searches - handled by parent */ },
+                                            onClick = { onClearRecentSearches?.invoke() },
                                             modifier = Modifier.align(Alignment.End)
                                         ) {
                                             Text("최근 검색 지우기", style = MaterialTheme.typography.labelSmall)
