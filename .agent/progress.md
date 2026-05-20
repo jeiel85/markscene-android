@@ -1,5 +1,31 @@
 # Agent Progress
 
+## 2026-05-20 (Iteration 6.0 - v2.2.0: 우선순위 UX/보안 3종 통합)
+
+작업 내용:
+- 남아있는 Epic 작업 중 자체 검증 가능한 우선순위 3개를 선정해 구현하고 v2.2.0으로 릴리즈했습니다.
+  1. **스와이프 삭제 실 연결**: 기존 `SwipeableGalleryItem`이 이름만 있고 실제 제스처가 없던 상태에서 Material3 `SwipeToDismissBox`로 재구현. 좌/우 스와이프 시 햅틱 + 삭제 확인 다이얼로그.
+  2. **개인정보 대시보드 통합**: `PrivacyDashboardScreen`은 이미 구현돼 있었으나 네비게이션에 연결되지 않은 상태였음. Settings 보안 섹션에 진입 항목 추가, `PRIVACY_DASHBOARD_ROUTE` 라우트 등록.
+  3. **앱 전체 스크린샷 차단 토글**: `UserPreferences`에 저장 API 추가, Settings 보안 섹션에 Switch 추가, 앱 루트(`MarkSceneApp`)에서 사용자 선택에 따라 `SecureScreenEffect(enabled=...)` 적용.
+- 버전 `2.1.0 / 210` → `2.2.0 / 220` 상향, CHANGELOG/HISTORY 정리.
+
+변경 파일:
+- `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`
+- `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`
+- `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`
+- `app/src/main/java/com/markscene/app/data/settings/UserPreferences.kt`
+- `app/src/main/res/values/strings.xml`
+- `gradle/libs.versions.toml`
+- `CHANGELOG.md`, `HISTORY.md`, `.agent/progress.md`, `.agent/tasks.md`
+
+검증:
+- 로컬: `./gradlew :app:compileDebugKotlin` 성공, `./gradlew :app:testDebugUnitTest` 성공.
+- CI: 푸시 후 `Android CI` / `Release APK` 결과 모니터링 예정.
+
+후속 작업:
+- `v2.2.0` 태그 푸시 후 GitHub Actions Release APK 산출물 점검.
+- 남아있는 Epic 작업(앱 시작 속도, Baseline Profile, 클립보드 보호 등) 다음 이터레이션에서 진행.
+
 ## 2026-05-13 (Iteration 5.0 - GitHub Issues 기준 문서 동기화)
 
 작업 내용:

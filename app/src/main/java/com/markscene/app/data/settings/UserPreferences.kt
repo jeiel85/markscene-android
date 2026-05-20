@@ -79,11 +79,26 @@ class UserPreferences(context: Context) {
         prefs.edit().remove(KEY_RECENT_SEARCHES).apply()
     }
 
+    /**
+     * Whether the app should block screenshots globally (FLAG_SECURE on every screen).
+     */
+    fun isScreenshotBlockEnabled(): Boolean {
+        return prefs.getBoolean(KEY_SCREENSHOT_BLOCK, false)
+    }
+
+    /**
+     * Toggle global screenshot blocking. Default off so users opt in.
+     */
+    fun setScreenshotBlockEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SCREENSHOT_BLOCK, enabled).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "markscene_prefs"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
         private const val KEY_TRUE_BLACK_MODE = "true_black_mode"
         private const val KEY_DYNAMIC_COLORS = "dynamic_colors"
         private const val KEY_RECENT_SEARCHES = "recent_searches"
+        private const val KEY_SCREENSHOT_BLOCK = "screenshot_block"
     }
 }

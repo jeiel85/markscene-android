@@ -35,12 +35,14 @@ fun SettingsScreen(
     isBiometricLockEnabled: Boolean,
     isTrueBlackEnabled: Boolean = false,
     isDynamicColorsEnabled: Boolean = false,
+    isScreenshotBlockEnabled: Boolean = false,
     tagCorrections: List<TagCorrectionEntity> = emptyList(),
     weeklyRecap: String? = null,
     achievementBadges: List<String> = emptyList(),
     onToggleBiometricLock: (Boolean) -> Unit,
     onToggleTrueBlack: (Boolean) -> Unit = {},
     onToggleDynamicColors: (Boolean) -> Unit = {},
+    onToggleScreenshotBlock: (Boolean) -> Unit = {},
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
@@ -52,6 +54,7 @@ fun SettingsScreen(
     externalMessage: String? = null,
     onMessageShown: () -> Unit,
     onOpenPrivacyNotice: () -> Unit,
+    onOpenPrivacyDashboard: () -> Unit = {},
     onOpenTutorial: () -> Unit = {},
     onBack: () -> Unit
 ) {
@@ -293,6 +296,38 @@ fun SettingsScreen(
                             )
                         }
                     }
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(Icons.Default.Visibility, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = stringResource(R.string.settings_screenshot_block), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(text = stringResource(R.string.settings_screenshot_block_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(
+                                checked = isScreenshotBlockEnabled,
+                                onCheckedChange = onToggleScreenshotBlock,
+                                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.semantics { contentDescription = context.getString(R.string.settings_screenshot_block) }
+                            )
+                        }
+                    }
+
+                    SettingsItem(
+                        icon = Icons.Default.Dashboard,
+                        title = stringResource(R.string.settings_privacy_dashboard),
+                        description = stringResource(R.string.settings_privacy_dashboard_desc),
+                        onClick = onOpenPrivacyDashboard
+                    )
 
                     SettingsItem(
                         icon = Icons.Default.PrivacyTip,

@@ -1,6 +1,7 @@
 package com.markscene.app.ui.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -442,7 +443,7 @@ fun RecordListScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun SwipeableGalleryItem(
     record: PhotoRecord,
@@ -451,40 +452,99 @@ private fun SwipeableGalleryItem(
     onLongClick: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
     var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { target ->
+            when (target) {
+                SwipeToDismissBoxValue.EndToStart,
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showDeleteConfirm = true
+                    false
+                }
+                else -> false
+            }
+        },
+        positionalThreshold = { distance -> distance * 0.5f }
+    )
 
     if (showDeleteConfirm) {
         AlertDialog(
-            onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("기록 삭제") },
-            text = { Text("'${record.title ?: "제목 없는 기록"}'을(를) 삭제하시겠습니까?") },
+            onDismissRequest = {
+                showDeleteConfirm = false
+            },
+            title = { Text(stringResource(R.string.swipe_delete_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.swipe_delete_message,
+                        record.title ?: stringResource(R.string.list_untitled)
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onDelete()
                         showDeleteConfirm = false
+                        onDelete()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("삭제")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("취소")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
     }
 
-    GalleryItem(
-        record = record,
-        isSelected = isSelected,
-        isSelectMode = false,
-        onClick = onClick,
-        onLongClick = onLongClick
-    )
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val isEnd = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            val alignment = if (isEnd) Alignment.CenterEnd else Alignment.CenterStart
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer),
+                contentAlignment = alignment
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Text(
+                        text = stringResource(R.string.delete),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        },
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true
+    ) {
+        GalleryItem(
+            record = record,
+            isSelected = isSelected,
+            isSelectMode = false,
+            onClick = onClick,
+            onLongClick = onLongClick
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

@@ -74,6 +74,7 @@ import com.markscene.app.data.settings.UserPreferences
 import com.markscene.app.ui.screen.CompareScreen
 import com.markscene.app.ui.screen.CreateRecordScreen
 import com.markscene.app.ui.screen.OnboardingScreen
+import com.markscene.app.ui.screen.PrivacyDashboardScreen
 import com.markscene.app.ui.screen.PrivacyNoticeScreen
 import com.markscene.app.ui.screen.RecallScreen
 import com.markscene.app.ui.screen.RecordDetailScreen
@@ -82,6 +83,7 @@ import com.markscene.app.ui.screen.SettingsScreen
 import com.markscene.app.ui.screen.SpaceTimelineScreen
 import com.markscene.app.ui.screen.TodayScreen
 import com.markscene.app.ui.security.BiometricAuthenticator
+import com.markscene.app.ui.util.SecureScreenEffect
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -102,6 +104,7 @@ private const val COMPARE_ROUTE = "compare"
 private const val COMPARE_ID1_ARG = "id1"
 private const val COMPARE_ID2_ARG = "id2"
 private const val PRIVACY_ROUTE = "privacy_notice"
+private const val PRIVACY_DASHBOARD_ROUTE = "privacy_dashboard"
 private const val ONBOARDING_ROUTE = "onboarding"
 
 private const val SOURCE_CAPTURE = "capture"
@@ -218,8 +221,12 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
     }
     var isTrueBlackEnabled by remember { mutableStateOf(userPrefs.useTrueBlackDarkMode()) }
     var isDynamicColorsEnabled by remember { mutableStateOf(userPrefs.useDynamicColors()) }
+    var isScreenshotBlockEnabled by remember { mutableStateOf(userPrefs.isScreenshotBlockEnabled()) }
     var isAppLocked by remember { mutableStateOf(isBiometricLockEnabled) }
     var backupStatusMessage by remember { mutableStateOf<String?>(null) }
+
+    // Apply global FLAG_SECURE when user opts in.
+    SecureScreenEffect(enabled = isScreenshotBlockEnabled)
 
     LaunchedEffect(Unit) {
         runCatching {
@@ -295,6 +302,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
         currentRoute.startsWith("space_timeline") -> false
         currentRoute.startsWith("compare") -> false
         currentRoute.startsWith("privacy_notice") -> false
+        currentRoute.startsWith("privacy_dashboard") -> false
         currentRoute == ONBOARDING_ROUTE -> false
         else -> true
     }
@@ -490,6 +498,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         isBiometricLockEnabled = isBiometricLockEnabled,
                         isTrueBlackEnabled = isTrueBlackEnabled,
                         isDynamicColorsEnabled = isDynamicColorsEnabled,
+                        isScreenshotBlockEnabled = isScreenshotBlockEnabled,
                         tagCorrections = corrections,
                         weeklyRecap = "최근 7일: ${weeklyCount}개 기록, ${weeklyTagCount}개 고유 태그",
                         achievementBadges = achievementBadges,
@@ -513,6 +522,14 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                             userPrefs.setDynamicColors(enabled)
                             isDynamicColorsEnabled = enabled
                             backupStatusMessage = if (enabled) "Material You 동적 색상이 활성화되었습니다. 앱을 재시작하면 적용됩니다." else "Material You 동적 색상이 비활성화되었습니다."
+                        },
+                        onToggleScreenshotBlock = { enabled ->
+                            userPrefs.setScreenshotBlockEnabled(enabled)
+                            isScreenshotBlockEnabled = enabled
+                            backupStatusMessage = context.getString(
+                                if (enabled) R.string.settings_screenshot_block_on
+                                else R.string.settings_screenshot_block_off
+                            )
                         },
                         onSaveApiKey = { key ->
                             val saved = apiKeyStore.saveGeminiApiKey(key)
@@ -538,6 +555,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                         externalMessage = backupStatusMessage,
                         onMessageShown = { backupStatusMessage = null },
                         onOpenPrivacyNotice = { navController.navigate(PRIVACY_ROUTE) },
+                        onOpenPrivacyDashboard = { navController.navigate(PRIVACY_DASHBOARD_ROUTE) },
                         onOpenTutorial = {
                             val tutorialUri = Uri.parse("https://github.com/jeiel85/markscene-android#-%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5")
                             val intent = Intent(Intent.ACTION_VIEW, tutorialUri)
@@ -548,6 +566,19 @@ fun MarkSceneApp(sharedImageUri: Uri? = null) {
                 }
                 composable(PRIVACY_ROUTE) {
                     PrivacyNoticeScreen(onBack = { navController.popBackStack() })
+                }
+                composable(PRIVACY_DASHBOARD_ROUTE) {
+                    val tagCount = remember(allRecords) {
+                        allRecords.flatMap { it.tags }.map { it.name }.distinct().size
+                    }
+                    PrivacyDashboardScreen(
+                        recordCount = allRecords.size,
+                        tagCount = tagCount,
+                        hasApiKey = hasApiKey,
+                        isBiometricEnabled = isBiometricLockEnabled,
+                        lastBackupDate = null,
+                        onBack = { navController.popBackStack() }
+                    )
                 }
             }
         }

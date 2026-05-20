@@ -162,4 +162,19 @@
     <!-- FAB -->
     <string name="fab_capture">촬영</string>
     <string name="fab_import">가져오기</string>
+
+    <!-- Swipe Actions -->
+    <string name="swipe_delete_title">기록 삭제</string>
+    <string name="swipe_delete_message">\'%1$s\'을(를) 삭제하시겠습니까?</string>
+
+    <!-- Privacy Dashboard -->
+    <string name="settings_privacy_dashboard">개인정보 대시보드</string>
+    <string name="settings_privacy_dashboard_desc">로컬 처리 현황과 보안 설정을 한눈에 확인</string>
+    <string name="privacy_dashboard_title">개인정보 대시보드</string>
+
+    <!-- Screenshot Block -->
+    <string name="settings_screenshot_block">앱 전체 스크린샷 차단</string>
+    <string name="settings_screenshot_block_desc">민감한 기록 보호를 위해 앱 화면 캡처/녹화를 시스템 레벨에서 차단합니다 (FLAG_SECURE)</string>
+    <string name="settings_screenshot_block_on">스크린샷 차단이 활성화되었습니다. 앱 전체에 적용됩니다.</string>
+    <string name="settings_screenshot_block_off">스크린샷 차단이 비활성화되었습니다.</string>
 </resources>

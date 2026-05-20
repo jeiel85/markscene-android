@@ -13,7 +13,8 @@
 
 ## Current Priority
 
-Complete remaining issues #2~#6, add test automation, and improve documentation.
+v2.2.0(2026-05-20)에서 우선순위 3종(스와이프 삭제 실 연결, 개인정보 대시보드 통합, 앱 전체 스크린샷 차단 토글) 통합 완료.
+다음 우선순위는 Epic #16 성능/안정성(앱 시작 속도, OOM 방어, 리스트 jank)과 Epic #17 보안(클립보드 보호, 권한 사전 안내) 영역.
 
 ## Task Backlog
 

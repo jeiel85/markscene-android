@@ -1,5 +1,22 @@
 # HISTORY.md
 
+## 2026-05-20 — v2.2.0 릴리즈 (UX/보안 강화 3종)
+
+- 작업: 우선순위 3개 작업(스와이프 삭제 실연결, 개인정보 대시보드 통합, 앱 전체 스크린샷 차단 토글) 구현 후 v2.2.0 릴리즈.
+- 변경 파일:
+  - `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`: 기존 이름만 있던 `SwipeableGalleryItem`을 Material3 `SwipeToDismissBox` 기반으로 재작성. 좌/우 스와이프 시 햅틱과 함께 삭제 확인 다이얼로그가 뜨도록 연결.
+  - `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`: `isScreenshotBlockEnabled`, `onToggleScreenshotBlock`, `onOpenPrivacyDashboard` 파라미터 추가. 보안 섹션에 스크린샷 차단 토글과 개인정보 대시보드 진입 항목 추가.
+  - `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: `PRIVACY_DASHBOARD_ROUTE` 추가, `PrivacyDashboardScreen`을 NavHost에 연결. 사용자 토글 상태(`UserPreferences.isScreenshotBlockEnabled`)에 따라 앱 루트에서 `SecureScreenEffect` 적용.
+  - `app/src/main/java/com/markscene/app/data/settings/UserPreferences.kt`: `isScreenshotBlockEnabled()` / `setScreenshotBlockEnabled()` 저장 API 추가.
+  - `app/src/main/res/values/strings.xml`: 스와이프 삭제, 개인정보 대시보드, 스크린샷 차단 관련 문구 추가.
+  - `gradle/libs.versions.toml`: `2.1.0 / 210` → `2.2.0 / 220` 상향.
+  - `CHANGELOG.md`, `HISTORY.md`, `.agent/progress.md`, `.agent/tasks.md`: 변경 이력 갱신.
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin` 성공, `./gradlew :app:testDebugUnitTest` 성공.
+  - CI: 푸시 후 `Android CI` / `Release APK` 워크플로우 결과 모니터링.
+- 결과: 기존에 컴포넌트만 존재하던 스와이프 삭제가 실제로 동작하고, 구현은 됐지만 네비게이션 미연결 상태였던 PrivacyDashboard가 Settings에서 진입 가능해졌으며, 사용자가 보안 수준에 따라 앱 전체 화면 캡처 차단을 선택할 수 있게 되었습니다.
+- 후속 작업: GitHub Actions `Android CI` 결과 확인, `v2.2.0` 태그 푸시 후 `Release APK` 산출물 점검.
+
 ## 2026-05-16 — v2.1.0 릴리즈
 
 - 작업: Scene Memory 전체 Phase(1~7) 구현 완료 및 v2.1.0 릴리즈
