@@ -3,358 +3,350 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MarkScene - 사진을 검색 가능한 비주얼 메모로</title>
+  <meta name="description" content="MarkScene은 사진을 검색 가능한 비주얼 메모로 바꾸는 로컬 우선 Android 앱입니다." />
+  <title>MarkScene - 사진을 검색 가능한 기억으로</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: #121a2f;
-      --accent: #14b8a6;
-      --accent2: #22d3ee;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --line: #1f2937;
-      --card-bg: rgba(18, 26, 47, 0.8);
+      --bg: #f7f8f5;
+      --ink: #111827;
+      --muted: #5f6b7a;
+      --panel: #ffffff;
+      --line: #dfe5df;
+      --teal: #0f766e;
+      --teal-dark: #0b4f4a;
+      --sky: #0e7490;
+      --amber: #b45309;
+      --rose: #be123c;
+      --shadow: 0 18px 50px rgba(17, 24, 39, 0.14);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      color: var(--text);
-      font-family: "Pretendard", "Noto Sans KR", sans-serif;
-      background:
-        radial-gradient(1000px 500px at -10% -10%, #1e293b 0%, transparent 50%),
-        radial-gradient(800px 400px at 110% 0%, #0f766e 0%, transparent 40%),
-        var(--bg);
-      min-height: 100vh;
-    }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
-    
-    /* Hero */
-    .hero { text-align: center; padding: 60px 0 40px; }
-    .badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--accent2);
-      font-size: 13px;
-      background: var(--card-bg);
-      margin-bottom: 20px;
-    }
-    h1 { 
-      font-size: clamp(32px, 5.5vw, 64px); 
-      line-height: 1.1; 
-      margin: 16px 0 20px;
-      background: linear-gradient(135deg, #e2e8f0, #22d3ee);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .lead { 
-      color: var(--muted); 
-      font-size: clamp(15px, 2vw, 20px); 
-      max-width: 640px; 
-      margin: 0 auto 32px;
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
       line-height: 1.6;
     }
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-    a.btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: var(--text);
-      text-decoration: none;
-      padding: 12px 20px;
-      font-weight: 600;
-      font-size: 15px;
-      transition: all 0.2s;
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(247, 248, 245, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
     }
-    a.btn:hover { border-color: var(--accent); transform: translateY(-1px); }
-    a.btn.primary {
-      background: linear-gradient(135deg, #0f766e, #155e75);
-      border: 0;
-    }
-    a.btn.primary:hover { opacity: 0.9; }
-    
-    /* Features */
-    .section { margin-top: 80px; }
-    .section-title {
-      font-size: 28px;
-      margin-bottom: 32px;
-      text-align: center;
-    }
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 28px 24px;
-      transition: border-color 0.2s;
-    }
-    .card:hover { border-color: var(--accent); }
-    .card-icon { font-size: 32px; margin-bottom: 16px; }
-    .card-title { font-size: 18px; margin-bottom: 10px; }
-    .card-desc { color: var(--muted); font-size: 14px; line-height: 1.6; }
-    
-    /* Tech Stack */
-    .tech-stack {
+    .nav-inner {
+      height: 64px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 24px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
-    .tech-badge {
-      padding: 8px 16px;
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+    .brand img { width: 34px; height: 34px; border-radius: 8px; }
+    .nav-links { display: flex; gap: 18px; color: var(--muted); font-size: 14px; }
+    .nav-links a { text-decoration: none; }
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 64px);
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(17, 24, 39, 0.96), rgba(17, 24, 39, 0.78), rgba(17, 24, 39, 0.22)),
+        url("./assets/screenshot-today.png") right 8% center / auto 92% no-repeat,
+        #111827;
+      color: #ffffff;
+    }
+    .hero .shell {
+      padding: 92px 0 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 610px);
+      align-items: end;
+    }
+    .eyebrow {
+      width: fit-content;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 999px;
+      color: #ccfbf1;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(15, 118, 110, 0.35);
+    }
+    h1 {
+      margin: 18px 0 18px;
+      font-size: clamp(42px, 7vw, 86px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+    .lead {
+      max-width: 580px;
+      margin: 0 0 28px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: clamp(17px, 2vw, 22px);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 8px;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .btn.primary { border-color: transparent; background: #0f766e; }
+    .hero-hint {
+      margin-top: 34px;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 14px;
+    }
+    .band { padding: 72px 0; border-bottom: 1px solid var(--line); }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+    h2 { margin: 0; font-size: clamp(28px, 4vw, 46px); line-height: 1.12; letter-spacing: 0; }
+    .section-head p, .muted { color: var(--muted); margin: 0; }
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .screen {
+      padding: 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      font-size: 14px;
-      background: var(--card-bg);
-      color: var(--accent);
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
-    
-    /* Privacy */
-    .privacy-box {
-      background: var(--card-bg);
+    .screen img { border-radius: 6px; aspect-ratio: 9 / 16; object-fit: cover; }
+    .screen strong { display: block; margin-top: 10px; font-size: 14px; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .feature {
+      min-height: 190px;
+      padding: 22px;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 32px;
-      margin-top: 24px;
+      border-radius: 8px;
+      background: var(--panel);
     }
-    .privacy-box h3 { margin-bottom: 16px; color: var(--accent); }
-    .privacy-box ul { 
-      list-style: none; 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    .feature b { color: var(--teal-dark); }
+    .feature p { margin: 10px 0 0; color: var(--muted); font-size: 15px; }
+    .privacy {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 28px;
+      align-items: center;
+    }
+    .privacy-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .privacy-list li {
+      padding: 14px 16px;
+      border-left: 4px solid var(--teal);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+    }
+    .links {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
     }
-    .privacy-box li { 
-      color: var(--muted); 
-      font-size: 14px; 
-      padding-left: 20px; 
-      position: relative;
-      line-height: 1.6;
-    }
-    .privacy-box li::before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-weight: bold;
-    }
-    
-    /* Workflow */
-    .workflow {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-    }
-    .workflow-step {
-      background: var(--card-bg);
+    .link-card {
+      padding: 18px;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 20px;
-      flex: 1;
-      min-width: 160px;
-      max-width: 200px;
-      text-align: center;
+      border-radius: 8px;
+      background: var(--panel);
+      text-decoration: none;
+      min-height: 118px;
     }
-    .step-num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0f766e, #155e75);
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 12px;
+    .link-card span { display: block; color: var(--muted); font-size: 13px; margin-top: 8px; }
+    footer { padding: 34px 0; color: var(--muted); font-size: 14px; }
+    footer .shell { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+
+    @media (max-width: 880px) {
+      .section-head, .privacy { grid-template-columns: 1fr; }
+      .screen-grid, .feature-grid, .links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .nav-links { display: none; }
+      .hero { min-height: 720px; background-position: center, right -88px center, center; }
     }
-    .step-text { font-size: 14px; color: var(--muted); line-height: 1.5; }
-    
-    /* Footer */
-    .footer { 
-      margin-top: 80px; 
-      padding-top: 32px;
-      border-top: 1px solid var(--line);
-      color: var(--muted); 
-      font-size: 13px; 
-      text-align: center;
-      line-height: 1.8;
-    }
-    .footer a { color: var(--accent2); text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
-    
-    @media (max-width: 640px) {
-      .features { grid-template-columns: 1fr; }
-      .workflow { flex-direction: column; align-items: center; }
-      .workflow-step { max-width: 100%; }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 28px, 1120px); }
+      .hero .shell { padding: 74px 0 48px; }
+      .screen-grid, .feature-grid, .links { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; align-items: stretch; }
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <!-- Hero -->
-    <section class="hero">
-      <span class="badge">MarkScene • Android • Local First • Privacy Focused</span>
-      <h1>사진을 검색 가능한<br/>비주얼 메모로</h1>
-      <p class="lead">
-        MarkScene은 사진 기록을 로컬 태그와 메모로 구조화해, 
-        다시 찾는 시간을 줄여주는 프라이버시 우선 Android 앱입니다.
-      </p>
-      <div class="actions">
-        <a class="btn primary" href="https://github.com/jeiel85/markscene-android/releases">
-          📦 APK 다운로드
-        </a>
-        <a class="btn" href="https://github.com/jeiel85/markscene-android">
-          🔧 GitHub 저장소
-        </a>
-        <a class="btn" href="./branding/">
-          🎨 브랜딩 페이지
-        </a>
+  <nav class="nav">
+    <div class="shell nav-inner">
+      <a class="brand" href="./" aria-label="MarkScene 홈">
+        <img src="./assets/app-icon.png" alt="" />
+        <span>MarkScene</span>
+      </a>
+      <div class="nav-links" aria-label="주요 링크">
+        <a href="#screens">화면</a>
+        <a href="#features">기능</a>
+        <a href="#privacy">개인정보</a>
+        <a href="#resources">자료</a>
       </div>
-      <p style="margin-top: 20px; color: var(--muted); font-size: 13px;">
-        기본 기능은 API Key 없이 동작하며, 고급 분석은 BYOK(Bring Your Own Key) 기반 선택 기능입니다.
-      </p>
-    </section>
+    </div>
+  </nav>
 
-    <!-- Core Features -->
-    <section class="section">
-      <h2 class="section-title">주요 기능</h2>
-      <div class="features">
-        <div class="card">
-          <div class="card-icon">📸</div>
-          <div class="card-title">사진 촬영 & 가져오기</div>
-          <div class="card-desc">
-            Android Photo Picker로 안전하게 사진을 선택하거나, 
-            CameraX 기반의 카메라로 즉시 촬영하세요.
-          </div>
+  <header class="hero">
+    <div class="shell">
+      <div>
+        <div class="eyebrow">Android · v2.5.0 · Local-first visual memory</div>
+        <h1>MarkScene</h1>
+        <p class="lead">
+          사진 한 장을 태그, 기억 유형, 메모, 다시 보기 목록으로 정리해 나중에 바로 찾을 수 있는 개인 비주얼 메모 앱입니다.
+        </p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/jeiel85/markscene-android/releases">APK 다운로드</a>
+          <a class="btn" href="https://github.com/jeiel85/markscene-android">GitHub 저장소</a>
+          <a class="btn" href="./privacy/">개인정보 처리방침</a>
         </div>
-        <div class="card">
-          <div class="card-icon">🏷</div>
-          <div class="card-title">자동 태그 생성</div>
-          <div class="card-desc">
-            ML Kit 온디바이스 라벨링으로 사진 속 주요 객체를 
-            자동으로 태그 초안으로 생성합니다.
-          </div>
+        <p class="hero-hint">API Key 없이 기본 기능이 동작하고, 고급 AI 분석은 사용자가 직접 실행하는 BYOK 옵션입니다.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="band" id="screens">
+      <div class="shell">
+        <div class="section-head">
+          <h2>오늘의 장면부터 다시 보기까지</h2>
+          <p>v2.5.0 기준 MarkScene은 Scene Timeline, 새 기록 작성, 검색, Recall Box를 중심으로 사진 기록을 빠르게 쌓고 다시 찾는 흐름을 제공합니다.</p>
         </div>
-        <div class="card">
-          <div class="card-icon">✏️</div>
-          <div class="card-title">태그 편집 & 메모</div>
-          <div class="card-desc">
-            생성된 태그를 수정, 삭제, 추가하고 
-            사진에 대한 메모를 자유롭게 작성하세요.
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-icon">🔍</div>
-          <div class="card-title">빠른 검색</div>
-          <div class="card-desc">
-            태그, 제목, 메모를 기반으로 
-            저장된 사진 기록을 즉시 검색할 수 있습니다.
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-icon">🤖</div>
-          <div class="card-title">BYOK 고급 AI 분석</div>
-          <div class="card-desc">
-            본인의 API Key를 입력해 
-            Gemini 기반 고급 이미지 분석을 선택적으로 사용하세요.
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-icon">🔒</div>
-          <div class="card-title">프라이버시 보호</div>
-          <div class="card-desc">
-            모든 데이터는 기기 내부에 저장되며, 
-            API Key는 Android Keystore로 암호화 보관됩니다.
-          </div>
+        <div class="screen-grid">
+          <article class="screen">
+            <img src="./assets/screenshot-today.png" alt="오늘의 장면 타임라인 화면" />
+            <strong>Today Timeline</strong>
+          </article>
+          <article class="screen">
+            <img src="./assets/screenshot-create.png" alt="새 기록 작성 화면" />
+            <strong>Memory Tags</strong>
+          </article>
+          <article class="screen">
+            <img src="./assets/screenshot-search.png" alt="검색 화면" />
+            <strong>Fast Search</strong>
+          </article>
+          <article class="screen">
+            <img src="./assets/screenshot-recall.png" alt="Recall Box 화면" />
+            <strong>Recall Box</strong>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- How It Works -->
-    <section class="section">
-      <h2 class="section-title">사용법</h2>
-      <div class="workflow">
-        <div class="workflow-step">
-          <div class="step-num">1</div>
-          <div class="step-text">사진 촬영<br/>또는 선택</div>
+    <section class="band" id="features">
+      <div class="shell">
+        <div class="section-head">
+          <h2>검색 가능한 기억으로 바꾸는 기능</h2>
+          <p>자동 태그는 시작점이고, 최종 기록은 사용자가 편집합니다. 사진, 태그, OCR, 메모, 기억 유형이 모두 로컬 검색의 단서가 됩니다.</p>
         </div>
-        <div class="workflow-step">
-          <div class="step-num">2</div>
-          <div class="step-text">즉시 이미지<br/>미리보기</div>
-        </div>
-        <div class="workflow-step">
-          <div class="step-num">3</div>
-          <div class="step-text">로컬 태그<br/>초안 생성</div>
-        </div>
-        <div class="workflow-step">
-          <div class="step-num">4</div>
-          <div class="step-text">태그 수정 &<br/>메모 작성</div>
-        </div>
-        <div class="workflow-step">
-          <div class="step-num">5</div>
-          <div class="step-text">로컬 기록<br/>저장</div>
-        </div>
-        <div class="workflow-step">
-          <div class="step-num">6</div>
-          <div class="step-text">태그/제목/<br/>메모로 검색</div>
+        <div class="feature-grid">
+          <article class="feature">
+            <b>Photo Picker + CameraX</b>
+            <p>전체 갤러리 스캔 없이 사용자가 고른 사진만 처리하고, 촬영 플로우는 CameraX 기반으로 동작합니다.</p>
+          </article>
+          <article class="feature">
+            <b>ML Kit local tags and OCR</b>
+            <p>태그 초안과 텍스트 인식을 기기 안에서 처리해 API Key 없이도 핵심 기록 흐름을 사용할 수 있습니다.</p>
+          </article>
+          <article class="feature">
+            <b>Room FTS search</b>
+            <p>태그, 제목, 메모, OCR 텍스트, 기억 유형을 빠르게 찾도록 로컬 DB와 검색 인덱스를 사용합니다.</p>
+          </article>
+          <article class="feature">
+            <b>Recall Box and weekly recap</b>
+            <p>다시 볼 기록을 따로 모으고, 주간 회고와 인기 태그로 기록의 흐름을 확인할 수 있습니다.</p>
+          </article>
+          <article class="feature">
+            <b>Secure sharing and export</b>
+            <p>공유 템플릿, 이미지 크롭, Markdown/CSV 내보내기, EXIF 제거 옵션으로 기록 활용성을 높였습니다.</p>
+          </article>
+          <article class="feature">
+            <b>Optional BYOK AI</b>
+            <p>Gemini API Key를 사용자가 직접 저장한 경우에만 고급 분석을 실행하며, 결과는 수정 가능한 제안으로 표시합니다.</p>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Privacy First -->
-    <section class="section">
-      <h2 class="section-title">프라이버시 우선 설계</h2>
-      <div class="privacy-box">
-        <h3>🔐 MarkScene는 언제든지 당신의 데이터를 존중합니다</h3>
-        <ul>
-          <li>기본 플로우에서 사진을 외부 서버로 업로드하지 않음</li>
-          <li>Android Photo Picker 사용으로 전체 갤러리 접근 차단</li>
-          <li>MANAGE_EXTERNAL_STORAGE 권한 사용 안 함</li>
-          <li>API Key는 기기 내부에만 암호화 저장</li>
-          <li>로그에 API Key, 사진 바이트, 개인정보 기록 안 함</li>
-          <li>BYOK 방식으로 사용자가 직접 API Key 관리</li>
-          <li>AI 분석은 사용자가 명시적으로 실행한 경우만</li>
-          <li>외부 전송 시 사전 고지 및 동의 절차</li>
+    <section class="band" id="privacy">
+      <div class="shell privacy">
+        <div>
+          <h2>기본값은 로컬 우선</h2>
+          <p class="muted">MarkScene은 사진 기록 앱이 다루는 정보가 민감할 수 있다는 전제에서 설계됩니다. 기본 기능은 외부 서버 없이 동작하고, 외부 AI 전송은 사용자가 명시적으로 실행할 때만 발생합니다.</p>
+        </div>
+        <ul class="privacy-list">
+          <li>기본 사진 가져오기는 Android Photo Picker를 우선합니다.</li>
+          <li>MANAGE_EXTERNAL_STORAGE와 광범위한 사진/동영상 권한을 사용하지 않습니다.</li>
+          <li>API Key는 기기 내부 암호화 저장소에 보관합니다.</li>
+          <li>API Key, 사진 바이트, 프롬프트, AI 응답, 민감 정보는 로그에 남기지 않습니다.</li>
         </ul>
       </div>
     </section>
 
-    <!-- Tech Stack -->
-    <section class="section">
-      <h2 class="section-title">기술 스택</h2>
-      <div class="tech-stack">
-        <span class="tech-badge">Kotlin</span>
-        <span class="tech-badge">Jetpack Compose</span>
-        <span class="tech-badge">Material 3</span>
-        <span class="tech-badge">CameraX</span>
-        <span class="tech-badge">Android Photo Picker</span>
-        <span class="tech-badge">Room</span>
-        <span class="tech-badge">DataStore</span>
-        <span class="tech-badge">Coroutines / Flow</span>
-        <span class="tech-badge">Coil</span>
-        <span class="tech-badge">ML Kit</span>
-        <span class="tech-badge">Android Keystore</span>
-        <span class="tech-badge">GitHub Actions</span>
+    <section class="band" id="resources">
+      <div class="shell">
+        <div class="section-head">
+          <h2>프로젝트와 출시 준비 자료</h2>
+          <p>소스, 릴리즈, 개인정보 처리방침, Play Store 준비 자료를 한곳에서 확인할 수 있습니다.</p>
+        </div>
+        <div class="links">
+          <a class="link-card" href="https://github.com/jeiel85/markscene-android">
+            GitHub Repository
+            <span>소스 코드와 이슈 추적</span>
+          </a>
+          <a class="link-card" href="https://github.com/jeiel85/markscene-android/releases">
+            Releases
+            <span>APK 및 태그 릴리즈</span>
+          </a>
+          <a class="link-card" href="./privacy/">
+            Privacy Policy
+            <span>사진, API Key, AI 전송 원칙</span>
+          </a>
+          <a class="link-card" href="./PLAY_STORE_CHECKLIST.md">
+            Play Store Checklist
+            <span>권한, Data Safety, ASO 점검</span>
+          </a>
+        </div>
       </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>MarkScene © 2026 • <a href="https://github.com/jeiel85/markscene-android">GitHub</a> • <a href="./PRIVACY_POLICY.md">Privacy Policy</a> • <a href="../LICENSE">MIT License</a></p>
-      <p style="margin-top: 8px;">이 프로젝트는 <a href="../LICENSE">MIT License</a> 하에 배포됩니다.</p>
-    </footer>
   </main>
+
+  <footer>
+    <div class="shell">
+      <span>MarkScene © 2026</span>
+      <span><a href="./branding/">Branding</a> · <a href="../LICENSE">MIT License</a></span>
+    </div>
+  </footer>
 </body>
 </html>

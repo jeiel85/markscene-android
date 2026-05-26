@@ -1,5 +1,20 @@
 # HISTORY.md
 
+## 2026-05-26 — 공개 표면 정비 (GitHub Pages / README / 메타데이터)
+
+- 작업: MarkScene의 GitHub IO 랜딩, README, 개인정보 처리방침 URL, Play Store 준비 자료, GitHub 설명/토픽을 v2.5.0 기준으로 정비.
+- 변경 내용:
+  1. `docs/index.html`: v2.5.0 최신 기능(오늘의 장면, Recall Box, 검색, 보안 옵션, 공유/내보내기, BYOK)을 강조하는 제품형 랜딩으로 재구성.
+  2. `docs/privacy/index.html`: GitHub Pages에서 바로 접근 가능한 공개 개인정보 처리방침 페이지 추가.
+  3. `docs/assets/`: 기존 store asset을 Pages 표시용 이미지로 재사용.
+  4. `README.md`: 공개 링크, 현재 버전, 핵심 기능, 개인정보 원칙, 스토어 준비 자료를 빠르게 찾도록 재정리.
+  5. `docs/STORE_LISTING_KO.md`, `store-assets/MarkScene_v2.5.0_playstore_listing.txt`: Play Store 문구와 개인정보 URL을 최신 버전에 맞춤.
+  6. GitHub 저장소 메타데이터: description/homepage/topics를 MarkScene 공개 포지션에 맞춰 갱신 예정.
+- 검증:
+  - 로컬: `git diff --check`, HTML 로컬 참조 검사, 이미지 크기 확인, Pages 로컬 HTTP 브라우저 미리보기 확인.
+  - 원격: 커밋/푸시 후 Pages 배포와 공개 URL HTTP 200 확인 예정.
+- 결과: 로컬 공개 표면 검증 완료, 원격 배포 검증 진행 예정.
+
 ## 2026-05-21 — v2.5.0 릴리즈 (보안 완성 + UX/Core/Marketing 통합)
 
 - 작업: Epic #4(보안) + Epic #1/#2/#3/#5 잔여 항목을 통합 구현 후 v2.5.0 릴리즈.

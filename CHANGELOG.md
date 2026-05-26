@@ -2,6 +2,18 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## Unreleased - 2026-05-26
+
+### Documentation
+- GitHub Pages 랜딩 페이지를 v2.5.0 기준으로 갱신해 Scene Timeline, Recall Box, 보안 옵션, 공유/내보내기 기능이 드러나도록 정리했습니다.
+- README를 공개 페이지, 릴리즈, 개인정보 처리방침, Play Store 준비 자료 중심으로 재구성했습니다.
+- 공개 개인정보 처리방침 URL을 `https://jeiel85.github.io/markscene-android/privacy/`로 연결할 수 있도록 Pages용 페이지를 추가했습니다.
+- Play Store 등록 문구와 store asset 목록을 v2.5.0 기준으로 정리했습니다.
+
+### Verification
+- 로컬: `git diff --check`, 정적 링크/이미지 참조 검증, Pages 로컬 HTTP 브라우저 미리보기를 완료했습니다.
+- CI: 푸시 후 GitHub Actions Pages/Android CI 결과를 확인합니다.
+
 ## v2.5.0 - 2026-05-21
 
 ### Added

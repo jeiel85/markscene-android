@@ -6,6 +6,7 @@ local.properties
 *.iml
 captures/
 .DS_Store
+__pycache__/
 .env
 secrets.properties
 keystore/

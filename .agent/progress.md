@@ -1,5 +1,18 @@
 # Agent Progress
 
+## 2026-05-26 (Public Surface - GitHub Pages / README / Store Assets)
+
+작업 내용:
+- MarkScene 공개 표면을 v2.5.0 기준으로 정리했습니다.
+- GitHub Pages 랜딩을 실제 앱 소개용 제품 페이지로 재구성하고, 기존 store asset 이미지를 `docs/assets/`에 배치했습니다.
+- Pages 공개 개인정보 처리방침 경로(`/privacy/`)를 추가했습니다.
+- README를 공개 링크, 핵심 기능, 개인정보 원칙, 스토어 준비 자료 중심으로 재정리했습니다.
+- Play Store 등록 문구를 v2.5.0 기능과 공개 개인정보 URL 기준으로 업데이트했습니다.
+
+검증:
+- 로컬: `git diff --check`, HTML 로컬 참조 검사, 이미지 크기 확인, Pages 로컬 HTTP 브라우저 미리보기 완료.
+- CI: 커밋/푸시 후 GitHub Actions Pages/Android CI 확인 예정.
+
 ## 2026-05-20 (Iteration 6.1 - v2.3.0: Trust/Security 3종)
 
 작업 내용:

@@ -1,0 +1,129 @@
+<!-- Google Play Console Listing — MarkScene v2.5.0 -->
+
+<!-- ============================================================
+     공통정보: 앱 이름, 짧은 설명, 자세한 설명
+     Play Console > 스토어 등록 정보 에서 붙여넣기
+   ============================================================ -->
+
+<AppName>MarkScene</AppName>
+
+<!-- ==========================================================
+     짧은 설명 (Short Description) — 80자 제한
+     각 언어별로 Play Console 해당 언어 탭에 입력
+   ========================================================== -->
+
+<ShortDesc-ko-KR>
+사진 속 장면을 태그, 메모, Recall Box로 다시 찾는 개인 비주얼 메모
+</ShortDesc-ko-KR>
+
+<ShortDesc-en-US>
+Save photos as searchable visual notes with tags, memos, and Recall Box
+</ShortDesc-en-US>
+
+<!-- ==========================================================
+     자세한 설명 (Full Description) — 4,000자 제한
+   ========================================================== -->
+
+<FullDesc-ko-KR>
+사진 한 장으로 오늘의 장면을 기록하세요.
+
+MarkScene는 사진을 찍거나 선택하면 ML Kit가 태그와 OCR 초안을 만들고, 사용자가 직접 제목, 메모, 기억 유형(아이디어, 업무, 영수증 등)을 정리할 수 있는 개인 비주얼 메모 앱입니다.
+
+■ 주요 특징
+
+📸 사진 촬영 & 가져오기
+CameraX 라이브 프리뷰 촬영과 Android Photo Picker 가져오기를 지원합니다. 광범위한 갤러리 접근 권한 없이 선택한 사진만 처리합니다.
+
+🏷 자동 태그 & 수동 편집
+ML Kit 온디바이스 라벨링으로 사진 속 물체와 장면을 자동 인식해 태그를 제안합니다. 태그는 자유롭게 수정, 삭제, 추가할 수 있습니다.
+
+📅 Scene Timeline
+오늘/어제/날짜별로 기록이 타임라인 형태로 표시됩니다. 언제 어떤 장면을 남겼는지 한눈에 확인하세요.
+
+🏷 Memory Tags (기억 유형)
+아이디어, 업무, 가족, 육아, 영수증, 장소, 물건 위치, 문서, 쇼핑, 집, 사이드 프로젝트, 나중에 보기, 감정 기록, 기타 등 14종의 기억 유형을 기록에 지정할 수 있습니다.
+
+🔖 Recall Box (다시 보기)
+나중에 다시 봐야 할 기록을 별도 탭에 모아 관리합니다. 저장 시 토글로 간편하게 지정하고, 메모 속 키워드 기반으로 자동 수집됩니다.
+
+📊 Daily Scene Recap
+오늘 남긴 장면 수와 많이 나온 태그 TOP5를 요약 카드로 확인할 수 있습니다.
+
+🔍 빠른 검색
+태그, 제목, 메모, OCR 텍스트, 기억 유형으로 검색 가능합니다. 필터 칩으로 원하는 조건의 기록을 빠르게 찾을 수 있습니다.
+
+🔐 보안 옵션
+EXIF 제거, 갤러리 숨김, 자동 잠금, 앱 전체 스크린샷 차단을 선택할 수 있습니다.
+
+↗️ 공유와 내보내기
+Polaroid 스타일 공유 템플릿, 이미지 크롭 저장, Markdown/CSV 내보내기를 지원합니다.
+
+■ 개인정보 보호
+MarkScene은 로컬 우선으로 동작합니다. 사진, 태그, 메모는 기본적으로 기기 내부에만 저장됩니다. 고급 AI 분석 시에만 선택한 이미지가 사용자가 직접 입력한 API Key로 AI 제공자에게 전송됩니다.
+
+■ BYOK (Bring Your Own Key) 고급 AI
+Gemini API Key를 등록하면 선택한 사진에 대한 AI 심층 분석(장면 요약, 태그 제안, 기억 유형 추천)을 이용할 수 있습니다. API Key는 Android Keystore에 암호화 저장됩니다.
+
+■ 권한
+- 카메라 (사진 촬영 시)
+- 인터넷 (선택 기능인 BYOK AI 분석 시)
+</FullDesc-ko-KR>
+
+<FullDesc-en-US>
+Turn every photo into a lasting memory.
+
+MarkScene is a personal visual note app that creates on-device tag and OCR drafts with ML Kit, lets you edit titles, memos, and memory types, and helps you revisit what matters later.
+
+■ Key Features
+
+📸 Capture & Import
+Take photos with CameraX live preview or pick from your gallery using Android Photo Picker. Only selected images are processed — no broad gallery permissions needed.
+
+🏷 Auto-Tagging & Editing
+ML Kit on-device labeling automatically detects objects and scenes, suggesting tags instantly. Tags are fully editable — add, remove, or rename with ease.
+
+📅 Scene Timeline
+Browse your records in a date-grouped timeline (Today / Yesterday / By date). See every moment at a glance.
+
+🏷 Memory Tags
+Choose from 14 memory types: Idea, Work, Family, Childcare, Receipt, Place, Item Location, Document, Shopping, Home, Side Project, Later, Emotion, Other. Assign multiple types to any record.
+
+🔖 Recall Box
+A dedicated tab collects records worth revisiting. Toggle the Recall switch when saving, and let memo keywords auto-identify items you'll want later.
+
+📊 Daily Scene Recap
+A daily summary card on the Today screen shows your scene count and top 5 most frequent tags.
+
+🔍 Fast Search
+Search across tags, titles, memos, OCR text, and memory types. Filter chips help you narrow down results instantly.
+
+🔐 Security Options
+Use EXIF removal, gallery hiding, auto-lock, and app-wide screenshot blocking when you want extra protection.
+
+↗️ Sharing & Export
+Share with a Polaroid-style template, save square crops, and export records as Markdown or CSV.
+
+■ Privacy First
+MarkScene operates local-first by default. Photos, tags, and memos stay on your device. Only when you choose to run advanced AI analysis is a selected image sent to the AI provider using your own API key.
+
+■ BYOK Advanced AI
+Bring your own Gemini API key for deep AI analysis: scene summaries, tag suggestions, memory type recommendations. Your key is stored encrypted in the Android Keystore.
+
+■ Permissions
+- Camera (for photo capture)
+- Internet (for optional BYOK AI analysis)
+</FullDesc-en-US>
+
+<!-- ==========================================================
+     카테고리 & 태그
+   ========================================================== -->
+<Category>Productivity</Category>
+<Category-ko-KR>생산성</Category-ko-KR>
+
+<Tags-ko-KR>사진,메모,태그,기억,기록,정리,생산성,AI,오프라인,개인정보보호,자동태그,검색</Tags-ko-KR>
+<Tags-en-US>photo,memo,tag,memory,journal,organization,productivity,AI,offline,privacy,auto-tag,search</Tags-en-US>
+
+<!-- ==========================================================
+     개인정보 처리방침 URL (GitHub Pages에 호스팅 가정)
+   ========================================================== -->
+<PrivacyURL>https://jeiel85.github.io/markscene-android/privacy/</PrivacyURL>

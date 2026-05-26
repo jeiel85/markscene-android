@@ -30,7 +30,7 @@
 - [ ] Current Google Play policy checked.
 - [ ] Current Android permission behavior checked.
 - [ ] Current Gemini/API provider terms checked.
-- [x] Privacy policy URL live (`docs/PRIVACY_POLICY.md` on GitHub Pages).
+- [x] Privacy policy URL live (`https://jeiel85.github.io/markscene-android/privacy/` on GitHub Pages).
 - [ ] Contact email works.
 - [x] Release signing configured outside repository (Secrets based automation).
 - [x] No debug logs expose private data (verified in `PRIVACY_AND_SECURITY.md`).
