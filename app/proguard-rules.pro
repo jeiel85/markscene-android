@@ -40,6 +40,15 @@
 -keep class com.google.mlkit.** { *; }
 -dontwarn com.google.mlkit.**
 
+# --- MediaPipe / Protobuf ---
+-keep class com.google.mediapipe.** { *; }
+-dontwarn com.google.mediapipe.**
+-dontwarn com.google.protobuf.Internal$ProtoMethodMayReturnNull
+-dontwarn com.google.protobuf.Internal$ProtoNonnullApi
+-dontwarn com.google.protobuf.ProtoField
+-dontwarn com.google.protobuf.ProtoPresenceBits
+-dontwarn com.google.protobuf.ProtoPresenceCheckedField
+
 # --- CameraX ---
 -keep class androidx.camera.** { *; }
 -dontwarn androidx.camera.**
