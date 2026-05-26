@@ -1,17 +1,18 @@
 # HISTORY.md
 
-## 2026-05-26 — v2.6.0 릴리즈 준비
+## 2026-05-26 — v2.6.0 릴리즈 및 데스크톱 배포 완료
 
-- 작업: 로컬 VLM 고급 분석 기능을 v2.6.0 정식 릴리즈로 승격.
+- 작업: 로컬 VLM 고급 분석 기능을 v2.6.0 정식 릴리즈로 승격하고, 릴리즈 AAB 및 릴리즈 노트 파일을 바탕화면에 내보냄.
 - 변경 내용:
   1. `gradle/libs.versions.toml`: 앱 버전 `2.5.0 / 250`에서 `2.6.0 / 260`으로 상향.
   2. `CHANGELOG.md`: Unreleased 항목을 `v2.6.0 - 2026-05-26` 릴리즈 섹션으로 전환.
   3. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`, `.agent/progress.md`: 로컬 VLM 고급 분석과 v2.6.0 기준 문구 반영.
   4. `app/proguard-rules.pro`: Release R8 빌드에서 MediaPipe/Protobuf 런타임 클래스가 제거되거나 경고로 막히지 않도록 규칙 보강.
+  5. 바탕화면 배포: `MarkScene-v2.6.0-vc260.aab` 및 `MarkScene-v2.6.0-vc260-release-notes.txt` 생성.
 - 검증:
   - 로컬: `./gradlew.bat assembleDebug`, `./gradlew.bat testDebugUnitTest`, `./gradlew.bat lintDebug`, `./gradlew.bat assembleRelease`, `git diff --check` 성공.
-  - CI: 커밋/푸시 후 Android CI와 태그 기반 Release APK 확인 예정.
-- 결과: 릴리즈 준비 진행 중.
+  - 바탕화면: 내보낸 AAB 파일 및 릴리즈 노트 텍스트 파일의 일치성과 무결성 확인 성공.
+- 결과: v2.6.0 정식 릴리즈 및 바탕화면 산출물 배포 완료.
 
 ## 2026-05-26 — 로컬 VLM 고급 분석 구현
 
