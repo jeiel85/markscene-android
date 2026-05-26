@@ -1,5 +1,16 @@
 # Agent Progress
 
+## 2026-05-26 (v2.6.0 Release - Local VLM Advanced Analysis)
+
+작업 내용:
+- 앱 버전을 `2.5.0 / 250`에서 `2.6.0 / 260`으로 올렸습니다.
+- 로컬 VLM 고급 분석을 새 릴리즈 기준 기능으로 정리했습니다.
+- README, GitHub Pages, Play Store 문구, CHANGELOG를 v2.6.0 기준으로 갱신했습니다.
+
+검증:
+- 로컬: `assembleDebug`, `testDebugUnitTest`, `lintDebug`, `assembleRelease`, `git diff --check` 성공.
+- CI: 버전 커밋과 태그 푸시 후 Android CI / Release APK 확인 예정.
+
 ## 2026-05-26 (Public Surface - GitHub Pages / README / Store Assets)
 
 작업 내용:

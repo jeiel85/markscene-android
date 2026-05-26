@@ -12,7 +12,7 @@
 | 항목 | 값 |
 | --- | --- |
 | 앱 이름 | MarkScene |
-| 최신 문서 기준 | v2.5.0 |
+| 최신 문서 기준 | v2.6.0 |
 | Android Application ID | `com.markscene.app` |
 | 루트 패키지 | `com.markscene.app` |
 | 저장소 | <https://github.com/jeiel85/markscene-android> |
@@ -24,7 +24,7 @@
 
 MarkScene은 사진을 검색 가능한 개인 기억으로 바꿉니다. 사진을 찍거나 선택하면 로컬 태그와 OCR 초안을 만들고, 사용자는 태그와 메모를 수정해 로컬에 저장한 뒤 나중에 검색과 Recall Box로 다시 찾을 수 있습니다.
 
-기본 기능은 API Key 없이 동작합니다. 고급 AI 분석은 사용자가 직접 API Key를 저장하고 명시적으로 실행하는 BYOK(Bring Your Own Key) 선택 기능입니다.
+기본 기능은 API Key 없이 동작합니다. v2.6.0부터 고급 AI 분석도 사용자가 가져온 로컬 VLM 모델이 있으면 외부 전송 없이 기기 안에서 먼저 실행하고, Gemini BYOK는 외부 분석이 필요할 때 선택적으로 사용합니다.
 
 ## 핵심 흐름
 
@@ -44,7 +44,8 @@ MarkScene은 사진을 검색 가능한 개인 기억으로 바꿉니다. 사진
 - **수정 가능한 기억 유형**: 아이디어, 업무, 영수증, 장소, 나중에 보기 등 여러 기억 유형을 지정합니다.
 - **빠른 검색**: 태그, 제목, 메모, OCR 텍스트, 기억 유형 기반으로 기록을 찾습니다.
 - **Recall Box**: 나중에 다시 볼 기록을 별도 탭에 모읍니다.
-- **BYOK 고급 AI 분석**: 사용자가 저장한 Gemini API Key가 있을 때만 고급 분석을 실행합니다.
+- **로컬 VLM 고급 분석**: MediaPipe 호환 온디바이스 모델 파일을 가져오면 API Key 없이 장면 요약과 추천 태그를 생성합니다.
+- **BYOK 고급 AI 분석**: 로컬 모델이 없거나 외부 분석을 선택할 때 사용자가 저장한 Gemini API Key로 고급 분석을 실행합니다.
 - **보안 옵션**: API Key 암호화 저장, EXIF 제거, 갤러리 숨김, 자동 잠금, 스크린샷 차단 옵션을 제공합니다.
 - **공유와 내보내기**: 소셜 공유 템플릿, 이미지 크롭, Markdown/CSV 내보내기를 지원합니다.
 
@@ -54,7 +55,7 @@ MarkScene은 사진을 검색 가능한 개인 기억으로 바꿉니다. 사진
 | --- | --- |
 | GitHub Pages 랜딩 | <https://jeiel85.github.io/markscene-android/> |
 | 개인정보 처리방침 | <https://jeiel85.github.io/markscene-android/privacy/> |
-| Play Store 등록 문구 | [docs/STORE_LISTING_KO.md](docs/STORE_LISTING_KO.md), [store-assets/MarkScene_v2.5.0_playstore_listing.txt](store-assets/MarkScene_v2.5.0_playstore_listing.txt) |
+| Play Store 등록 문구 | [docs/STORE_LISTING_KO.md](docs/STORE_LISTING_KO.md) |
 | 앱 아이콘 512x512 | [store-assets/MarkScene_icon_512.png](store-assets/MarkScene_icon_512.png) |
 | Feature graphic 1024x500 | [store-assets/MarkScene_feature_graphic_1024x500.png](store-assets/MarkScene_feature_graphic_1024x500.png) |
 | 스크린샷 | [store-assets](store-assets) |
@@ -66,7 +67,8 @@ MarkScene은 사진을 검색 가능한 개인 기억으로 바꿉니다. 사진
 - 기본 플로우에서 사용자 사진을 외부 서버로 업로드하지 않습니다.
 - Android Photo Picker를 우선 사용하고, 전체 갤러리 스캔을 하지 않습니다.
 - `MANAGE_EXTERNAL_STORAGE`, 광범위한 사진/동영상 권한, 백그라운드 위치 권한을 사용하지 않습니다.
-- API Key는 선택 기능이며 기기 내부 암호화 저장소에 보관합니다.
+- 로컬 VLM 모델을 가져온 경우 고급 분석도 기기 안에서 처리되며 API Key가 필요하지 않습니다.
+- API Key는 외부 AI 분석을 위한 선택 기능이며 기기 내부 암호화 저장소에 보관합니다.
 - API Key, 이미지 바이트, 프롬프트, AI 응답, 민감 정보는 로그에 남기지 않습니다.
 - AI와 로컬 태그 결과는 확정 사실이 아니라 수정 가능한 제안으로 표시합니다.
 
@@ -89,7 +91,7 @@ MarkScene은 사진을 검색 가능한 개인 기억으로 바꿉니다. 사진
 | 로컬 저장 | Room, DataStore |
 | 비동기 | Coroutines / Flow |
 | 이미지 | Coil, 앱 내부 이미지 최적화 |
-| 로컬 AI | ML Kit Image Labeling, ML Kit Text Recognition |
+| 로컬 AI | ML Kit Image Labeling, ML Kit Text Recognition, MediaPipe LLM Inference |
 | 선택 AI | Gemini BYOK |
 | 보안 | Android Keystore, EncryptedSharedPreferences |
 | CI/CD | GitHub Actions, GitHub Pages |

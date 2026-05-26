@@ -2,7 +2,7 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
-## Unreleased - 2026-05-26
+## v2.6.0 - 2026-05-26
 
 ### Added
 - 설정에서 MediaPipe 호환 로컬 VLM 모델 파일을 가져와 앱 내부 저장소에 보관할 수 있습니다.
@@ -14,17 +14,23 @@
 - 개인정보 안내 화면과 대시보드가 로컬 고급 AI 모델의 데이터 흐름을 설명하도록 갱신되었습니다.
 - Android CI의 에뮬레이터 smoke test를 instrumentation APK 설치 방식에서 debug APK 직접 설치/실행 방식으로 바꿔 MediaPipe 네이티브 라이브러리 추가 후에도 CI 검증이 안정적으로 동작하도록 했습니다.
 
+### Build / CI
+- 앱 버전을 `2.6.0` / `260`으로 올렸습니다.
+- Release R8 빌드에서 MediaPipe/Protobuf 런타임 클래스가 보존되도록 ProGuard 규칙을 보강했습니다.
+
 ### Documentation
 - AI Provider Strategy, Local Tagging, Privacy/Security, Architecture, PRD, Data Model 문서에 로컬 VLM 우선 전략과 제약을 반영했습니다.
-- GitHub Pages 랜딩 페이지를 v2.5.0 기준으로 갱신해 Scene Timeline, Recall Box, 보안 옵션, 공유/내보내기 기능이 드러나도록 정리했습니다.
+- GitHub Pages 랜딩 페이지를 v2.6.0 기준으로 갱신해 Scene Timeline, Recall Box, 보안 옵션, 공유/내보내기, 로컬 VLM 기능이 드러나도록 정리했습니다.
 - README를 공개 페이지, 릴리즈, 개인정보 처리방침, Play Store 준비 자료 중심으로 재구성했습니다.
 - 공개 개인정보 처리방침 URL을 `https://jeiel85.github.io/markscene-android/privacy/`로 연결할 수 있도록 Pages용 페이지를 추가했습니다.
-- Play Store 등록 문구와 store asset 목록을 v2.5.0 기준으로 정리했습니다.
+- Play Store 등록 문구를 v2.6.0 기준으로 정리했습니다.
 
 ### Verification
 - 로컬: `./gradlew.bat assembleDebug` 성공.
+- 로컬: `./gradlew.bat testDebugUnitTest`, `./gradlew.bat lintDebug`, `git diff --check` 성공.
+- 로컬: `./gradlew.bat assembleRelease` 성공.
 - 로컬: `git diff --check`, 정적 링크/이미지 참조 검증, Pages 로컬 HTTP 브라우저 미리보기를 완료했습니다.
-- CI: 푸시 후 GitHub Actions Pages/Android CI 결과를 확인합니다.
+- CI: Android CI와 Pages build 성공.
 
 ## v2.5.0 - 2026-05-21
 
