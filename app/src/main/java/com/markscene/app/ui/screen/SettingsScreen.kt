@@ -41,6 +41,7 @@ fun SettingsScreen(
     hasApiKey: Boolean,
     hasLocalVlmModel: Boolean = false,
     localVlmModelName: String? = null,
+    isLocalVlmModelDownloading: Boolean = false,
     isBiometricLockEnabled: Boolean,
     isTrueBlackEnabled: Boolean = false,
     isDynamicColorsEnabled: Boolean = false,
@@ -182,6 +183,8 @@ fun SettingsScreen(
                                     Text(
                                         text = if (hasLocalVlmModel) {
                                             stringResource(R.string.settings_local_vlm_ready, localVlmModelName ?: "local model")
+                                        } else if (isLocalVlmModelDownloading) {
+                                            stringResource(R.string.settings_local_vlm_downloading)
                                         } else {
                                             stringResource(R.string.settings_local_vlm_desc)
                                         },
@@ -197,12 +200,21 @@ fun SettingsScreen(
                             ) {
                                 OutlinedButton(
                                     onClick = onImportLocalVlmModel,
+                                    enabled = !isLocalVlmModelDownloading,
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(Modifier.width(6.dp))
-                                    Text(stringResource(if (hasLocalVlmModel) R.string.settings_local_vlm_replace else R.string.settings_local_vlm_import))
+                                    Text(
+                                        stringResource(
+                                            when {
+                                                isLocalVlmModelDownloading -> R.string.settings_local_vlm_downloading_short
+                                                hasLocalVlmModel -> R.string.settings_local_vlm_redownload
+                                                else -> R.string.settings_local_vlm_download
+                                            }
+                                        )
+                                    )
                                 }
                                 if (hasLocalVlmModel) {
                                     OutlinedButton(

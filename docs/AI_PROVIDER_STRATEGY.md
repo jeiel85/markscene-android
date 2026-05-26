@@ -12,11 +12,11 @@ The app uses three levels of intelligence:
 
 ## Preferred Advanced Path
 
-The preferred advanced path is local VLM analysis when the user imports a compatible model file.
+The preferred advanced path is local VLM analysis when the app downloads an approved compatible model file.
 
 Current implementation:
 
-- Settings can import a MediaPipe LLM Inference compatible local model file into app-private storage.
+- Settings can download a MediaPipe LLM Inference compatible local model file into app-private storage.
 - Record detail advanced analysis prefers the local VLM model when it is available.
 - Local VLM analysis uses image + prompt input and asks for strict JSON.
 - Suggested objects and tags are saved as editable suggestions with `LocalVlm` tag source.
@@ -74,7 +74,7 @@ Local VLM support uses MediaPipe LLM Inference on Android.
 
 Rules:
 
-- Use only user-imported or explicitly approved model files.
+- Use only explicitly approved model files from HTTPS download sources.
 - Store the model in app-private storage.
 - Do not upload the selected image, prompt, model path, or model output.
 - Resize images before local inference to reduce latency and memory pressure.

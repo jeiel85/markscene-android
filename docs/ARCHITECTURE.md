@@ -69,7 +69,7 @@ app/
 - Local tagger interface.
 - Advanced AI provider interface.
 - Mock providers for development and testing.
-- Local VLM implementation for user-imported MediaPipe-compatible models.
+- Local VLM implementation for app-downloaded, approved MediaPipe-compatible models.
 - Gemini implementation remains an external BYOK fallback.
 
 ## Core Interfaces
@@ -133,7 +133,7 @@ Avoid:
 
 - No API key: show setup prompt.
 - No local model and no API key: show setup prompt.
-- Local model error: keep local tags and show retry or model replacement guidance.
+- Local model error: keep local tags and show retry or model re-download guidance.
 - Network error: keep local tags and show retry.
 - AI parse error: show raw failure state only in debug builds; user-facing message should be simple.
 - Local database error: show non-destructive error and avoid data loss.

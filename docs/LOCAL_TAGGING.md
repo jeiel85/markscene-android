@@ -62,7 +62,7 @@ Local VLM analysis can be used when the user wants a deeper scene/object summary
 Current app direction:
 
 - Basic tags still come from the fast local tagger path.
-- A user-imported MediaPipe-compatible VLM model enables advanced local analysis.
+- An app-downloaded, approved MediaPipe-compatible VLM model enables advanced local analysis.
 - The advanced local model is triggered manually from the record detail screen.
 - The output is parsed into scene summary and suggested tags.
 - Local VLM tags use the `local_vlm` source.

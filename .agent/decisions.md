@@ -42,11 +42,11 @@ Implication: UI must allow editing, deletion, and manual additions.
 
 ## D006: Prefer Local VLM Before External BYOK
 
-Decision: Advanced photo analysis should prefer a user-imported on-device VLM model when available, and use BYOK Gemini only as the external fallback.
+Decision: Advanced photo analysis should prefer an app-downloaded approved on-device VLM model when available, and use BYOK Gemini only as the external fallback.
 
 Reason: Local VLM analysis better matches MarkScene's privacy promise and avoids requiring an external API key for richer object/tag suggestions.
 
-Implication: Settings must manage the local model file, record detail must disclose on-device processing, and local VLM output must be stored as editable suggestions with a distinct source.
+Implication: Settings must manage local model download/delete, record detail must disclose on-device processing, and local VLM output must be stored as editable suggestions with a distinct source.
 
 
 ## 2026-04-30 - Project Naming

@@ -15,7 +15,7 @@ MarkScene is local-first. The basic experience must work without sending user ph
 - User-confirmed tags.
 - Analysis metadata.
 - Optional API key for advanced AI provider.
-- Optional local VLM model file imported by the user.
+- Optional local VLM model file downloaded by the app after user action.
 
 ### Sent Outside the Device
 

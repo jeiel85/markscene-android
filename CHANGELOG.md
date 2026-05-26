@@ -2,10 +2,24 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## v2.6.1 - 2026-05-26
+
+### Changed
+- 로컬 고급 AI 모델 설정 버튼이 파일 선택기를 열지 않고, 앱에 설정된 HTTPS 모델 URL에서 자동 다운로드하도록 변경되었습니다.
+- 로컬 VLM 안내 문구를 모델 파일 가져오기에서 모델 다운로드 기준으로 정리했습니다.
+
+### Build / CI
+- Play Store 업로드용 `versionCode` 중복을 피하기 위해 앱 버전을 `2.6.1` / `261`로 올렸습니다.
+- `MARKSCENE_LOCAL_VLM_MODEL_URL`, `MARKSCENE_LOCAL_VLM_MODEL_NAME` 빌드 설정으로 승인된 로컬 모델 다운로드 소스를 주입할 수 있습니다.
+
+### Verification
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `git diff --check` 성공.
+- 로컬: `./gradlew.bat bundleRelease --no-daemon`은 10분 제한 초과로 완료 확인하지 못했습니다. Play Store 업로드용 최종 AAB는 CI 산출물에서 확인합니다.
+
 ## v2.6.0 - 2026-05-26
 
 ### Added
-- 설정에서 MediaPipe 호환 로컬 VLM 모델 파일을 가져와 앱 내부 저장소에 보관할 수 있습니다.
+- 설정에서 MediaPipe 호환 로컬 VLM 모델 파일을 앱 내부 저장소에 보관할 수 있습니다.
 - 기록 상세 화면의 고급 AI 분석이 로컬 모델을 우선 사용해 사진을 외부 서버로 보내지 않고 장면 요약과 추천 태그를 생성합니다.
 - 로컬 VLM 태그 소스를 추가해 외부 AI 태그와 온디바이스 고급 분석 태그를 구분합니다.
 

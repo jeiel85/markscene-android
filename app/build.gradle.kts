@@ -12,6 +12,13 @@ android {
     namespace = "com.markscene.app"
     compileSdk = 35
 
+    val localVlmModelUrl = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_URL")
+        .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_URL"))
+        .orElse("")
+    val localVlmModelName = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_NAME")
+        .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_NAME"))
+        .orElse("MarkScene local VLM model")
+
     defaultConfig {
         applicationId = "com.markscene.app"
         minSdk = 26
@@ -23,6 +30,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildConfigField("String", "LOCAL_VLM_MODEL_URL", "\"${localVlmModelUrl.get().replace("\\", "\\\\").replace("\"", "\\\"")}\"")
+        buildConfigField("String", "LOCAL_VLM_MODEL_NAME", "\"${localVlmModelName.get().replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         // APK 용량 다이어트 + CI 에뮬레이터 호환(x86_64 포함)
         ndk {
             abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86_64"))
@@ -93,6 +102,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeCompiler {
         enableStrongSkippingMode = true

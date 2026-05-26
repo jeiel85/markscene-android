@@ -1,5 +1,20 @@
 # HISTORY.md
 
+## 2026-05-26 — 로컬 VLM 모델 자동 다운로드 전환
+
+- 작업: 설정 화면의 로컬 AI 모델 버튼이 파일 선택기를 열지 않고 승인된 HTTPS 모델 URL에서 자동으로 다운로드하도록 전환하고, Play Store versionCode 중복을 피하기 위해 버전을 `2.6.1 / 261`로 상향.
+- 변경 내용:
+  1. `LocalVisionModelManager`: 사용자 파일 가져오기 대신 HTTPS 다운로드 후 앱 내부 저장소에 원자적으로 저장하도록 변경.
+  2. `MarkSceneApp`, `SettingsScreen`, `strings.xml`: 로컬 VLM 모델 버튼을 다운로드/다시 다운로드 흐름으로 바꾸고 다운로드 중 상태와 실패 메시지를 표시.
+  3. `app/build.gradle.kts`: `MARKSCENE_LOCAL_VLM_MODEL_URL`, `MARKSCENE_LOCAL_VLM_MODEL_NAME` 빌드 설정값을 `BuildConfig`로 주입.
+  4. `gradle/libs.versions.toml`, `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`, `CHANGELOG.md`: Play Store 재업로드용 버전 `2.6.1 / 261` 반영.
+  5. 제품/보안/아키텍처 문서와 작업 문서를 모델 다운로드 기준으로 갱신.
+- 검증:
+  - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `git diff --check` 성공.
+  - 로컬: `./gradlew.bat bundleRelease --no-daemon`은 10분 제한 초과로 완료 확인하지 못함. 기존 AAB는 v2.6.0 생성분이라 재사용하지 않음.
+  - 진행 예정: 커밋/푸시 후 GitHub Actions에서 v2.6.1 산출물 확인.
+- 결과: 사용자가 로컬 AI 모델 설정에서 파일을 직접 고르는 흐름을 제거하고, 앱이 설정된 모델을 준비하는 UX로 전환.
+
 ## 2026-05-26 — v2.6.0 릴리즈 및 데스크톱 배포 완료
 
 - 작업: 로컬 VLM 고급 분석 기능을 v2.6.0 정식 릴리즈로 승격하고, 릴리즈 AAB 및 릴리즈 노트 파일을 바탕화면에 내보냄.

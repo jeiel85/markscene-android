@@ -1,5 +1,18 @@
 # Agent Progress
 
+## 2026-05-26 (Local VLM Auto Download)
+
+작업 내용:
+- 설정 화면의 로컬 AI 모델 버튼이 파일 선택기를 열지 않고, 앱에 설정된 HTTPS 모델 URL에서 자동 다운로드하도록 바꿨습니다.
+- 모델 다운로드 URL/표시 이름은 `MARKSCENE_LOCAL_VLM_MODEL_URL`, `MARKSCENE_LOCAL_VLM_MODEL_NAME` 빌드 설정으로 주입하도록 했습니다.
+- Play Store 업로드용 `versionCode` 중복을 피하기 위해 버전을 `2.6.1 / 261`로 올렸습니다.
+- 제품/보안/아키텍처 문서와 사용자 문구를 모델 다운로드 기준으로 정리했습니다.
+
+검증:
+- 로컬: `compileDebugKotlin`, `testDebugUnitTest`, `lintDebug`, `git diff --check` 성공.
+- 로컬: `bundleRelease`는 10분 제한 초과로 완료 확인하지 못했습니다.
+- CI: 커밋/푸시 후 확인 예정.
+
 ## 2026-05-26 (v2.6.0 Release - Local VLM Advanced Analysis)
 
 작업 내용:

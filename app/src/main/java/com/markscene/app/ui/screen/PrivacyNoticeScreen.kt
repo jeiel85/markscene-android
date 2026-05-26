@@ -80,7 +80,7 @@ fun PrivacyNoticeScreen(onBack: () -> Unit) {
 
             PrivacyItem(
                 title = "2. 선택적 로컬 고급 AI",
-                description = "사용자가 로컬 VLM 모델 파일을 가져온 경우, 고급 AI 분석도 기기 안에서 처리됩니다. 모델 파일은 앱 내부 저장소에 복사되며 사진은 외부 서버로 전송되지 않습니다."
+                description = "사용자가 로컬 VLM 모델 다운로드를 실행한 경우, 고급 AI 분석도 기기 안에서 처리됩니다. 모델 파일은 앱 내부 저장소에 저장되며 사진은 외부 서버로 전송되지 않습니다."
             )
 
             PrivacyItem(

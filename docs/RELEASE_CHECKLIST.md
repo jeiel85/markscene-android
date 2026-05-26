@@ -34,17 +34,17 @@
 - [ ] Contact email works.
 - [x] Release signing configured outside repository (Secrets based automation).
 - [x] No debug logs expose private data (verified in `PRIVACY_AND_SECURITY.md`).
-- [x] Version name and code set (`versionName "2.6.0"`, `versionCode 260`).
+- [x] Version name and code set (`versionName "2.6.1"`, `versionCode 261`).
 
 ## Current Implementation Status
 
 | Component | Status |
 |-----------|--------|
-| Version | v2.6.0 (2026-05-26) |
+| Version | v2.6.1 (2026-05-26) |
 | CameraX Capture | ✅ Implemented |
 | Photo Picker Import | ✅ Implemented |
 | ML Kit Local Tagging | ✅ Implemented (fallback to mock) |
-| Local VLM Advanced Analysis | ✅ Implemented (user-imported MediaPipe-compatible model) |
+| Local VLM Advanced Analysis | ✅ Implemented (app-downloaded approved MediaPipe-compatible model) |
 | Gemini BYOK Analysis | ✅ Implemented (external fallback) |
 | Room Database | ✅ Implemented |
 | Encrypted API Key Storage | ✅ Implemented (EncryptedSharedPreferences) |

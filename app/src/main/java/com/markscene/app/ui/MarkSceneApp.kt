@@ -51,6 +51,7 @@ import androidx.navigation.navArgument
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.markscene.app.BuildConfig
 import com.markscene.app.R
 import com.markscene.app.ai.provider.GeminiAdvancedVisionProvider
 import com.markscene.app.ai.provider.LocalVisionModelManager
@@ -234,6 +235,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
     var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
     var localVlmModelName by remember { mutableStateOf(localVisionModelManager.getModelName()) }
     var hasLocalVlmModel by remember { mutableStateOf(localVisionModelManager.getModelPath() != null) }
+    var isLocalVlmModelDownloading by remember { mutableStateOf(false) }
     var isBiometricLockEnabled by remember {
         mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false })
     }
@@ -320,24 +322,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                 backupStatusMessage = "Markdown 내보내기가 완료되었습니다."
             } catch (e: Exception) { backupStatusMessage = "Markdown 내보내기 실패: ${e.message}" }
         }}
-    }
-
-    val localVlmModelLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let {
-            scope.launch {
-                val result = localVisionModelManager.importModel(it)
-                if (result.isSuccess) {
-                    localVlmModelName = result.getOrNull()
-                    hasLocalVlmModel = localVisionModelManager.getModelPath() != null
-                    backupStatusMessage = context.getString(R.string.settings_local_vlm_imported, localVlmModelName ?: "local model")
-                } else {
-                    backupStatusMessage = context.getString(
-                        R.string.settings_local_vlm_failed,
-                        result.exceptionOrNull()?.message ?: "unknown"
-                    )
-                }
-            }
-        }
     }
 
     val allRecordsFlow = remember(repository) {
@@ -673,6 +657,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                         hasApiKey = hasApiKey,
                         hasLocalVlmModel = hasLocalVlmModel,
                         localVlmModelName = localVlmModelName,
+                        isLocalVlmModelDownloading = isLocalVlmModelDownloading,
                         isBiometricLockEnabled = isBiometricLockEnabled,
                         isTrueBlackEnabled = isTrueBlackEnabled,
                         isDynamicColorsEnabled = isDynamicColorsEnabled,
@@ -747,7 +732,27 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             }
                         },
                         onImportLocalVlmModel = {
-                            localVlmModelLauncher.launch(arrayOf("application/octet-stream", "application/x-mediapipe", "*/*"))
+                            if (!isLocalVlmModelDownloading) {
+                                scope.launch {
+                                    isLocalVlmModelDownloading = true
+                                    backupStatusMessage = context.getString(R.string.settings_local_vlm_downloading)
+                                    val result = localVisionModelManager.downloadModel(
+                                        modelUrl = BuildConfig.LOCAL_VLM_MODEL_URL,
+                                        displayName = BuildConfig.LOCAL_VLM_MODEL_NAME
+                                    )
+                                    isLocalVlmModelDownloading = false
+                                    if (result.isSuccess) {
+                                        localVlmModelName = result.getOrNull()
+                                        hasLocalVlmModel = localVisionModelManager.getModelPath() != null
+                                        backupStatusMessage = context.getString(R.string.settings_local_vlm_downloaded, localVlmModelName ?: "local model")
+                                    } else {
+                                        backupStatusMessage = context.getString(
+                                            R.string.settings_local_vlm_failed,
+                                            result.exceptionOrNull()?.message ?: "unknown"
+                                        )
+                                    }
+                                }
+                            }
                         },
                         onDeleteLocalVlmModel = {
                             localVisionModelManager.clearModel()

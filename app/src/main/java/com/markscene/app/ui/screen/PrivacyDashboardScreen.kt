@@ -101,7 +101,7 @@ fun PrivacyDashboardScreen(
                 icon = Icons.Default.CloudOff,
                 title = "로컬 고급 AI",
                 isEnabled = hasLocalVlmModel,
-                description = if (hasLocalVlmModel) "온디바이스 VLM 사용 가능" else "설정에서 모델 파일 가져오기 가능"
+                description = if (hasLocalVlmModel) "온디바이스 VLM 사용 가능" else "설정에서 모델 다운로드 가능"
             )
 
             SecurityItem(
