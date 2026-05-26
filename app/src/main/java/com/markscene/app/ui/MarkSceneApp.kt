@@ -236,6 +236,9 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
     var localVlmModelName by remember { mutableStateOf(localVisionModelManager.getModelName()) }
     var hasLocalVlmModel by remember { mutableStateOf(localVisionModelManager.getModelPath() != null) }
     var isLocalVlmModelDownloading by remember { mutableStateOf(false) }
+    var localVlmDownloadedBytes by remember { mutableStateOf(0L) }
+    var localVlmTotalBytes by remember { mutableStateOf(0L) }
+    var hasHuggingFaceToken by remember { mutableStateOf(!apiKeyStore.getHuggingFaceToken().isNullOrBlank()) }
     var isBiometricLockEnabled by remember {
         mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false })
     }
@@ -658,6 +661,13 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                         hasLocalVlmModel = hasLocalVlmModel,
                         localVlmModelName = localVlmModelName,
                         isLocalVlmModelDownloading = isLocalVlmModelDownloading,
+                        localVlmDownloadedBytes = localVlmDownloadedBytes,
+                        localVlmTotalBytes = localVlmTotalBytes,
+                        localVlmDefaultModelName = BuildConfig.LOCAL_VLM_MODEL_NAME,
+                        localVlmDefaultModelSizeMb = BuildConfig.LOCAL_VLM_MODEL_SIZE_MB,
+                        localVlmRequiresLicense = BuildConfig.LOCAL_VLM_MODEL_URL.contains("huggingface.co", ignoreCase = true),
+                        localVlmLicenseUrl = BuildConfig.LOCAL_VLM_MODEL_LICENSE_URL.takeIf { it.isNotBlank() },
+                        hasHuggingFaceToken = hasHuggingFaceToken,
                         isBiometricLockEnabled = isBiometricLockEnabled,
                         isTrueBlackEnabled = isTrueBlackEnabled,
                         isDynamicColorsEnabled = isDynamicColorsEnabled,
@@ -733,23 +743,41 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                         },
                         onImportLocalVlmModel = {
                             if (!isLocalVlmModelDownloading) {
-                                scope.launch {
-                                    isLocalVlmModelDownloading = true
-                                    backupStatusMessage = context.getString(R.string.settings_local_vlm_downloading)
-                                    val result = localVisionModelManager.downloadModel(
-                                        modelUrl = BuildConfig.LOCAL_VLM_MODEL_URL,
-                                        displayName = BuildConfig.LOCAL_VLM_MODEL_NAME
-                                    )
-                                    isLocalVlmModelDownloading = false
-                                    if (result.isSuccess) {
-                                        localVlmModelName = result.getOrNull()
-                                        hasLocalVlmModel = localVisionModelManager.getModelPath() != null
-                                        backupStatusMessage = context.getString(R.string.settings_local_vlm_downloaded, localVlmModelName ?: "local model")
-                                    } else {
-                                        backupStatusMessage = context.getString(
-                                            R.string.settings_local_vlm_failed,
-                                            result.exceptionOrNull()?.message ?: "unknown"
+                                val requiresLicense = BuildConfig.LOCAL_VLM_MODEL_URL.contains("huggingface.co", ignoreCase = true)
+                                val token = apiKeyStore.getHuggingFaceToken()
+                                if (requiresLicense && token.isNullOrBlank()) {
+                                    backupStatusMessage = context.getString(R.string.settings_local_vlm_hf_missing)
+                                } else {
+                                    scope.launch {
+                                        isLocalVlmModelDownloading = true
+                                        localVlmDownloadedBytes = 0L
+                                        localVlmTotalBytes = 0L
+                                        backupStatusMessage = context.getString(R.string.settings_local_vlm_downloading)
+                                        val result = localVisionModelManager.downloadModel(
+                                            modelUrl = BuildConfig.LOCAL_VLM_MODEL_URL,
+                                            displayName = BuildConfig.LOCAL_VLM_MODEL_NAME,
+                                            fileName = BuildConfig.LOCAL_VLM_MODEL_FILENAME,
+                                            expectedSizeMb = BuildConfig.LOCAL_VLM_MODEL_SIZE_MB,
+                                            authToken = token,
+                                            onProgress = { read, total ->
+                                                localVlmDownloadedBytes = read
+                                                localVlmTotalBytes = total
+                                            }
                                         )
+                                        isLocalVlmModelDownloading = false
+                                        if (result.isSuccess) {
+                                            localVlmModelName = result.getOrNull()
+                                            hasLocalVlmModel = localVisionModelManager.getModelPath() != null
+                                            backupStatusMessage = context.getString(
+                                                R.string.settings_local_vlm_downloaded,
+                                                localVlmModelName ?: "local model"
+                                            )
+                                        } else {
+                                            backupStatusMessage = context.getString(
+                                                R.string.settings_local_vlm_failed,
+                                                result.exceptionOrNull()?.message ?: "unknown"
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -759,6 +787,31 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             localVlmModelName = null
                             hasLocalVlmModel = false
                             backupStatusMessage = context.getString(R.string.settings_local_vlm_deleted)
+                        },
+                        onSaveHuggingFaceToken = { token ->
+                            val saved = apiKeyStore.saveHuggingFaceToken(token)
+                            hasHuggingFaceToken = saved && token.isNotBlank()
+                            if (!saved) {
+                                backupStatusMessage = "보안 저장소를 사용할 수 없어 토큰을 저장하지 못했습니다."
+                            }
+                        },
+                        onDeleteHuggingFaceToken = {
+                            apiKeyStore.clearHuggingFaceToken()
+                            hasHuggingFaceToken = false
+                        },
+                        onOpenModelLicense = {
+                            val licenseUrl = BuildConfig.LOCAL_VLM_MODEL_LICENSE_URL
+                            if (licenseUrl.isNotBlank()) {
+                                runCatching {
+                                    val intent = android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse(licenseUrl)
+                                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    context.startActivity(intent)
+                                }.onFailure { e ->
+                                    backupStatusMessage = "브라우저를 열 수 없습니다: ${e.message}"
+                                }
+                            }
                         },
                         onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
                         onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },

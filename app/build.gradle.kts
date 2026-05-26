@@ -12,12 +12,23 @@ android {
     namespace = "com.markscene.app"
     compileSdk = 35
 
+    // 기본값: Google Gemma-3n E2B INT4 LiteRT-LM 모델 (HuggingFace 라이선스 수락 + 사용자 토큰 필요).
+    // gradle property 또는 환경 변수로 다른 MediaPipe 호환 .task/.litertlm URL을 주입할 수 있다.
     val localVlmModelUrl = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_URL")
         .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_URL"))
-        .orElse("")
+        .orElse("https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm")
     val localVlmModelName = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_NAME")
         .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_NAME"))
-        .orElse("MarkScene local VLM model")
+        .orElse("Gemma 3n E2B (INT4)")
+    val localVlmModelFileName = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_FILENAME")
+        .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_FILENAME"))
+        .orElse("gemma-3n-E2B-it-int4.litertlm")
+    val localVlmModelSizeMb = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_SIZE_MB")
+        .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_SIZE_MB"))
+        .orElse("3660")
+    val localVlmModelLicenseUrl = providers.gradleProperty("MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL")
+        .orElse(providers.environmentVariable("MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL"))
+        .orElse("https://huggingface.co/google/gemma-3n-E2B-it-litert-lm")
 
     defaultConfig {
         applicationId = "com.markscene.app"
@@ -32,6 +43,9 @@ android {
         }
         buildConfigField("String", "LOCAL_VLM_MODEL_URL", "\"${localVlmModelUrl.get().replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         buildConfigField("String", "LOCAL_VLM_MODEL_NAME", "\"${localVlmModelName.get().replace("\\", "\\\\").replace("\"", "\\\"")}\"")
+        buildConfigField("String", "LOCAL_VLM_MODEL_FILENAME", "\"${localVlmModelFileName.get().replace("\\", "\\\\").replace("\"", "\\\"")}\"")
+        buildConfigField("long", "LOCAL_VLM_MODEL_SIZE_MB", "${localVlmModelSizeMb.get().toLongOrNull() ?: 0L}L")
+        buildConfigField("String", "LOCAL_VLM_MODEL_LICENSE_URL", "\"${localVlmModelLicenseUrl.get().replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         // APK 용량 다이어트 + CI 에뮬레이터 호환(x86_64 포함)
         ndk {
             abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86_64"))

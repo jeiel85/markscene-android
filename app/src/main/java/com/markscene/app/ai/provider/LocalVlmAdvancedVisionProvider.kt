@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.genai.llminference.GraphOptions
-import com.google.mediapipe.tasks.genai.llminference.LlmInference
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
 import com.markscene.app.core.model.PhotoRecord
 import kotlinx.coroutines.Dispatchers
@@ -20,28 +19,30 @@ class LocalVlmAdvancedVisionProvider(
 ) {
     suspend fun analyze(record: PhotoRecord): Result<MockAdvancedAnalysisResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val modelPath = modelManager.getModelPath() ?: error("로컬 AI 모델이 설정되지 않았습니다.")
+            modelManager.getModelPath() ?: error("로컬 AI 모델이 설정되지 않았습니다. 설정에서 모델을 다운로드해주세요.")
             val bitmap = decodeImage(record.imageUri)
             val mpImage = BitmapImageBuilder(bitmap).build()
 
-            val inferenceOptions = LlmInference.LlmInferenceOptions.builder()
-                .setModelPath(modelPath)
-                .setMaxTokens(512)
-                .setMaxNumImages(1)
-                .build()
+            val inference = try {
+                modelManager.acquireInference()
+            } catch (oom: OutOfMemoryError) {
+                error("이 기기의 메모리로는 로컬 AI 모델을 로드할 수 없습니다. 더 가벼운 모델이 필요합니다.")
+            } catch (t: Throwable) {
+                error("로컬 AI 모델 로드 실패: ${t.message ?: "알 수 없는 오류"}")
+            }
+
             val sessionOptions = LlmInferenceSession.LlmInferenceSessionOptions.builder()
                 .setTopK(10)
                 .setTemperature(0.2f)
                 .setGraphOptions(GraphOptions.builder().setEnableVisionModality(true).build())
                 .build()
 
-            LlmInference.createFromOptions(context, inferenceOptions).use { inference ->
-                LlmInferenceSession.createFromOptions(inference, sessionOptions).use { session ->
-                    session.addQueryChunk(buildPrompt(record))
-                    session.addImage(mpImage)
-                    parseAnalysisResponse(session.generateResponse())
-                }
+            val responseText = LlmInferenceSession.createFromOptions(inference, sessionOptions).use { session ->
+                session.addQueryChunk(buildPrompt(record))
+                session.addImage(mpImage)
+                session.generateResponse()
             }
+            parseAnalysisResponse(responseText)
         }
     }
 
@@ -71,9 +72,24 @@ class LocalVlmAdvancedVisionProvider(
             .trim()
         val start = cleaned.indexOf('{')
         val end = cleaned.lastIndexOf('}')
-        require(start >= 0 && end > start) { "로컬 AI 응답에서 JSON을 찾을 수 없습니다." }
+        if (start < 0 || end <= start) {
+            // 모델이 JSON을 만들지 못한 경우에도 사용자에게 의미 있는 결과를 돌려준다.
+            val fallbackSummary = cleaned.lines().firstOrNull { it.isNotBlank() }?.take(200)
+                ?: "로컬 AI가 응답을 생성했지만 구조화된 결과를 만들지 못했습니다."
+            return MockAdvancedAnalysisResult(
+                sceneSummary = fallbackSummary,
+                suggestedTags = emptyList(),
+                warnings = listOf("로컬 AI 응답을 구조화할 수 없어 요약만 표시했습니다. 결과는 수정 가능한 제안입니다.")
+            )
+        }
         val jsonText = cleaned.substring(start, end + 1)
-        val parsed = JSONObject(jsonText)
+        val parsed = runCatching { JSONObject(jsonText) }.getOrElse {
+            return MockAdvancedAnalysisResult(
+                sceneSummary = "로컬 AI 응답을 해석할 수 없습니다.",
+                suggestedTags = emptyList(),
+                warnings = listOf("로컬 AI 응답이 JSON 형식이 아니어서 무시했습니다. 다시 시도해주세요.")
+            )
+        }
         val suggestedTags = parsed.optJSONArray("suggestedTags") ?: JSONArray()
         val objects = parsed.optJSONArray("objects") ?: JSONArray()
         val warnings = parsed.optJSONArray("warnings") ?: JSONArray()

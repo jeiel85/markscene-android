@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.markscene.app.R
@@ -42,6 +43,13 @@ fun SettingsScreen(
     hasLocalVlmModel: Boolean = false,
     localVlmModelName: String? = null,
     isLocalVlmModelDownloading: Boolean = false,
+    localVlmDownloadedBytes: Long = 0L,
+    localVlmTotalBytes: Long = 0L,
+    localVlmDefaultModelName: String = "",
+    localVlmDefaultModelSizeMb: Long = 0L,
+    localVlmRequiresLicense: Boolean = false,
+    localVlmLicenseUrl: String? = null,
+    hasHuggingFaceToken: Boolean = false,
     isBiometricLockEnabled: Boolean,
     isTrueBlackEnabled: Boolean = false,
     isDynamicColorsEnabled: Boolean = false,
@@ -64,6 +72,9 @@ fun SettingsScreen(
     onTestConnection: () -> String,
     onImportLocalVlmModel: () -> Unit = {},
     onDeleteLocalVlmModel: () -> Unit = {},
+    onSaveHuggingFaceToken: (String) -> Unit = {},
+    onDeleteHuggingFaceToken: () -> Unit = {},
+    onOpenModelLicense: () -> Unit = {},
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
     onExportCsv: () -> Unit = {},
@@ -81,6 +92,8 @@ fun SettingsScreen(
     val context = LocalContext.current
     var apiKeyInput by rememberSaveable { mutableStateOf("") }
     var apiKeyVisible by rememberSaveable { mutableStateOf(false) }
+    var hfTokenInput by rememberSaveable { mutableStateOf("") }
+    var hfTokenVisible by rememberSaveable { mutableStateOf(false) }
     var resultMessage by rememberSaveable { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()
 
@@ -184,13 +197,125 @@ fun SettingsScreen(
                                         text = if (hasLocalVlmModel) {
                                             stringResource(R.string.settings_local_vlm_ready, localVlmModelName ?: "local model")
                                         } else if (isLocalVlmModelDownloading) {
-                                            stringResource(R.string.settings_local_vlm_downloading)
+                                            formatLocalVlmProgress(
+                                                context = context,
+                                                downloaded = localVlmDownloadedBytes,
+                                                total = localVlmTotalBytes
+                                            )
                                         } else {
                                             stringResource(R.string.settings_local_vlm_desc)
                                         },
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                    if (!hasLocalVlmModel && !isLocalVlmModelDownloading && localVlmDefaultModelName.isNotBlank() && localVlmDefaultModelSizeMb > 0) {
+                                        Text(
+                                            text = stringResource(
+                                                R.string.settings_local_vlm_model_info,
+                                                localVlmDefaultModelName,
+                                                localVlmDefaultModelSizeMb
+                                            ),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (isLocalVlmModelDownloading && localVlmTotalBytes > 0) {
+                                LinearProgressIndicator(
+                                    progress = { (localVlmDownloadedBytes.toFloat() / localVlmTotalBytes.toFloat()).coerceIn(0f, 1f) },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            } else if (isLocalVlmModelDownloading) {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                            }
+
+                            if (localVlmRequiresLicense && !hasHuggingFaceToken) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.settings_local_vlm_license_required),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        if (!localVlmLicenseUrl.isNullOrBlank()) {
+                                            TextButton(onClick = onOpenModelLicense) {
+                                                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(stringResource(R.string.settings_local_vlm_open_license))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // HuggingFace 토큰 입력 (Gemma 등 라이선스 게이트 모델용)
+                            OutlinedTextField(
+                                value = hfTokenInput,
+                                onValueChange = { hfTokenInput = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text(stringResource(R.string.settings_local_vlm_hf_label)) },
+                                placeholder = { Text(stringResource(R.string.settings_local_vlm_hf_placeholder)) },
+                                supportingText = { Text(stringResource(R.string.settings_local_vlm_hf_help), style = MaterialTheme.typography.labelSmall) },
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                visualTransformation = if (hfTokenVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Done,
+                                    autoCorrect = false
+                                ),
+                                trailingIcon = {
+                                    Row {
+                                        IconButton(onClick = { hfTokenVisible = !hfTokenVisible }) {
+                                            Icon(
+                                                imageVector = if (hfTokenVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                                contentDescription = null
+                                            )
+                                        }
+                                        if (hfTokenInput.isNotBlank()) {
+                                            IconButton(onClick = { hfTokenInput = "" }) {
+                                                Icon(Icons.Default.Clear, contentDescription = null)
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        if (hfTokenInput.isNotBlank()) {
+                                            onSaveHuggingFaceToken(hfTokenInput.trim())
+                                            resultMessage = context.getString(R.string.settings_local_vlm_hf_saved)
+                                            hfTokenInput = ""
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    enabled = hfTokenInput.isNotBlank()
+                                ) { Text(stringResource(R.string.save)) }
+
+                                if (hasHuggingFaceToken) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            onDeleteHuggingFaceToken()
+                                            resultMessage = context.getString(R.string.settings_local_vlm_hf_deleted)
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                    ) { Text(stringResource(R.string.delete)) }
                                 }
                             }
 
@@ -200,7 +325,7 @@ fun SettingsScreen(
                             ) {
                                 OutlinedButton(
                                     onClick = onImportLocalVlmModel,
-                                    enabled = !isLocalVlmModelDownloading,
+                                    enabled = !isLocalVlmModelDownloading && (!localVlmRequiresLicense || hasHuggingFaceToken),
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
@@ -227,6 +352,12 @@ fun SettingsScreen(
                                     }
                                 }
                             }
+
+                            Text(
+                                text = stringResource(R.string.settings_local_vlm_device_warning),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
 
@@ -719,3 +850,30 @@ private fun StatusBadge(label: String, isActive: Boolean) {
 }
 
 private fun Modifier.size(size: androidx.compose.ui.unit.Dp): Modifier = this.width(size).height(size)
+
+private fun formatLocalVlmProgress(
+    context: android.content.Context,
+    downloaded: Long,
+    total: Long
+): String {
+    val downloadedText = formatBytesHuman(downloaded)
+    if (total <= 0L) {
+        return context.getString(R.string.settings_local_vlm_progress_unknown, downloadedText)
+    }
+    val percent = ((downloaded.toDouble() / total.toDouble()) * 100.0).toInt().coerceIn(0, 100)
+    val totalText = formatBytesHuman(total)
+    return context.getString(R.string.settings_local_vlm_progress, percent, downloadedText, totalText)
+}
+
+private fun formatBytesHuman(bytes: Long): String {
+    if (bytes <= 0L) return "0 B"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    var size = bytes.toDouble()
+    var unitIndex = 0
+    while (size >= 1024.0 && unitIndex < units.lastIndex) {
+        size /= 1024.0
+        unitIndex++
+    }
+    return if (unitIndex >= 2) String.format("%.1f %s", size, units[unitIndex])
+    else String.format("%d %s", size.toLong(), units[unitIndex])
+}

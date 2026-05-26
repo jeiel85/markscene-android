@@ -2,6 +2,27 @@
 
 이 문서는 MarkScene의 사용자에게 공개 가능한 변경 사항을 기록합니다.
 
+## Unreleased
+
+### Added
+- 로컬 고급 AI 모델 다운로드가 기본 모델(Google Gemma 3n E2B INT4 LiteRT-LM, 약 3.66GB)로 즉시 동작합니다. 별도 빌드 설정 주입 없이도 다운로드 버튼이 활성화됩니다.
+- 설정에서 HuggingFace read 토큰을 안전하게 저장/삭제할 수 있습니다. 토큰은 EncryptedSharedPreferences를 통해 기기 내부에만 암호화 저장되며, 모델 다운로드 시 Authorization 헤더로 전송됩니다.
+- 모델 다운로드 진행률(다운로드된 바이트 / 전체 크기, 퍼센트, 진행 막대)이 설정 화면에 표시됩니다.
+- 라이선스 게이트가 있는 모델의 경우 HuggingFace 모델 페이지를 바로 여는 버튼이 제공됩니다.
+
+### Changed
+- 로컬 AI 모델 매니저가 청크 단위 스트리밍 다운로드, 디스크 여유 공간 사전 검증, HTTP 401/403/404 등에 대한 명확한 한국어 오류 메시지, 코루틴 취소 지원, 10분 단위로 늘어난 읽기 타임아웃을 지원합니다.
+- 로컬 VLM 추론 인스턴스를 lazy singleton으로 유지해, 매 분석 호출마다 수 GB 모델을 다시 로드하지 않습니다. 모델 삭제 또는 재다운로드 시 자동으로 release 됩니다.
+- 로컬 VLM JSON 파싱 실패 시 사용자에게 의미 있는 fallback 요약을 표시합니다.
+
+### Build / CI
+- `MARKSCENE_LOCAL_VLM_MODEL_FILENAME`, `MARKSCENE_LOCAL_VLM_MODEL_SIZE_MB`, `MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL` 빌드 설정으로 다른 MediaPipe 호환 모델로 교체할 수 있습니다.
+
+### Verification
+- 로컬: `./gradlew :app:compileDebugKotlin`, `./gradlew :app:assembleDebug`, `./gradlew :app:testDebugUnitTest`, `./gradlew :app:lintDebug` 모두 성공.
+- 로컬: 생성된 `BuildConfig.java`에 `LOCAL_VLM_MODEL_URL`이 Gemma 3n E2B LiteRT-LM URL로 박혀 있는지 직접 확인.
+- 미실시: 실제 기기에서 모델 다운로드 → 추론 end-to-end 검증은 충분한 RAM과 라이선스 수락된 사용자 토큰이 필요해 보류.
+
 ## v2.6.1 - 2026-05-26
 
 ### Changed

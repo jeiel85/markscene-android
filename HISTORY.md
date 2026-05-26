@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-27 — 로컬 VLM 실제 구동 가능 상태로 완성
+
+- 작업: 코드 경로는 있지만 모델 URL 미주입과 큰 파일 다운로드 미지원으로 실사용 불가였던 로컬 VLM 기능을, 기본 모델 + 토큰 입력 + 진행률 + 추론 인스턴스 재사용까지 모두 갖춰 실제로 동작 가능한 상태로 만듦.
+- 변경 내용:
+  1. `app/build.gradle.kts`: `LOCAL_VLM_MODEL_URL` 기본값을 Gemma 3n E2B INT4 LiteRT-LM HuggingFace URL로 설정. `LOCAL_VLM_MODEL_FILENAME`, `LOCAL_VLM_MODEL_SIZE_MB`, `LOCAL_VLM_MODEL_LICENSE_URL` 빌드 설정 추가.
+  2. `LocalVisionModelManager`: 청크 스트리밍 다운로드, HF 토큰 Bearer 헤더, Content-Length 검증, 디스크 여유 공간 사전 검증, 코루틴 취소, 10분 readTimeout, HTTP 상태별 한국어 오류, `acquireInference()`/`closeCachedInference()`로 LlmInference 인스턴스 lazy 캐싱 추가.
+  3. `LocalVlmAdvancedVisionProvider`: 매 분석마다 LlmInference를 재생성하던 흐름을 modelManager에 위임. 세션만 매번 새로 만들고 OOM/타임아웃/JSON 파싱 실패에 사용자 친화 fallback.
+  4. `ApiKeyStore`: HuggingFace 토큰 저장/조회/삭제 메서드 추가. 기존 EncryptedSharedPreferences 그대로 활용.
+  5. `SettingsScreen`: HF 토큰 입력 필드(visibility toggle, 도움말, 저장/삭제), 모델 정보(이름·크기), 라이선스 안내 + 페이지 열기 버튼, 다운로드 진행률(LinearProgressIndicator + 바이트/퍼센트 텍스트), 디바이스 메모리 요구 안내 추가.
+  6. `MarkSceneApp`: 진행률/HF 토큰 상태와 콜백 연결. 다운로드 시 라이선스 필요 모델이면 토큰 없으면 사전 차단.
+  7. `strings.xml`: 진행률, 라이선스 안내, HF 토큰 관련 한국어 문구 12종 추가.
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin`, `./gradlew :app:assembleDebug`, `./gradlew :app:testDebugUnitTest`, `./gradlew :app:lintDebug` 모두 성공.
+  - 로컬: 생성된 `BuildConfig.java`에서 `LOCAL_VLM_MODEL_URL`이 `https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm`로 박혀 있는지 직접 확인.
+  - 보류: 실제 기기에서 다운로드 → 추론 end-to-end 검증은 라이선스 수락된 사용자 HuggingFace 토큰과 충분한 RAM(약 4GB)을 가진 기기가 필요해 본 작업 범위 외로 보류.
+- 결과: 사용자가 ① HuggingFace에서 Gemma 라이선스 수락 후 read 토큰 발급, ② 앱 설정에 토큰 저장, ③ "모델 다운로드" 클릭으로 로컬 VLM이 동작 가능한 상태에 도달.
+- 후속 작업:
+  - 실기기에서 다운로드 시간/추론 지연/메모리 사용량 측정 후 사용자 안내 문구 보정.
+  - 다운로드 도중 화면 이탈/프로세스 종료에도 안전한 ForegroundService 또는 WorkManager 기반 전환 검토.
+
 ## 2026-05-26 — 로컬 VLM 모델 자동 다운로드 전환
 
 - 작업: 설정 화면의 로컬 AI 모델 버튼이 파일 선택기를 열지 않고 승인된 HTTPS 모델 URL에서 자동으로 다운로드하도록 전환하고, Play Store versionCode 중복을 피하기 위해 버전을 `2.6.1 / 261`로 상향.

@@ -85,6 +85,54 @@ RELEASE_KEY_PASSWORD    -> key 비밀번호
 RELEASE_STORE_FILE      -> release.jks (app 모듈 기준 상대 경로)
 ```
 
+## 로컬 VLM 모델 설정
+
+MarkScene은 기본적으로 Google Gemma 3n E2B INT4 LiteRT-LM 모델(약 3.66GB)을 로컬 고급 AI로 사용합니다.
+
+### 기본 빌드 동작
+
+`app/build.gradle.kts`의 기본값으로 다음 BuildConfig가 생성됩니다.
+
+```text
+LOCAL_VLM_MODEL_URL         = https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm
+LOCAL_VLM_MODEL_NAME        = Gemma 3n E2B (INT4)
+LOCAL_VLM_MODEL_FILENAME    = gemma-3n-E2B-it-int4.litertlm
+LOCAL_VLM_MODEL_SIZE_MB     = 3660
+LOCAL_VLM_MODEL_LICENSE_URL = https://huggingface.co/google/gemma-3n-E2B-it-litert-lm
+```
+
+### 다른 MediaPipe 호환 모델로 교체
+
+`local.properties` 또는 환경 변수로 override 할 수 있습니다.
+
+```properties
+MARKSCENE_LOCAL_VLM_MODEL_URL=https://...your-mediapipe-compatible-.task-or-.litertlm-url
+MARKSCENE_LOCAL_VLM_MODEL_NAME=My Custom VLM
+MARKSCENE_LOCAL_VLM_MODEL_FILENAME=my-model.litertlm
+MARKSCENE_LOCAL_VLM_MODEL_SIZE_MB=1500
+MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL=https://...license-page (선택)
+```
+
+### 사용자(end user) 사전 준비
+
+기본 Gemma 모델은 HuggingFace 라이선스 게이트가 있어 사용자가 직접 다음 단계를 수행해야 합니다.
+
+1. https://huggingface.co/google/gemma-3n-E2B-it-litert-lm 접속 후 라이선스 수락
+2. https://huggingface.co/settings/tokens 에서 read 권한 토큰(예: `hf_...`) 발급
+3. MarkScene 앱 → 설정 → "HuggingFace 토큰" 필드에 입력 후 저장
+4. "모델 다운로드" 클릭 (WiFi 권장, 약 3.66GB)
+5. 다운로드 완료 후 사진 상세 화면에서 "로컬 AI로 자세히 분석하기" 실행
+
+토큰은 EncryptedSharedPreferences로 기기 내부에만 암호화 저장됩니다. 모델 다운로드 시 Authorization Bearer 헤더로만 전송되고, 그 외 외부 서버로 전달되지 않습니다.
+
+### 디바이스 요구 사항
+
+- Android 8.0 (API 26) 이상
+- 약 4GB 이상의 사용 가능 RAM (Gemma 3n E2B INT4 추론 기준)
+- 약 4GB 이상의 빈 저장 공간 (다운로드 + 임시 파일)
+
+저사양 기기에서는 추론 시 OOM 또는 매우 느린 응답이 발생할 수 있습니다. 이 경우 사용자는 모델을 삭제하고 외부 BYOK Gemini 경로를 사용할 수 있습니다.
+
 ## 현재 설정 상태
 
 - ✅ `keystore/` 디렉터리 → `.gitignore`에 포함됨
