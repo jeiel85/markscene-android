@@ -137,6 +137,28 @@ class UserPreferences(context: Context) {
         prefs.edit().putString(KEY_PREFERRED_LAYOUT, layout).apply()
     }
 
+    fun getLocalVlmModelPath(): String? {
+        return prefs.getString(KEY_LOCAL_VLM_MODEL_PATH, null)?.takeIf { it.isNotBlank() }
+    }
+
+    fun getLocalVlmModelName(): String? {
+        return prefs.getString(KEY_LOCAL_VLM_MODEL_NAME, null)?.takeIf { it.isNotBlank() }
+    }
+
+    fun setLocalVlmModel(path: String, displayName: String) {
+        prefs.edit()
+            .putString(KEY_LOCAL_VLM_MODEL_PATH, path)
+            .putString(KEY_LOCAL_VLM_MODEL_NAME, displayName)
+            .apply()
+    }
+
+    fun clearLocalVlmModel() {
+        prefs.edit()
+            .remove(KEY_LOCAL_VLM_MODEL_PATH)
+            .remove(KEY_LOCAL_VLM_MODEL_NAME)
+            .apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "markscene_prefs"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
@@ -148,5 +170,7 @@ class UserPreferences(context: Context) {
         private const val KEY_GALLERY_HIDDEN = "gallery_hidden"
         private const val KEY_AUTO_LOCK = "auto_lock"
         private const val KEY_PREFERRED_LAYOUT = "preferred_layout"
+        private const val KEY_LOCAL_VLM_MODEL_PATH = "local_vlm_model_path"
+        private const val KEY_LOCAL_VLM_MODEL_NAME = "local_vlm_model_name"
     }
 }

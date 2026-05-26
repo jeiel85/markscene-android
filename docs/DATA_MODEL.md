@@ -26,20 +26,20 @@ Fields:
 - `recordId`: parent record ID.
 - `name`: normalized display name.
 - `rawName`: nullable raw source label.
-- `source`: mock, local_image_label, local_object_detection, user, advanced_ai.
+- `source`: mock, local_image_label, local_object_detection, local_vlm, user, advanced_ai.
 - `confidence`: nullable float.
 - `userConfirmed`: boolean.
 - `createdAt`: timestamp.
 
 ### AdvancedAnalysis
 
-Optional analysis result from BYOK AI provider.
+Optional analysis result from local VLM or BYOK AI provider.
 
 Fields:
 
 - `id`: stable unique ID.
 - `recordId`: parent record ID.
-- `provider`: Gemini or future provider.
+- `provider`: local_vlm, Gemini, or future provider.
 - `modelName`: nullable string.
 - `sceneSummary`: nullable string.
 - `createdAt`: timestamp.
@@ -59,7 +59,7 @@ Fields:
 - `count`: nullable int.
 - `position`: nullable string.
 - `confidenceLabel`: high, medium, low, unknown.
-- `source`: local_object_detection, advanced_ai, user.
+- `source`: local_object_detection, local_vlm, advanced_ai, user.
 - `userConfirmed`: boolean.
 
 ## Suggested Kotlin Models
@@ -90,6 +90,7 @@ enum class TagSource {
     Mock,
     LocalImageLabel,
     LocalObjectDetection,
+    LocalVlm,
     User,
     AdvancedAi
 }

@@ -79,17 +79,22 @@ fun PrivacyNoticeScreen(onBack: () -> Unit) {
             )
 
             PrivacyItem(
-                title = "2. 선택적 AI 분석 (BYOK)",
-                description = "사용자가 명시적으로 '고급 AI 분석'을 실행할 때만, 선택한 이미지와 프롬프트가 사용자가 등록한 API Key를 통해 외부 AI 제공자(Google Gemini 등)에게 전송됩니다."
+                title = "2. 선택적 로컬 고급 AI",
+                description = "사용자가 로컬 VLM 모델 파일을 가져온 경우, 고급 AI 분석도 기기 안에서 처리됩니다. 모델 파일은 앱 내부 저장소에 복사되며 사진은 외부 서버로 전송되지 않습니다."
             )
 
             PrivacyItem(
-                title = "3. 안전한 키 관리",
+                title = "3. 선택적 외부 AI 분석 (BYOK)",
+                description = "로컬 모델이 없고 사용자가 명시적으로 '고급 AI 분석'을 실행할 때만, 선택한 이미지와 프롬프트가 사용자가 등록한 API Key를 통해 외부 AI 제공자(Google Gemini 등)에게 전송됩니다."
+            )
+
+            PrivacyItem(
+                title = "4. 안전한 키 관리",
                 description = "사용자가 등록한 API Key는 안드로이드 시스템의 암호화 저장소(EncryptedSharedPreferences)에 안전하게 보관되며, 앱 외부로 유출되지 않습니다."
             )
 
             PrivacyItem(
-                title = "4. 최소한의 권한",
+                title = "5. 최소한의 권한",
                 description = "앱은 기능 수행에 필요한 최소한의 권한(카메라, 사진 선택 등)만을 요구하며, 전체 갤러리를 스캔하거나 무단으로 데이터에 접근하지 않습니다."
             )
 

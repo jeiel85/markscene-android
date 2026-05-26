@@ -58,6 +58,9 @@ fun RecordDetailScreen(
     latestAnalysis: AdvancedAnalysis?,
     historyRecords: List<PhotoRecord> = emptyList(),
     chatMessages: List<ChatMessage> = emptyList(),
+    isAdvancedAnalysisAvailable: Boolean = false,
+    advancedAnalysisLabel: String? = null,
+    advancedAnalysisConsent: String? = null,
     onRunAdvancedAnalysis: suspend (PhotoRecord) -> MockAdvancedAnalysisResult,
     onApplyAdvancedAnalysis: (MockAdvancedAnalysisResult) -> Unit,
     onSendQuestion: (String) -> Unit,
@@ -82,6 +85,8 @@ fun RecordDetailScreen(
     var isSendingQuestion by remember { mutableStateOf(false) }
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
     var isPlayingAudio by remember { mutableStateOf(false) }
+    val runAdvancedLabel = advancedAnalysisLabel ?: stringResource(R.string.detail_run_advanced)
+    val consentMessage = advancedAnalysisConsent ?: stringResource(R.string.detail_ai_consent_desc)
 
     DisposableEffect(Unit) {
         onDispose {
@@ -462,7 +467,7 @@ fun RecordDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         contentPadding = PaddingValues(16.dp),
-                        enabled = !isAnalyzing
+                        enabled = !isAnalyzing && isAdvancedAnalysisAvailable
                     ) {
                         if (isAnalyzing) {
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -471,8 +476,15 @@ fun RecordDetailScreen(
                         } else {
                             Icon(Icons.Default.AutoAwesome, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.detail_run_advanced))
+                            Text(runAdvancedLabel)
                         }
+                    }
+                    if (!isAdvancedAnalysisAvailable) {
+                        Text(
+                            text = stringResource(R.string.detail_ai_unavailable),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
                 
@@ -507,7 +519,7 @@ fun RecordDetailScreen(
         AlertDialog(
             onDismissRequest = { showConsentDialog = false },
             title = { Text(stringResource(R.string.detail_ai_consent_title)) },
-            text = { Text(stringResource(R.string.detail_ai_consent_desc)) },
+            text = { Text(consentMessage) },
             confirmButton = {
                 Button(onClick = {
                     showConsentDialog = false

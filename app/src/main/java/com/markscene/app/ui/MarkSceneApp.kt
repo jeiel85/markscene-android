@@ -53,6 +53,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.markscene.app.R
 import com.markscene.app.ai.provider.GeminiAdvancedVisionProvider
+import com.markscene.app.ai.provider.LocalVisionModelManager
+import com.markscene.app.ai.provider.LocalVlmAdvancedVisionProvider
 import com.markscene.app.ai.provider.MlKitLocalImageTagger
 import com.markscene.app.ai.provider.MlKitTextRecognizer
 import com.markscene.app.core.database.MarkSceneDatabase
@@ -218,16 +220,20 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
     val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
     val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
-    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao(), database.memoryContextDao(), database.recordFtsDao()) }
     val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
     val userPrefs = remember { UserPreferences(context.applicationContext) }
+    val localVisionModelManager = remember { LocalVisionModelManager(context.applicationContext, userPrefs) }
+    val localVlmProvider = remember { LocalVlmAdvancedVisionProvider(context.applicationContext, localVisionModelManager) }
+    val repository = remember { RoomRecordRepository(database.recordDao(), database.advancedAnalysisDao(), database.chatMessageDao(), database.memoryContextDao(), database.recordFtsDao()) }
     val backupManager = remember { BackupManager(context.applicationContext, repository) }
     val authenticator = remember { activity?.let { BiometricAuthenticator(it) } }
 
     var searchQuery by remember { mutableStateOf("") }
     var showOnboarding by remember { mutableStateOf(!userPrefs.isOnboardingCompleted()) }
     var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
+    var localVlmModelName by remember { mutableStateOf(localVisionModelManager.getModelName()) }
+    var hasLocalVlmModel by remember { mutableStateOf(localVisionModelManager.getModelPath() != null) }
     var isBiometricLockEnabled by remember {
         mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false })
     }
@@ -314,6 +320,24 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                 backupStatusMessage = "Markdown 내보내기가 완료되었습니다."
             } catch (e: Exception) { backupStatusMessage = "Markdown 내보내기 실패: ${e.message}" }
         }}
+    }
+
+    val localVlmModelLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            scope.launch {
+                val result = localVisionModelManager.importModel(it)
+                if (result.isSuccess) {
+                    localVlmModelName = result.getOrNull()
+                    hasLocalVlmModel = localVisionModelManager.getModelPath() != null
+                    backupStatusMessage = context.getString(R.string.settings_local_vlm_imported, localVlmModelName ?: "local model")
+                } else {
+                    backupStatusMessage = context.getString(
+                        R.string.settings_local_vlm_failed,
+                        result.exceptionOrNull()?.message ?: "unknown"
+                    )
+                }
+            }
+        }
     }
 
     val allRecordsFlow = remember(repository) {
@@ -512,7 +536,95 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                     val recordMemoryTypes by (recordId?.let { repository.observeMemoryTypes(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
 
                     if (record != null) {
-                        RecordDetailScreen(record = record, latestAnalysis = latestAnalysis, historyRecords = historyRecords, chatMessages = chatMessages, memoryContext = memoryContext, memoryTypes = recordMemoryTypes, onRunAdvancedAnalysis = { targetRecord -> val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isBlank()) error("API key missing"); geminiProvider.analyze(targetRecord, apiKey).getOrThrow() }, onApplyAdvancedAnalysis = { result -> scope.launch { val now = System.currentTimeMillis(); val advancedTags = result.suggestedTags.map { tagName -> PhotoTag(id = UUID.randomUUID().toString(), recordId = record.id, name = tagName.lowercase(), rawName = null, source = TagSource.AdvancedAi, confidence = null, userConfirmed = false, createdAt = now) }; val mergedTags = (record.tags + advancedTags).distinctBy { it.name }; val updatedRecord = record.copy(updatedAt = now, analysisStatus = AnalysisStatus.AdvancedComplete, tags = mergedTags); repository.saveRecord(updatedRecord); repository.saveAdvancedAnalysis(AdvancedAnalysis(id = UUID.randomUUID().toString(), recordId = record.id, provider = if (apiKeyStore.getGeminiApiKey() != null) "gemini" else "mock", sceneSummary = result.sceneSummary, createdAt = now)); if (result.memoryTypes.isNotEmpty() || result.recallCandidate) { val existingContext = repository.getMemoryContext(record.id); val primaryType = result.memoryTypes.firstOrNull() ?: existingContext?.primaryMemoryType; repository.saveMemoryContext(MemoryContext(id = existingContext?.id ?: UUID.randomUUID().toString(), recordId = record.id, primaryMemoryType = primaryType, mood = result.moodSuggestion ?: existingContext?.mood, energy = existingContext?.energy, contextType = result.contextType ?: existingContext?.contextType, isWorthRecalling = result.recallCandidate || (existingContext?.isWorthRecalling == true), recallReason = result.recallReason ?: existingContext?.recallReason, createdAt = existingContext?.createdAt ?: now, updatedAt = now)); if (result.memoryTypes.isNotEmpty()) { repository.saveMemoryTypes(record.id, result.memoryTypes, MemorySource.AdvancedAi, false) } } } }, onSendQuestion = { question -> scope.launch { val apiKey = apiKeyStore.getGeminiApiKey().orEmpty(); if (apiKey.isNotBlank()) { repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis())); val response = geminiProvider.askQuestion(record, question, apiKey); val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다."); repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis())) } else { backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다." } } }, onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } }, onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") }, onBack = { navController.popBackStack() })
+                        val useLocalVlm = hasLocalVlmModel
+                        RecordDetailScreen(
+                            record = record,
+                            latestAnalysis = latestAnalysis,
+                            historyRecords = historyRecords,
+                            chatMessages = chatMessages,
+                            memoryContext = memoryContext,
+                            memoryTypes = recordMemoryTypes,
+                            isAdvancedAnalysisAvailable = hasLocalVlmModel || hasApiKey,
+                            advancedAnalysisLabel = stringResource(if (useLocalVlm) R.string.detail_run_local_vlm else R.string.detail_run_gemini),
+                            advancedAnalysisConsent = stringResource(if (useLocalVlm) R.string.detail_local_vlm_consent_desc else R.string.detail_ai_consent_desc),
+                            onRunAdvancedAnalysis = { targetRecord ->
+                                if (localVisionModelManager.getModelPath() != null) {
+                                    localVlmProvider.analyze(targetRecord).getOrThrow()
+                                } else {
+                                    val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
+                                    if (apiKey.isBlank()) error("로컬 AI 모델 또는 Gemini API Key가 필요합니다.")
+                                    geminiProvider.analyze(targetRecord, apiKey).getOrThrow()
+                                }
+                            },
+                            onApplyAdvancedAnalysis = { result ->
+                                scope.launch {
+                                    val now = System.currentTimeMillis()
+                                    val tagSource = if (localVisionModelManager.getModelPath() != null) TagSource.LocalVlm else TagSource.AdvancedAi
+                                    val providerName = if (tagSource == TagSource.LocalVlm) "local_vlm" else "gemini"
+                                    val advancedTags = result.suggestedTags.map { tagName ->
+                                        PhotoTag(
+                                            id = UUID.randomUUID().toString(),
+                                            recordId = record.id,
+                                            name = tagName.lowercase(),
+                                            rawName = null,
+                                            source = tagSource,
+                                            confidence = null,
+                                            userConfirmed = false,
+                                            createdAt = now
+                                        )
+                                    }
+                                    val mergedTags = (record.tags + advancedTags).distinctBy { it.name }
+                                    val updatedRecord = record.copy(updatedAt = now, analysisStatus = AnalysisStatus.AdvancedComplete, tags = mergedTags)
+                                    repository.saveRecord(updatedRecord)
+                                    repository.saveAdvancedAnalysis(
+                                        AdvancedAnalysis(
+                                            id = UUID.randomUUID().toString(),
+                                            recordId = record.id,
+                                            provider = providerName,
+                                            sceneSummary = result.sceneSummary,
+                                            createdAt = now
+                                        )
+                                    )
+                                    if (result.memoryTypes.isNotEmpty() || result.recallCandidate) {
+                                        val existingContext = repository.getMemoryContext(record.id)
+                                        val primaryType = result.memoryTypes.firstOrNull() ?: existingContext?.primaryMemoryType
+                                        repository.saveMemoryContext(
+                                            MemoryContext(
+                                                id = existingContext?.id ?: UUID.randomUUID().toString(),
+                                                recordId = record.id,
+                                                primaryMemoryType = primaryType,
+                                                mood = result.moodSuggestion ?: existingContext?.mood,
+                                                energy = existingContext?.energy,
+                                                contextType = result.contextType ?: existingContext?.contextType,
+                                                isWorthRecalling = result.recallCandidate || (existingContext?.isWorthRecalling == true),
+                                                recallReason = result.recallReason ?: existingContext?.recallReason,
+                                                createdAt = existingContext?.createdAt ?: now,
+                                                updatedAt = now
+                                            )
+                                        )
+                                        if (result.memoryTypes.isNotEmpty()) {
+                                            repository.saveMemoryTypes(record.id, result.memoryTypes, MemorySource.AdvancedAi, false)
+                                        }
+                                    }
+                                }
+                            },
+                            onSendQuestion = { question ->
+                                scope.launch {
+                                    val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
+                                    if (apiKey.isNotBlank()) {
+                                        repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis()))
+                                        val response = geminiProvider.askQuestion(record, question, apiKey)
+                                        val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다.")
+                                        repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis()))
+                                    } else {
+                                        backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다."
+                                    }
+                                }
+                            },
+                            onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } },
+                            onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") },
+                            onBack = { navController.popBackStack() }
+                        )
                     }
                 }
                 composable(route = "$SPACE_TIMELINE_ROUTE/{$SPACE_NAME_ARG}", arguments = listOf(navArgument(SPACE_NAME_ARG) { type = NavType.StringType })) { backStackEntry ->
@@ -559,6 +671,8 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                     }
                     SettingsScreen(
                         hasApiKey = hasApiKey,
+                        hasLocalVlmModel = hasLocalVlmModel,
+                        localVlmModelName = localVlmModelName,
                         isBiometricLockEnabled = isBiometricLockEnabled,
                         isTrueBlackEnabled = isTrueBlackEnabled,
                         isDynamicColorsEnabled = isDynamicColorsEnabled,
@@ -632,6 +746,15 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                                 "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
                             }
                         },
+                        onImportLocalVlmModel = {
+                            localVlmModelLauncher.launch(arrayOf("application/octet-stream", "application/x-mediapipe", "*/*"))
+                        },
+                        onDeleteLocalVlmModel = {
+                            localVisionModelManager.clearModel()
+                            localVlmModelName = null
+                            hasLocalVlmModel = false
+                            backupStatusMessage = context.getString(R.string.settings_local_vlm_deleted)
+                        },
                         onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
                         onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
                         onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") },
@@ -660,6 +783,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                         recordCount = allRecords.size,
                         tagCount = tagCount,
                         hasApiKey = hasApiKey,
+                        hasLocalVlmModel = hasLocalVlmModel,
                         isBiometricEnabled = isBiometricLockEnabled,
                         lastBackupDate = null,
                         onBack = { navController.popBackStack() }

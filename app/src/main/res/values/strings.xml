@@ -71,10 +71,14 @@
     <string name="detail_suggested_tags">추천 태그</string>
     <string name="detail_apply_tags">태그 적용하기</string>
     <string name="detail_run_advanced">고급 AI 분석 실행하기</string>
+    <string name="detail_run_local_vlm">로컬 AI로 자세히 분석하기</string>
+    <string name="detail_run_gemini">Gemini로 고급 분석하기</string>
+    <string name="detail_ai_unavailable">설정에서 로컬 AI 모델을 가져오거나 Gemini API Key를 등록하면 고급 분석을 사용할 수 있습니다.</string>
     <string name="detail_location_history">위치 히스토리</string>
     <string name="detail_unassigned_space">미지정 공간</string>
     <string name="detail_ai_consent_title">AI 고급 분석 안내</string>
     <string name="detail_ai_consent_desc">이 사진을 분석하기 위해 외부 AI 엔진으로 전송합니다. 계속하시겠습니까?</string>
+    <string name="detail_local_vlm_consent_desc">이 사진은 기기 안의 로컬 AI 모델로 분석됩니다. 외부 서버로 전송되지 않지만, 분석에는 시간이 걸리고 결과는 수정 가능한 제안입니다.</string>
     <string name="detail_ai_start">분석 시작</string>
 
     <!-- Space Timeline & Compare -->
@@ -86,7 +90,15 @@
     <string name="compare_suffix">의 변화</string>
 
     <!-- Settings Screen -->
-    <string name="settings_ai_engine">AI 엔진 설정 (BYOK)</string>
+    <string name="settings_ai_engine">AI 엔진 설정</string>
+    <string name="settings_local_vlm_title">로컬 고급 AI 모델</string>
+    <string name="settings_local_vlm_desc">MediaPipe 호환 온디바이스 VLM 모델 파일을 가져오면 사진을 외부 전송 없이 자세히 분석합니다.</string>
+    <string name="settings_local_vlm_ready">%1$s 사용 가능</string>
+    <string name="settings_local_vlm_import">모델 가져오기</string>
+    <string name="settings_local_vlm_replace">모델 교체</string>
+    <string name="settings_local_vlm_imported">로컬 AI 모델을 가져왔습니다: %1$s</string>
+    <string name="settings_local_vlm_deleted">로컬 AI 모델을 삭제했습니다.</string>
+    <string name="settings_local_vlm_failed">로컬 AI 모델 가져오기 실패: %1$s</string>
     <string name="settings_api_active">Gemini API Key 활성화됨</string>
     <string name="settings_api_required">API Key 등록 필요</string>
     <string name="settings_api_label">Gemini API Key</string>
@@ -115,7 +127,7 @@
     <string name="settings_lock_desc">앱 실행 시 지문 또는 얼굴 인식 사용</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="settings_privacy_policy_desc">데이터 관리 및 보안 정책 확인</string>
-    <string name="settings_local_first_notice">MarkScene은 로컬 우선으로 동작합니다. 고급 분석 실행 시에만 선택한 이미지가 암호화되어 AI 제공자에게 전송됩니다.</string>
+    <string name="settings_local_first_notice">MarkScene은 로컬 우선으로 동작합니다. 로컬 AI 모델이 있으면 고급 분석도 기기 안에서 처리하고, 외부 AI는 사용자가 API Key를 등록해 명시적으로 실행할 때만 선택한 이미지를 전송합니다.</string>
 
     <!-- Appearance Settings -->
     <string name="settings_appearance">화면 테마</string>

@@ -15,16 +15,26 @@ MarkScene is local-first. The basic experience must work without sending user ph
 - User-confirmed tags.
 - Analysis metadata.
 - Optional API key for advanced AI provider.
+- Optional local VLM model file imported by the user.
 
 ### Sent Outside the Device
 
-Only when the user explicitly runs advanced AI analysis:
+Only when the user explicitly runs external BYOK advanced AI analysis:
 
 - Selected image or resized copy.
 - Prompt needed for image analysis.
 - API key required by the selected provider.
 
 The MVP must not send data to a developer-owned backend.
+
+### Processed On Device For Advanced Local AI
+
+When a local VLM model is configured:
+
+- The selected image is analyzed on device.
+- The prompt and model output stay on device.
+- The model file is stored in app-private storage.
+- Results are still suggestions and can be wrong.
 
 ## API Key Rules
 
@@ -78,6 +88,15 @@ This image will be sent to the selected AI provider for analysis.
 Do not analyze images containing sensitive personal information unless you understand the provider's data terms.
 ```
 
+### Before Local VLM Analysis
+
+Suggested copy:
+
+```text
+This image will be analyzed by the local AI model on this device.
+It will not be sent to an external server, but analysis may take time and the result is only a suggestion.
+```
+
 ### API Key Setup
 
 Suggested copy:
@@ -96,6 +115,7 @@ Never log:
 - Image bytes.
 - Base64 images.
 - AI response bodies containing private content.
+- Local VLM raw responses containing private content.
 - Local file paths that may expose user information.
 
 ## Open Source Repository Safety

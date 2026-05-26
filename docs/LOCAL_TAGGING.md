@@ -55,6 +55,20 @@ Object detection may be added to support approximate positions or visual object 
 
 Do not rely on local object detection for precise object names or counts in MVP.
 
+### Phase 4: Optional Local VLM Advanced Analysis
+
+Local VLM analysis can be used when the user wants a deeper scene/object summary without sending the photo to an external AI provider.
+
+Current app direction:
+
+- Basic tags still come from the fast local tagger path.
+- A user-imported MediaPipe-compatible VLM model enables advanced local analysis.
+- The advanced local model is triggered manually from the record detail screen.
+- The output is parsed into scene summary and suggested tags.
+- Local VLM tags use the `local_vlm` source.
+
+This must not become an automatic capture-time requirement because model load time, memory use, and battery impact can be high.
+
 ## Tag Normalization
 
 Create a small dictionary first:
@@ -99,6 +113,7 @@ Sources:
 - `mock`
 - `local_image_label`
 - `local_object_detection`
+- `local_vlm`
 - `user`
 - `advanced_ai`
 

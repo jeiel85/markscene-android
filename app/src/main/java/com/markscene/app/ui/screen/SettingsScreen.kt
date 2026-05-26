@@ -39,6 +39,8 @@ import com.markscene.app.ui.util.SecureScreenEffect
 @Composable
 fun SettingsScreen(
     hasApiKey: Boolean,
+    hasLocalVlmModel: Boolean = false,
+    localVlmModelName: String? = null,
     isBiometricLockEnabled: Boolean,
     isTrueBlackEnabled: Boolean = false,
     isDynamicColorsEnabled: Boolean = false,
@@ -59,6 +61,8 @@ fun SettingsScreen(
     onSaveApiKey: (String) -> Unit,
     onDeleteApiKey: () -> Unit,
     onTestConnection: () -> String,
+    onImportLocalVlmModel: () -> Unit = {},
+    onDeleteLocalVlmModel: () -> Unit = {},
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
     onExportCsv: () -> Unit = {},
@@ -152,6 +156,67 @@ fun SettingsScreen(
                         label = if (hasApiKey) stringResource(R.string.settings_api_active) else stringResource(R.string.settings_api_required),
                         isActive = hasApiKey
                     )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(Icons.Default.Memory, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.settings_local_vlm_title),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = if (hasLocalVlmModel) {
+                                            stringResource(R.string.settings_local_vlm_ready, localVlmModelName ?: "local model")
+                                        } else {
+                                            stringResource(R.string.settings_local_vlm_desc)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = onImportLocalVlmModel,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(stringResource(if (hasLocalVlmModel) R.string.settings_local_vlm_replace else R.string.settings_local_vlm_import))
+                                }
+                                if (hasLocalVlmModel) {
+                                    OutlinedButton(
+                                        onClick = onDeleteLocalVlmModel,
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                    ) {
+                                        Text(stringResource(R.string.delete))
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     OutlinedTextField(
                         value = apiKeyInput,

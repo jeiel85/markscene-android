@@ -69,7 +69,8 @@ app/
 - Local tagger interface.
 - Advanced AI provider interface.
 - Mock providers for development and testing.
-- Gemini implementation added only after the core flow works.
+- Local VLM implementation for user-imported MediaPipe-compatible models.
+- Gemini implementation remains an external BYOK fallback.
 
 ## Core Interfaces
 
@@ -106,8 +107,9 @@ Photo capture/import
 
 ```text
 User taps Advanced AI Analysis
-  -> check API key
-  -> show external analysis warning if needed
+  -> prefer configured local VLM model
+  -> if local VLM exists, show on-device analysis warning
+  -> otherwise check API key and show external analysis warning
   -> resize/compress selected image
   -> call selected AI provider
   -> parse structured result
@@ -130,6 +132,8 @@ Avoid:
 ## Error Handling Principles
 
 - No API key: show setup prompt.
+- No local model and no API key: show setup prompt.
+- Local model error: keep local tags and show retry or model replacement guidance.
 - Network error: keep local tags and show retry.
 - AI parse error: show raw failure state only in debug builds; user-facing message should be simple.
 - Local database error: show non-destructive error and avoid data loss.

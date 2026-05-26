@@ -25,6 +25,7 @@ fun PrivacyDashboardScreen(
     recordCount: Int,
     tagCount: Int,
     hasApiKey: Boolean,
+    hasLocalVlmModel: Boolean = false,
     isBiometricEnabled: Boolean,
     lastBackupDate: String?,
     onBack: () -> Unit
@@ -98,9 +99,16 @@ fun PrivacyDashboardScreen(
 
             SecurityItem(
                 icon = Icons.Default.CloudOff,
+                title = "로컬 고급 AI",
+                isEnabled = hasLocalVlmModel,
+                description = if (hasLocalVlmModel) "온디바이스 VLM 사용 가능" else "설정에서 모델 파일 가져오기 가능"
+            )
+
+            SecurityItem(
+                icon = Icons.Default.Key,
                 title = "BYOK API Key",
                 isEnabled = hasApiKey,
-                description = if (hasApiKey) "사용자 제공 키 사용 중" else "기본 AI 분석만 사용"
+                description = if (hasApiKey) "사용자 제공 키 사용 중" else "외부 AI 비활성"
             )
 
             // Backup Info
@@ -129,7 +137,7 @@ fun PrivacyDashboardScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "MarkScene은 귀하의 데이터를 외부 서버에 업로드하지 않습니다. 고급 AI 분석을 사용할 때만 선택한 이미지가 암호화되어 전송됩니다.",
+                        text = "MarkScene은 기본 태깅과 OCR을 기기 안에서 처리합니다. 로컬 AI 모델이 있으면 고급 분석도 외부 전송 없이 실행하며, BYOK 외부 AI는 사용자가 명시적으로 실행할 때만 선택한 이미지를 전송합니다.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

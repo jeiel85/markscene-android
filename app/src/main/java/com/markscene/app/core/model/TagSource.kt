@@ -8,5 +8,6 @@ enum class TagSource {
     LocalImageLabel,
     LocalObjectDetection,
     User,
-    AdvancedAi
+    AdvancedAi,
+    LocalVlm
 }

@@ -4,13 +4,24 @@
 
 ## Unreleased - 2026-05-26
 
+### Added
+- 설정에서 MediaPipe 호환 로컬 VLM 모델 파일을 가져와 앱 내부 저장소에 보관할 수 있습니다.
+- 기록 상세 화면의 고급 AI 분석이 로컬 모델을 우선 사용해 사진을 외부 서버로 보내지 않고 장면 요약과 추천 태그를 생성합니다.
+- 로컬 VLM 태그 소스를 추가해 외부 AI 태그와 온디바이스 고급 분석 태그를 구분합니다.
+
+### Changed
+- 고급 AI 분석 안내 문구를 로컬 VLM 분석과 외부 BYOK Gemini 분석으로 구분했습니다.
+- 개인정보 안내 화면과 대시보드가 로컬 고급 AI 모델의 데이터 흐름을 설명하도록 갱신되었습니다.
+
 ### Documentation
+- AI Provider Strategy, Local Tagging, Privacy/Security, Architecture, PRD, Data Model 문서에 로컬 VLM 우선 전략과 제약을 반영했습니다.
 - GitHub Pages 랜딩 페이지를 v2.5.0 기준으로 갱신해 Scene Timeline, Recall Box, 보안 옵션, 공유/내보내기 기능이 드러나도록 정리했습니다.
 - README를 공개 페이지, 릴리즈, 개인정보 처리방침, Play Store 준비 자료 중심으로 재구성했습니다.
 - 공개 개인정보 처리방침 URL을 `https://jeiel85.github.io/markscene-android/privacy/`로 연결할 수 있도록 Pages용 페이지를 추가했습니다.
 - Play Store 등록 문구와 store asset 목록을 v2.5.0 기준으로 정리했습니다.
 
 ### Verification
+- 로컬: `./gradlew.bat assembleDebug` 성공.
 - 로컬: `git diff --check`, 정적 링크/이미지 참조 검증, Pages 로컬 HTTP 브라우저 미리보기를 완료했습니다.
 - CI: 푸시 후 GitHub Actions Pages/Android CI 결과를 확인합니다.
 

@@ -1,5 +1,24 @@
 # HISTORY.md
 
+## 2026-05-26 — 로컬 VLM 고급 분석 구현
+
+- 작업: 외부 AI API Key 없이도 사용자가 가져온 온디바이스 VLM 모델로 사진을 자세히 분석할 수 있는 실행 경로를 추가.
+- 변경 내용:
+  1. `LocalVisionModelManager`: 설정에서 선택한 MediaPipe 호환 모델 파일을 앱 내부 저장소로 복사하고 경로/이름을 관리.
+  2. `LocalVlmAdvancedVisionProvider`: MediaPipe LLM Inference + 이미지 입력으로 장면 요약, 객체 기반 태그, 경고를 JSON으로 받아 파싱.
+  3. `SettingsScreen`: 로컬 고급 AI 모델 가져오기/교체/삭제 UI 추가.
+  4. `RecordDetailScreen`: 로컬 모델이 있으면 고급 분석 버튼과 동의 문구를 온디바이스 분석 기준으로 표시하고, 없으면 Gemini BYOK 경로를 사용.
+  5. `PrivacyNoticeScreen`, `PrivacyDashboardScreen`, `strings.xml`: 로컬 VLM과 외부 BYOK 분석의 데이터 흐름을 구분해 안내.
+  6. `TagSource.LocalVlm`: 로컬 VLM이 만든 태그를 외부 고급 AI 태그와 구분.
+  7. `docs/AI_PROVIDER_STRATEGY.md`, `docs/LOCAL_TAGGING.md`, `docs/PRIVACY_AND_SECURITY.md`, `docs/DATA_MODEL.md`, `docs/ARCHITECTURE.md`, `docs/PRD.md`: 로컬 VLM 우선 전략과 제약 반영.
+- 검증:
+  - 로컬: `./gradlew.bat assembleDebug` 성공.
+  - 런타임: 실제 기기 모델 파일 추론은 MediaPipe 호환 모델 파일과 고성능 Android 기기가 필요하므로 로컬 빌드 검증까지만 완료.
+- 결과: 로컬 VLM 모델 파일을 설정하면 상세 화면에서 외부 전송 없이 고급 분석을 실행할 수 있는 수준으로 구현 완료.
+- 후속 작업:
+  - 실제 Gemma 3n E2B/E4B MediaPipe 모델 파일을 기기에 넣고 성능/메모리/JSON 안정성 측정.
+  - 필요 시 로컬/외부 provider 선택 UI를 추가.
+
 ## 2026-05-26 — 공개 표면 정비 (GitHub Pages / README / 메타데이터)
 
 - 작업: MarkScene의 GitHub IO 랜딩, README, 개인정보 처리방침 URL, Play Store 준비 자료, GitHub 설명/토픽을 v2.5.0 기준으로 정비.
