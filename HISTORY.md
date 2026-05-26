@@ -11,8 +11,11 @@
   5. `PrivacyNoticeScreen`, `PrivacyDashboardScreen`, `strings.xml`: 로컬 VLM과 외부 BYOK 분석의 데이터 흐름을 구분해 안내.
   6. `TagSource.LocalVlm`: 로컬 VLM이 만든 태그를 외부 고급 AI 태그와 구분.
   7. `docs/AI_PROVIDER_STRATEGY.md`, `docs/LOCAL_TAGGING.md`, `docs/PRIVACY_AND_SECURITY.md`, `docs/DATA_MODEL.md`, `docs/ARCHITECTURE.md`, `docs/PRD.md`: 로컬 VLM 우선 전략과 제약 반영.
+  8. `.github/workflows/android-ci.yml`: MediaPipe 네이티브 라이브러리 추가 후 CI 에뮬레이터의 connected AndroidTest 설치가 불안정해져, 기존 빌드 APK를 직접 설치/실행하는 launch smoke test로 전환.
 - 검증:
   - 로컬: `./gradlew.bat assembleDebug` 성공.
+  - 로컬: `./gradlew.bat testDebugUnitTest`, `./gradlew.bat lintDebug`, `git diff --check` 성공.
+  - CI: 첫 푸시에서 lint/unit/debug APK 빌드는 성공, emulator connected AndroidTest 설치 단계 실패. 이후 launch smoke test 방식으로 수정 후 재검증 진행.
   - 런타임: 실제 기기 모델 파일 추론은 MediaPipe 호환 모델 파일과 고성능 Android 기기가 필요하므로 로컬 빌드 검증까지만 완료.
 - 결과: 로컬 VLM 모델 파일을 설정하면 상세 화면에서 외부 전송 없이 고급 분석을 실행할 수 있는 수준으로 구현 완료.
 - 후속 작업:

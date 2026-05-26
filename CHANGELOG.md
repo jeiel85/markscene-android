@@ -12,6 +12,7 @@
 ### Changed
 - 고급 AI 분석 안내 문구를 로컬 VLM 분석과 외부 BYOK Gemini 분석으로 구분했습니다.
 - 개인정보 안내 화면과 대시보드가 로컬 고급 AI 모델의 데이터 흐름을 설명하도록 갱신되었습니다.
+- Android CI의 에뮬레이터 smoke test를 instrumentation APK 설치 방식에서 debug APK 직접 설치/실행 방식으로 바꿔 MediaPipe 네이티브 라이브러리 추가 후에도 CI 검증이 안정적으로 동작하도록 했습니다.
 
 ### Documentation
 - AI Provider Strategy, Local Tagging, Privacy/Security, Architecture, PRD, Data Model 문서에 로컬 VLM 우선 전략과 제약을 반영했습니다.
