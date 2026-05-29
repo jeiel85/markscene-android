@@ -1,5 +1,18 @@
 # Agent Progress
 
+## 2026-05-29 (v2.6.2 Release - Local VLM Only + Test Automation)
+
+작업 내용:
+- 앱 버전을 `2.6.2 / 262`로 올렸습니다.
+- Gemini/BYOK 제거와 로컬 VLM 전용 전환을 v2.6.2 릴리즈 기준으로 정리했습니다.
+- emulator 통합 테스트와 앱 실행 smoke test 자동화를 v2.6.2 릴리즈 검증 범위에 포함했습니다.
+
+검증:
+- 로컬: `compileDebugKotlin`, `testDebugUnitTest`, `lintDebug`, `assembleDebug`는 릴리즈 준비 전 성공.
+- CI: Android CI에서 `lintDebug`, `testDebugUnitTest`, `assembleDebug`, emulator `connectedDebugAndroidTest`, launch smoke test 성공.
+- 로컬: `bundleRelease` 성공. AAB manifest에서 `versionCode=262`, `versionName=2.6.2` 확인.
+- 진행 중: v2.6.2 버전 커밋 후 태그/Release APK 워크플로 확인.
+
 ## 2026-05-29 (Local VLM Only Conversion)
 
 작업 내용:

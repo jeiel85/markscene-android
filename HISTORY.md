@@ -1,5 +1,18 @@
 # HISTORY.md
 
+## 2026-05-29 — v2.6.2 릴리즈 준비
+
+- 작업: 로컬 VLM 전용 전환과 단위/통합 테스트 자동화가 자체 검증 및 CI에서 통과한 상태를 v2.6.2 정식 릴리즈로 승격.
+- 변경 내용:
+  1. `gradle/libs.versions.toml`: 앱 버전을 `2.6.2 / 262`로 상향.
+  2. `CHANGELOG.md`: 로컬 VLM 전용 전환, Gemini/BYOK 제거, CI 통합 테스트 자동화, launch smoke test를 `v2.6.2 - 2026-05-29` 릴리즈 섹션으로 정리.
+  3. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`, `.agent/progress.md`: v2.6.2 기준 문구와 검증 상태 반영.
+- 검증:
+  - 선행 로컬: `compileDebugKotlin`, `testDebugUnitTest`, `lintDebug`, `assembleDebug` 성공.
+  - 선행 CI: Android CI에서 `lintDebug`, `testDebugUnitTest`, `assembleDebug`, emulator `connectedDebugAndroidTest`, launch smoke test 성공.
+  - 로컬: `./gradlew.bat :app:bundleRelease --no-daemon` 성공. `app/build/intermediates/bundle_manifest/release/processApplicationManifestReleaseForBundle/AndroidManifest.xml`에서 `versionCode=262`, `versionName=2.6.2` 확인.
+  - 진행 중: v2.6.2 버전 커밋 후 태그 릴리즈 워크플로와 산출물 확인 예정.
+
 ## 2026-05-29 — 단위/통합 테스트 자동화
 
 - 작업: 단위 테스트와 emulator 기반 통합 테스트가 CI에서 자동으로 실행되도록 Android CI를 강화.

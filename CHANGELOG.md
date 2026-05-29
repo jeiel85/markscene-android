@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- 다음 변경 사항을 기록할 예정입니다.
+
+## v2.6.2 - 2026-05-29
+
 ### Added
 - CI에서 emulator 기반 `connectedDebugAndroidTest`를 실행하도록 통합 테스트 자동화를 추가했습니다.
 - Room 기록 저장/태그 검색/OCR 검색/삭제 cascade를 검증하는 instrumentation 통합 테스트를 추가했습니다.
@@ -27,13 +31,15 @@
 - 기존에 저장되어 있던 Gemini API Key 값은 앱 시작 시 보안 저장소에서 제거합니다.
 
 ### Build / CI
+- Play Store 업로드용 새 산출물을 만들기 위해 앱 버전을 `2.6.2` / `262`로 올렸습니다.
 - Android CI가 `lintDebug`, `testDebugUnitTest`, `assembleDebug`, emulator `connectedDebugAndroidTest`, launch smoke test를 순서대로 실행합니다.
 - `MARKSCENE_LOCAL_VLM_MODEL_FILENAME`, `MARKSCENE_LOCAL_VLM_MODEL_SIZE_MB`, `MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL` 빌드 설정으로 다른 MediaPipe 호환 모델로 교체할 수 있습니다.
 
 ### Verification
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
 - 로컬: 통합 테스트 자동화 변경 후 `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 재확인 성공.
-- CI 예정: emulator `connectedDebugAndroidTest`와 launch smoke test 확인.
+- 로컬: `./gradlew.bat :app:bundleRelease --no-daemon` 성공. 생성된 AAB manifest에서 `versionCode=262`, `versionName=2.6.2` 확인.
+- CI: emulator `connectedDebugAndroidTest`와 launch smoke test 성공.
 - CI 1차: emulator `connectedDebugAndroidTest`는 성공했으며, launch smoke 전 debug APK 재설치가 필요해 워크플로를 보정했습니다.
 - 로컬: 생성된 `BuildConfig.java`에 `LOCAL_VLM_MODEL_URL`이 Gemma 3n E2B LiteRT-LM URL로 박혀 있는지 직접 확인.
 - 미실시: 실제 기기에서 모델 다운로드 → 추론/Q&A end-to-end 검증은 충분한 RAM과 라이선스 수락된 사용자 토큰이 필요해 보류.
