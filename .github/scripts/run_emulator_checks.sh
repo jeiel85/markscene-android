@@ -38,7 +38,6 @@ retry_adb_install() {
 }
 
 wait_for_emulator
-./gradlew :app:assembleDebugAndroidTest --stacktrace
 retry_adb_install app/build/outputs/apk/debug/app-debug.apk
 retry_adb_install app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell am instrument -w com.markscene.app.test/androidx.test.runner.AndroidJUnitRunner
