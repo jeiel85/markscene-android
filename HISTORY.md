@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-29 — 로컬 모델 다운로드 접근성 개선
+
+- 작업: HuggingFace 라이선스/토큰 절차 때문에 로컬 고급 AI 모델을 받기 어렵던 설정 화면의 안내와 바로가기를 개선.
+- 변경 내용:
+  1. `SettingsScreen`: 라이선스 수락, read 토큰 생성, 토큰 저장 후 다운로드 순서를 단계별 안내로 표시.
+  2. `SettingsScreen`, `MarkSceneApp`: HuggingFace 토큰 발급 페이지 바로가기 콜백과 버튼 추가.
+  3. `SettingsScreen`: 토큰이 없어도 다운로드 버튼을 누를 수 있게 하고, 기존 누락 안내 메시지로 다음 행동을 알려주도록 변경.
+  4. `strings.xml`, `CHANGELOG.md`, `.agent/progress.md`, `.agent/tasks.md`, `docs/AI_PROVIDER_STRATEGY.md`, `docs/PRD.md`: 접근성 개선 내용 기록.
+- 검증:
+  - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
+  - 로컬: `./gradlew.bat :app:lintDebug --no-daemon` 성공.
+  - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
+  - 로컬: `git diff --check` 성공.
+  - 참고: `testDebugUnitTest`를 `lintDebug`와 병렬 실행한 첫 시도는 `bundleDebugClassesToCompileJar/classes.jar` 동시 접근으로 실패했고, 테스트 단독 재실행은 성공.
+- 결과: 외부 AI provider나 개발자 소유 토큰을 추가하지 않고, 사용자가 직접 모델 준비 절차를 따라가기 쉬운 화면으로 개선.
+- 후속 작업:
+  - 실제 기기에서 라이선스 수락 후 토큰 저장, 다운로드 시작까지의 UX 확인.
+
 ## 2026-05-29 — v2.6.3 릴리즈 준비
 
 - 작업: Play Console에서 `versionCode 262`가 이미 사용 중인 상태를 피하기 위해 새 업로드용 v2.6.3 릴리즈를 준비.

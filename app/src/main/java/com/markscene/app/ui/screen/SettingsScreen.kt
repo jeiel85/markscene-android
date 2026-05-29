@@ -71,6 +71,7 @@ fun SettingsScreen(
     onSaveHuggingFaceToken: (String) -> Unit = {},
     onDeleteHuggingFaceToken: () -> Unit = {},
     onOpenModelLicense: () -> Unit = {},
+    onOpenHuggingFaceTokenPage: () -> Unit = {},
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
     onExportCsv: () -> Unit = {},
@@ -227,7 +228,7 @@ fun SettingsScreen(
 
                             if (localVlmRequiresLicense && !hasHuggingFaceToken) {
                                 Surface(
-                                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Column(
@@ -239,11 +240,38 @@ fun SettingsScreen(
                                             style = MaterialTheme.typography.bodySmall,
                                             fontWeight = FontWeight.Bold
                                         )
+                                        Text(
+                                            text = stringResource(R.string.settings_local_vlm_setup_intro),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        ModelSetupStep(
+                                            index = 1,
+                                            text = stringResource(R.string.settings_local_vlm_setup_step_license)
+                                        )
+                                        ModelSetupStep(
+                                            index = 2,
+                                            text = stringResource(R.string.settings_local_vlm_setup_step_token)
+                                        )
+                                        ModelSetupStep(
+                                            index = 3,
+                                            text = stringResource(R.string.settings_local_vlm_setup_step_download)
+                                        )
                                         if (!localVlmLicenseUrl.isNullOrBlank()) {
-                                            TextButton(onClick = onOpenModelLicense) {
-                                                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
-                                                Spacer(Modifier.width(6.dp))
-                                                Text(stringResource(R.string.settings_local_vlm_open_license))
+                                            FlowRow(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                OutlinedButton(onClick = onOpenModelLicense, shape = RoundedCornerShape(12.dp)) {
+                                                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text(stringResource(R.string.settings_local_vlm_open_license))
+                                                }
+                                                OutlinedButton(onClick = onOpenHuggingFaceTokenPage, shape = RoundedCornerShape(12.dp)) {
+                                                    Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(16.dp))
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text(stringResource(R.string.settings_local_vlm_open_token_page))
+                                                }
                                             }
                                         }
                                     }
@@ -319,7 +347,7 @@ fun SettingsScreen(
                             ) {
                                 OutlinedButton(
                                     onClick = onImportLocalVlmModel,
-                                    enabled = !isLocalVlmModelDownloading && (!localVlmRequiresLicense || hasHuggingFaceToken),
+                                    enabled = !isLocalVlmModelDownloading,
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
@@ -694,6 +722,32 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ModelSetupStep(index: Int, text: String) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.primary,
+            shape = CircleShape
+        ) {
+            Text(
+                text = index.toString(),
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

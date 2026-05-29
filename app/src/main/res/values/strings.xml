@@ -104,7 +104,12 @@
     <string name="settings_local_vlm_progress_unknown">다운로드 중: %1$s</string>
     <string name="settings_local_vlm_model_info">모델: %1$s · 약 %2$dMB · WiFi 권장</string>
     <string name="settings_local_vlm_license_required">이 모델은 HuggingFace에서 라이선스 수락과 read 토큰이 필요합니다.</string>
+    <string name="settings_local_vlm_setup_intro">앱 밖에서 필요한 절차를 아래 순서대로 끝내면, 이후에는 설정에서 한 번만 다운로드하면 됩니다.</string>
+    <string name="settings_local_vlm_setup_step_license">모델 페이지에서 라이선스를 수락합니다.</string>
+    <string name="settings_local_vlm_setup_step_token">HuggingFace token 페이지에서 read 권한 토큰을 만듭니다.</string>
+    <string name="settings_local_vlm_setup_step_download">토큰을 저장한 뒤 모델 다운로드를 누릅니다.</string>
     <string name="settings_local_vlm_open_license">라이선스 페이지 열기</string>
+    <string name="settings_local_vlm_open_token_page">토큰 만들기</string>
     <string name="settings_local_vlm_hf_label">HuggingFace 토큰 (hf_…)</string>
     <string name="settings_local_vlm_hf_placeholder">read 권한 토큰을 입력하세요</string>
     <string name="settings_local_vlm_hf_help">huggingface.co/settings/tokens 에서 read 토큰을 만들고, 모델 페이지에서 라이선스를 수락하세요. 토큰은 기기 내부에 암호화 저장됩니다.</string>

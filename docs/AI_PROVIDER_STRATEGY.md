@@ -18,6 +18,7 @@ Current implementation:
 - Settings downloads a MediaPipe LLM Inference compatible local model file into app-private storage.
 - The default configured model is Google Gemma 3n E2B INT4 LiteRT-LM.
 - License-gated model downloads may require a HuggingFace read token; this token is for model download only, not for analysis.
+- If a license-gated model is configured, Settings should show a guided setup path with direct links for model-license acceptance and read-token creation.
 - Record detail advanced analysis uses the local VLM model only.
 - Local VLM analysis uses image + prompt input and asks for cautious structured JSON.
 - Suggested objects and tags are saved as editable suggestions with `LocalVlm` tag source.

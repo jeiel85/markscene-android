@@ -1,5 +1,19 @@
 # Agent Progress
 
+## 2026-05-29 (Local Model Download Accessibility)
+
+작업 내용:
+- 설정 화면에서 로컬 고급 AI 모델을 받기 위한 절차를 단계별로 보이게 정리했습니다.
+- HuggingFace 모델 라이선스 페이지와 토큰 발급 페이지를 각각 바로 열 수 있게 했습니다.
+- 토큰이 없는 상태에서도 다운로드 버튼을 누르면 필요한 토큰 저장 안내가 나오도록 바꿔, 버튼 비활성화로 막힌 느낌을 줄였습니다.
+
+검증:
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
+- 로컬: `./gradlew.bat :app:lintDebug --no-daemon` 성공.
+- 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
+- 로컬: `git diff --check` 성공.
+- 참고: `testDebugUnitTest`를 `lintDebug`와 병렬 실행한 첫 시도는 중간 JAR 동시 접근으로 실패했고, 테스트 단독 재실행은 성공.
+
 ## 2026-05-29 (v2.6.3 Release - Play versionCode Recovery)
 
 작업 내용:

@@ -4,7 +4,13 @@
 
 ## Unreleased
 
-- 다음 변경 사항을 기록할 예정입니다.
+### Changed
+- 로컬 고급 AI 모델 설정 화면에 라이선스 수락, HuggingFace read 토큰 생성, 토큰 저장 후 다운로드 순서를 단계별로 안내합니다.
+- HuggingFace 토큰 발급 페이지 바로가기 버튼을 추가해 모델 다운로드 준비 동선을 줄였습니다.
+- 토큰이 없을 때도 모델 다운로드 버튼을 누를 수 있게 하고, 필요한 토큰 저장 안내를 표시하도록 접근성을 개선했습니다.
+
+### Verification
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `git diff --check` 성공.
 
 ## v2.6.3 - 2026-05-29
 

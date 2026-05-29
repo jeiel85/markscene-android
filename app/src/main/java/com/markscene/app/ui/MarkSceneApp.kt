@@ -786,6 +786,17 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                                 }
                             }
                         },
+                        onOpenHuggingFaceTokenPage = {
+                            runCatching {
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse("https://huggingface.co/settings/tokens")
+                                ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context.startActivity(intent)
+                            }.onFailure { e ->
+                                backupStatusMessage = "브라우저를 열 수 없습니다: ${e.message}"
+                            }
+                        },
                         onExportBackup = { exportLauncher.launch("MarkScene_Backup_${System.currentTimeMillis()}.zip") },
                         onImportBackup = { importLauncher.launch(arrayOf("application/zip")) },
                         onExportCsv = { csvExportLauncher.launch("MarkScene_Data_${System.currentTimeMillis()}.csv") },
