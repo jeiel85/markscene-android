@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-29 — v2.6.3 릴리즈 준비
+
+- 작업: Play Console에서 `versionCode 262`가 이미 사용 중인 상태를 피하기 위해 새 업로드용 v2.6.3 릴리즈를 준비.
+- 변경 내용:
+  1. `gradle/libs.versions.toml`: 앱 버전을 `2.6.3 / 263`으로 상향.
+  2. `CHANGELOG.md`: v2.6.3 릴리즈 섹션을 추가하고, 릴리즈 노트 태그 규칙 보정과 versionCode 회피를 기록.
+  3. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`, `.agent/progress.md`: v2.6.3 기준 문구 반영.
+- 검증:
+  - 로컬: `./gradlew.bat :app:bundleRelease --no-daemon` 성공.
+  - 로컬: `app/build/intermediates/bundle_manifest/release/processApplicationManifestReleaseForBundle/AndroidManifest.xml`에서 `versionCode=263`, `versionName=2.6.3` 확인.
+  - 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.3-vc263.aab`와 `MarkScene-v2.6.3-vc263-release-notes.txt` 내보내기 성공.
+  - 로컬: Play Console용 TXT는 `<ko-KR>` 265자, `<en-US>` 384자로 각 500자 이하 확인.
+  - 진행 중: v2.6.3 태그 릴리즈 워크플로와 산출물 확인 예정.
+
 ## 2026-05-29 — 릴리즈 노트 태그 규칙 보정
 
 - 작업: 태그 릴리즈가 GitHub 자동 생성 비교 링크만 게시하던 문제를 수정.

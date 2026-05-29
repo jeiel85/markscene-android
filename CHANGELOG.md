@@ -4,9 +4,18 @@
 
 ## Unreleased
 
+- 다음 변경 사항을 기록할 예정입니다.
+
+## v2.6.3 - 2026-05-29
+
 ### Build / CI
+- Play Console에서 `versionCode 262`가 이미 사용 중인 상태를 피하기 위해 앱 버전을 `2.6.3` / `263`으로 올렸습니다.
 - 태그 릴리즈가 GitHub 자동 비교 링크만 게시하지 않도록, `CHANGELOG.md`의 해당 `vX.Y.Z` 섹션을 릴리즈 노트 본문으로 사용합니다.
 - 릴리즈 APK 파일명에 태그를 포함해 어떤 버전 산출물인지 바로 확인할 수 있게 했습니다.
+
+### Verification
+- 로컬: `./gradlew.bat :app:bundleRelease --no-daemon` 성공. 생성된 AAB manifest에서 `versionCode=263`, `versionName=2.6.3` 확인.
+- 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.3-vc263.aab`와 Play Console용 `MarkScene-v2.6.3-vc263-release-notes.txt` 내보내기 성공. TXT는 `<ko-KR>` 265자, `<en-US>` 384자로 각 500자 이하 확인.
 
 ## v2.6.2 - 2026-05-29
 

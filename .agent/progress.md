@@ -1,5 +1,17 @@
 # Agent Progress
 
+## 2026-05-29 (v2.6.3 Release - Play versionCode Recovery)
+
+작업 내용:
+- Play Console에서 `versionCode 262`가 이미 사용 중인 상태를 피하기 위해 앱 버전을 `2.6.3 / 263`으로 올렸습니다.
+- v2.6.3 GitHub Release 본문은 `CHANGELOG.md`의 해당 섹션을 사용하고, Play Console용 TXT는 짧은 `<ko-KR>`/`<en-US>` 형식으로 내보냅니다.
+
+검증:
+- 로컬: `bundleRelease` 성공. AAB manifest에서 `versionCode=263`, `versionName=2.6.3` 확인.
+- 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.3-vc263.aab`와 `MarkScene-v2.6.3-vc263-release-notes.txt` 내보내기 성공.
+- 로컬: Play Console용 TXT는 `<ko-KR>` 265자, `<en-US>` 384자로 각 500자 이하 확인.
+- 진행 중: v2.6.3 태그/Release APK 워크플로 확인.
+
 ## 2026-05-29 (v2.6.2 Release - Local VLM Only + Test Automation)
 
 작업 내용:
