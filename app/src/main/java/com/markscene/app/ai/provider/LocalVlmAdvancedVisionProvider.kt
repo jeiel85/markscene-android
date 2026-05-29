@@ -46,6 +46,35 @@ class LocalVlmAdvancedVisionProvider(
         }
     }
 
+    suspend fun askQuestion(record: PhotoRecord, question: String): Result<String> = withContext(Dispatchers.IO) {
+        runCatching {
+            modelManager.getModelPath() ?: error("로컬 AI 모델이 설정되지 않았습니다. 설정에서 모델을 다운로드해주세요.")
+            val bitmap = decodeImage(record.imageUri)
+            val mpImage = BitmapImageBuilder(bitmap).build()
+            val inference = try {
+                modelManager.acquireInference()
+            } catch (oom: OutOfMemoryError) {
+                error("이 기기의 메모리로는 로컬 AI 모델을 로드할 수 없습니다. 더 가벼운 모델이 필요합니다.")
+            } catch (t: Throwable) {
+                error("로컬 AI 모델 로드 실패: ${t.message ?: "알 수 없는 오류"}")
+            }
+
+            val sessionOptions = LlmInferenceSession.LlmInferenceSessionOptions.builder()
+                .setTopK(10)
+                .setTemperature(0.2f)
+                .setGraphOptions(GraphOptions.builder().setEnableVisionModality(true).build())
+                .build()
+
+            LlmInferenceSession.createFromOptions(inference, sessionOptions).use { session ->
+                session.addQueryChunk(buildQuestionPrompt(record, question))
+                session.addImage(mpImage)
+                session.generateResponse().trim().ifBlank {
+                    "로컬 AI가 답변을 생성하지 못했습니다. 질문을 조금 더 구체적으로 바꿔 다시 시도해주세요."
+                }
+            }
+        }
+    }
+
     private fun buildPrompt(record: PhotoRecord): String {
         return """
             Analyze this image as a private visual note for MarkScene.
@@ -62,6 +91,23 @@ class LocalVlmAdvancedVisionProvider(
             - Memo: ${record.memo ?: "없음"}
             - Existing tags: ${record.tags.joinToString { it.name }.ifBlank { "없음" }}
             Do not claim certainty. Prefer useful searchable tags. Use 4 to 10 tags.
+        """.trimIndent()
+    }
+
+    private fun buildQuestionPrompt(record: PhotoRecord, question: String): String {
+        return """
+            You are MarkScene's private on-device visual assistant.
+            Answer in Korean based only on the attached image and local record metadata.
+            Do not claim certainty. If uncertain, say that it only appears that way.
+            Keep the answer concise and useful for adding searchable notes or tags.
+
+            Existing metadata:
+            - Title: ${record.title ?: "없음"}
+            - Memo: ${record.memo ?: "없음"}
+            - Existing tags: ${record.tags.joinToString { it.name }.ifBlank { "없음" }}
+
+            User question:
+            $question
         """.trimIndent()
     }
 

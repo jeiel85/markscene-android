@@ -24,7 +24,6 @@ import com.markscene.app.R
 fun PrivacyDashboardScreen(
     recordCount: Int,
     tagCount: Int,
-    hasApiKey: Boolean,
     hasLocalVlmModel: Boolean = false,
     isBiometricEnabled: Boolean,
     lastBackupDate: String?,
@@ -104,13 +103,6 @@ fun PrivacyDashboardScreen(
                 description = if (hasLocalVlmModel) "온디바이스 VLM 사용 가능" else "설정에서 모델 다운로드 가능"
             )
 
-            SecurityItem(
-                icon = Icons.Default.Key,
-                title = "BYOK API Key",
-                isEnabled = hasApiKey,
-                description = if (hasApiKey) "사용자 제공 키 사용 중" else "외부 AI 비활성"
-            )
-
             // Backup Info
             lastBackupDate?.let { date ->
                 PrivacyBadge(
@@ -137,7 +129,7 @@ fun PrivacyDashboardScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "MarkScene은 기본 태깅과 OCR을 기기 안에서 처리합니다. 로컬 AI 모델이 있으면 고급 분석도 외부 전송 없이 실행하며, BYOK 외부 AI는 사용자가 명시적으로 실행할 때만 선택한 이미지를 전송합니다.",
+                        text = "MarkScene은 기본 태깅, OCR, 로컬 AI 고급 분석을 기기 안에서 처리합니다. 사진과 분석 프롬프트는 외부 AI 제공자에게 전송되지 않습니다.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

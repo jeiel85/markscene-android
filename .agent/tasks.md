@@ -58,15 +58,15 @@ v2.4.0(2026-05-20)에서 우선순위 10종(이미지 파이프라인 OOM 방어
 - [x] Add search screen.
 - [x] Search by tag/title/memo.
 
-### Settings and BYOK
+### Settings and Local AI
 
 - [x] Add settings screen.
-- [x] Add API key status UI.
-- [x] Add encrypted API key storage.
-- [x] Add API key delete action.
+- [x] Remove external AI API key status/input UI.
+- [x] Add encrypted model-download token storage.
+- [x] Add model-download token delete action.
 - [x] Add mock advanced AI provider.
-- [x] Add external analysis warning.
-- [x] Add Gemini provider after mock flow is stable.
+- [x] Add local analysis warning.
+- [x] Remove Gemini provider and external fallback.
 - [x] Add local VLM model download and on-device advanced analysis path.
 
 ### Privacy and Release

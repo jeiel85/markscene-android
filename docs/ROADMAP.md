@@ -42,18 +42,17 @@ Tasks:
 - Add error handling.
 - Keep mock implementation for tests/previews.
 
-## Phase 3: BYOK Advanced AI
+## Phase 3: Local VLM Advanced AI
 
-Goal: Add optional Gemini-based advanced analysis.
+Goal: Add optional on-device advanced analysis with an app-downloaded local VLM model.
 
 Tasks:
 
-- Settings screen for API key.
-- Encrypted API key storage.
-- API key test action.
-- Advanced analysis consent dialog.
+- Settings screen for local model download/delete.
+- Encrypted model-download token storage when a gated model source requires it.
+- Local advanced analysis consent dialog.
 - Mock advanced AI provider.
-- Gemini provider.
+- Local VLM provider.
 - Structured response parsing.
 - Editable advanced suggestions.
 

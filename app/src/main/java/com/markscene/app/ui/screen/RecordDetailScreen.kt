@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.markscene.app.R
-import com.markscene.app.ai.provider.MockAdvancedVisionProvider
 import com.markscene.app.ai.provider.MockAdvancedAnalysisResult
 import com.markscene.app.core.model.AdvancedAnalysis
 import com.markscene.app.core.model.ChatMessage
@@ -386,9 +385,9 @@ fun RecordDetailScreen(
                     }
                 }
 
-                // AI Chat Section (Visual Q&A)
+                // Local AI Q&A Section
                 Text(
-                    text = "비주얼 비서와 대화하기",
+                    text = "로컬 비주얼 비서와 대화하기",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -417,10 +416,10 @@ fun RecordDetailScreen(
                                 value = questionInput,
                                 onValueChange = { questionInput = it },
                                 modifier = Modifier.weight(1f),
-                                placeholder = { Text("사진에 대해 물어보세요...") },
+                                placeholder = { Text(if (isAdvancedAnalysisAvailable) "사진에 대해 물어보세요..." else "로컬 AI 모델을 먼저 다운로드해주세요") },
                                 shape = RoundedCornerShape(16.dp),
                                 maxLines = 3,
-                                enabled = !isSendingQuestion
+                                enabled = !isSendingQuestion && isAdvancedAnalysisAvailable
                             )
                             IconButton(
                                 onClick = {
@@ -434,7 +433,7 @@ fun RecordDetailScreen(
                                 modifier = Modifier
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primary),
-                                enabled = questionInput.isNotBlank() && !isSendingQuestion
+                                enabled = questionInput.isNotBlank() && !isSendingQuestion && isAdvancedAnalysisAvailable
                             ) {
                                 if (isSendingQuestion) {
                                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)

@@ -84,13 +84,13 @@ fun PrivacyNoticeScreen(onBack: () -> Unit) {
             )
 
             PrivacyItem(
-                title = "3. 선택적 외부 AI 분석 (BYOK)",
-                description = "로컬 모델이 없고 사용자가 명시적으로 '고급 AI 분석'을 실행할 때만, 선택한 이미지와 프롬프트가 사용자가 등록한 API Key를 통해 외부 AI 제공자(Google Gemini 등)에게 전송됩니다."
+                title = "3. 외부 AI 분석 없음",
+                description = "MarkScene은 Gemini 같은 외부 AI 제공자 분석 경로와 분석용 API Key 입력을 제공하지 않습니다. 고급 분석은 로컬 모델이 준비된 경우에만 실행됩니다."
             )
 
             PrivacyItem(
-                title = "4. 안전한 키 관리",
-                description = "사용자가 등록한 API Key는 안드로이드 시스템의 암호화 저장소(EncryptedSharedPreferences)에 안전하게 보관되며, 앱 외부로 유출되지 않습니다."
+                title = "4. 모델 다운로드 토큰 관리",
+                description = "라이선스가 필요한 모델을 다운로드할 때만 HuggingFace read 토큰을 저장할 수 있습니다. 이 토큰은 모델 다운로드 요청에만 사용되며 기기 내부 암호화 저장소에 보관됩니다."
             )
 
             PrivacyItem(

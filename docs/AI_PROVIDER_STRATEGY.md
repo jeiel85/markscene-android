@@ -2,35 +2,32 @@
 
 ## Strategy Summary
 
-MarkScene must not depend on a developer-owned AI key.
+MarkScene is local-first and must not depend on external AI API keys for photo analysis.
 
-The app uses three levels of intelligence:
+The app uses two levels of intelligence:
 
-1. Basic local tagging without an API key.
-2. Optional on-device VLM advanced analysis.
-3. Optional BYOK external advanced AI analysis.
+1. Basic on-device tagging/OCR without any key.
+2. Optional on-device VLM advanced analysis after the app downloads an approved compatible model file.
 
-## Preferred Advanced Path
+Gemini/BYOK external provider fallback is removed from the product and code path.
 
-The preferred advanced path is local VLM analysis when the app downloads an approved compatible model file.
+## Local VLM Path
 
 Current implementation:
 
-- Settings can download a MediaPipe LLM Inference compatible local model file into app-private storage.
-- Record detail advanced analysis prefers the local VLM model when it is available.
-- Local VLM analysis uses image + prompt input and asks for strict JSON.
+- Settings downloads a MediaPipe LLM Inference compatible local model file into app-private storage.
+- The default configured model is Google Gemma 3n E2B INT4 LiteRT-LM.
+- License-gated model downloads may require a HuggingFace read token; this token is for model download only, not for analysis.
+- Record detail advanced analysis uses the local VLM model only.
+- Local VLM analysis uses image + prompt input and asks for cautious structured JSON.
 - Suggested objects and tags are saved as editable suggestions with `LocalVlm` tag source.
-- If no local model is configured, the app can fall back to BYOK Gemini when an API key exists.
+- Visual Q&A uses the same local VLM model when the model is available.
 
 The app must not bundle a multi-GB model in the APK unless a future release explicitly accepts the store-size and licensing impact.
 
-## Why BYOK
-
-BYOK remains the external-provider fallback. It reduces developer operating cost and avoids putting a secret key into a public GitHub repository. It also makes the data flow easier to explain: the user's selected image goes from the user's device to the user's chosen AI provider only when the user requests external advanced analysis.
-
 ## Product Rule
 
-API key setup must not be part of mandatory onboarding.
+API key setup must not be part of onboarding, settings, or record detail flows.
 
 The user should first experience the basic product:
 
@@ -38,41 +35,9 @@ The user should first experience the basic product:
 2. See local tag suggestions.
 3. Save a record.
 
-Then the app may present advanced AI analysis as an optional enhancement. Local VLM should be shown before external BYOK because it better matches the local-first privacy promise.
+Then the app may present local advanced AI as an optional enhancement. If the local model is missing, the app should guide the user to download it instead of falling back to an external provider.
 
-## Provider Abstraction
-
-```kotlin
-enum class AiProvider {
-    LocalVlm,
-    Gemini
-}
-
-interface AdvancedVisionProvider {
-    val provider: AiProvider
-
-    suspend fun analyzeImage(request: AdvancedAnalysisRequest): Result<AdvancedAnalysis>
-}
-```
-
-## Mock Provider First
-
-Before adding a real Gemini client, implement `MockAdvancedVisionProvider`.
-
-Mock output should include:
-
-- Scene summary.
-- Object list.
-- Suggested tags.
-- Warnings.
-
-This allows UI and persistence work without a real API key.
-
-## Local VLM Provider
-
-Local VLM support uses MediaPipe LLM Inference on Android.
-
-Rules:
+## Local VLM Rules
 
 - Use only explicitly approved model files from HTTPS download sources.
 - Store the model in app-private storage.
@@ -81,27 +46,26 @@ Rules:
 - Prefer high-end devices for acceptable performance.
 - Treat output as suggestions and allow editing before saving.
 - Show that local analysis can be slow and may be inaccurate.
+- Do not log prompts, image bytes, local model raw responses, or token values.
 
 Known constraints:
 
 - The app needs a MediaPipe-compatible model file; arbitrary GGUF or Hugging Face files do not run directly.
 - Large VLMs can require several GB of storage/RAM and may fail on low-memory phones.
 - JSON output can still be malformed, so parsing must fail gracefully.
+- Downloading a gated model may require the user to accept the model license and provide a read token.
 
-## Gemini Provider
+## Removed External Providers
 
-Gemini support is the external fallback after the core local flow exists.
+The app does not provide:
 
-Rules:
+- Gemini API key input.
+- External provider connection test.
+- External advanced analysis warning.
+- External provider fallback when the local model is missing.
+- Developer-owned API keys.
 
-- Read API key from `ApiKeyStore`.
-- Never hardcode a real key.
-- Resize/compress images before sending.
-- Ask for structured JSON output.
-- Treat AI output as suggestions.
-- Allow user editing before saving.
-- Show explicit external-analysis warning.
-- Do not use Gemini when a valid local VLM model is configured unless the user explicitly chooses the external provider in a future provider selector.
+Any future reintroduction of external analysis must be treated as a policy change, documented in this file, and reviewed against privacy/store requirements before implementation.
 
 ## Suggested Advanced Analysis Schema
 
@@ -126,7 +90,7 @@ Rules:
 ## Suggested Prompt Pattern
 
 ```text
-Analyze this image as a personal visual note.
+Analyze this image as a private visual note.
 Return only valid JSON matching the requested schema.
 Do not claim certainty when uncertain.
 Prefer common object names.
@@ -136,16 +100,13 @@ Use cautious wording.
 
 ## Failure States
 
-- Missing API key.
 - Missing local model.
+- Missing model download token for a license-gated model.
 - Unsupported or invalid local model.
 - Device memory/runtime failure.
-- Invalid API key.
-- Network error.
-- Provider quota error.
-- Safety block.
+- Model download network error.
+- Model download permission error.
 - JSON parse failure.
 - Empty or low-confidence result.
 
 Each state must have a user-friendly message and must not affect local records.
-

@@ -21,7 +21,7 @@ Initial target users:
 
 - People who want to remember where items are.
 - People who organize desks, shelves, boxes, rooms, or storage spaces.
-- Developers and power users comfortable with optional BYOK AI features.
+- Users comfortable downloading an optional local AI model for deeper analysis.
 - Privacy-conscious users who prefer local-first apps.
 
 Not the initial target:
@@ -46,7 +46,7 @@ The user should be able to take a photo and get editable tag chips such as:
 
 MarkScene is not trying to beat general image search products. It is a personal memory and organization tool.
 
-The app should be useful even when offline and even without an API key.
+The app should be useful even when offline and without an external AI API key.
 
 ## Key Differentiator
 

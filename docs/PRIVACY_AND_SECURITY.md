@@ -14,16 +14,14 @@ MarkScene is local-first. The basic experience must work without sending user ph
 - Tag suggestions.
 - User-confirmed tags.
 - Analysis metadata.
-- Optional API key for advanced AI provider.
 - Optional local VLM model file downloaded by the app after user action.
+- Optional model-download read token when the configured model source requires license-gated access.
 
 ### Sent Outside the Device
 
-Only when the user explicitly runs external BYOK advanced AI analysis:
+MarkScene does not send photos, prompts, or analysis output to an external AI provider.
 
-- Selected image or resized copy.
-- Prompt needed for image analysis.
-- API key required by the selected provider.
+Network access is used only for app-requested model download from the configured HTTPS model source. If the source requires authorization, the download-only read token is sent to that model host as an Authorization header.
 
 The MVP must not send data to a developer-owned backend.
 
@@ -36,15 +34,16 @@ When a local VLM model is configured:
 - The model file is stored in app-private storage.
 - Results are still suggestions and can be wrong.
 
-## API Key Rules
+## Token Rules
 
-- API keys are optional.
-- API keys must be stored only on the device.
-- API keys must be encrypted using Android Keystore-backed storage or equivalent.
-- API keys must never be logged.
-- API keys must never be committed.
-- API keys must never be included in crash reports.
-- API keys must be deletable from settings.
+- External AI analysis API keys are not supported.
+- Model-download tokens are optional and used only for license-gated model downloads.
+- Model-download tokens must be stored only on the device.
+- Model-download tokens must be encrypted using Android Keystore-backed storage or equivalent.
+- Model-download tokens must never be logged.
+- Model-download tokens must never be committed.
+- Model-download tokens must never be included in crash reports.
+- Model-download tokens must be deletable from settings.
 
 ## Photo Handling Rules
 
@@ -76,16 +75,7 @@ Suggested copy:
 ```text
 MarkScene creates searchable records from photos.
 Basic tagging works on your device.
-Advanced AI analysis is optional and may send the selected image to your chosen AI provider.
-```
-
-### Before Advanced AI Analysis
-
-Suggested copy:
-
-```text
-This image will be sent to the selected AI provider for analysis.
-Do not analyze images containing sensitive personal information unless you understand the provider's data terms.
+Advanced AI analysis uses a local model when you download one.
 ```
 
 ### Before Local VLM Analysis
@@ -97,20 +87,20 @@ This image will be analyzed by the local AI model on this device.
 It will not be sent to an external server, but analysis may take time and the result is only a suggestion.
 ```
 
-### API Key Setup
+### Model Download Token Setup
 
 Suggested copy:
 
 ```text
-Your API key is stored only on this device and is used only when you run advanced AI analysis.
-MarkScene does not send your API key to a developer-owned server.
+Your model download token is stored only on this device and is used only to download the selected local AI model.
+MarkScene does not use this token for photo analysis.
 ```
 
 ## Logging Rules
 
 Never log:
 
-- API keys.
+- Model download tokens.
 - Full prompts.
 - Image bytes.
 - Base64 images.

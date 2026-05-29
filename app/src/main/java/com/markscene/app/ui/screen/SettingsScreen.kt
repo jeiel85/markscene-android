@@ -39,7 +39,6 @@ import com.markscene.app.ui.util.SecureScreenEffect
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
-    hasApiKey: Boolean,
     hasLocalVlmModel: Boolean = false,
     localVlmModelName: String? = null,
     isLocalVlmModelDownloading: Boolean = false,
@@ -67,9 +66,6 @@ fun SettingsScreen(
     onToggleExifStripping: (Boolean) -> Unit = {},
     onToggleGalleryHide: (Boolean) -> Unit = {},
     onToggleAutoLock: (Boolean) -> Unit = {},
-    onSaveApiKey: (String) -> Unit,
-    onDeleteApiKey: () -> Unit,
-    onTestConnection: () -> String,
     onImportLocalVlmModel: () -> Unit = {},
     onDeleteLocalVlmModel: () -> Unit = {},
     onSaveHuggingFaceToken: (String) -> Unit = {},
@@ -90,8 +86,6 @@ fun SettingsScreen(
     SecureScreenEffect()
 
     val context = LocalContext.current
-    var apiKeyInput by rememberSaveable { mutableStateOf("") }
-    var apiKeyVisible by rememberSaveable { mutableStateOf(false) }
     var hfTokenInput by rememberSaveable { mutableStateOf("") }
     var hfTokenVisible by rememberSaveable { mutableStateOf(false) }
     var resultMessage by rememberSaveable { mutableStateOf<String?>(null) }
@@ -163,12 +157,12 @@ fun SettingsScreen(
                 }
             }
 
-            // API Key Section
+            // Local AI Section
             SettingsSection(title = stringResource(R.string.settings_ai_engine)) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     StatusBadge(
-                        label = if (hasApiKey) stringResource(R.string.settings_api_active) else stringResource(R.string.settings_api_required),
-                        isActive = hasApiKey
+                        label = if (hasLocalVlmModel) stringResource(R.string.settings_local_vlm_status_ready) else stringResource(R.string.settings_local_vlm_status_required),
+                        isActive = hasLocalVlmModel
                     )
 
                     Card(
@@ -361,83 +355,6 @@ fun SettingsScreen(
                         }
                     }
 
-                    OutlinedTextField(
-                        value = apiKeyInput,
-                        onValueChange = { apiKeyInput = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.settings_api_label)) },
-                        placeholder = { Text(stringResource(R.string.settings_api_placeholder)) },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        visualTransformation = if (apiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done,
-                            autoCorrect = false
-                        ),
-                        trailingIcon = {
-                            Row {
-                                IconButton(onClick = { apiKeyVisible = !apiKeyVisible }) {
-                                    Icon(
-                                        imageVector = if (apiKeyVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                        contentDescription = stringResource(
-                                            if (apiKeyVisible) R.string.settings_api_hide else R.string.settings_api_show
-                                        )
-                                    )
-                                }
-                                if (apiKeyInput.isNotBlank()) {
-                                    IconButton(onClick = { apiKeyInput = "" }) {
-                                        Icon(Icons.Default.Clear, contentDescription = null)
-                                    }
-                                }
-                            }
-                        }
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                if (apiKeyInput.isNotBlank()) {
-                                    onSaveApiKey(apiKeyInput.trim())
-                                    resultMessage = context.getString(R.string.settings_api_saved)
-                                    apiKeyInput = ""
-                                }
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            enabled = apiKeyInput.isNotBlank()
-                        ) {
-                            Text(stringResource(R.string.save))
-                        }
-                        
-                        if (hasApiKey) {
-                            OutlinedButton(
-                                onClick = {
-                                    onDeleteApiKey()
-                                    resultMessage = context.getString(R.string.settings_api_deleted)
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                Text(stringResource(R.string.delete))
-                            }
-                        }
-                    }
-
-                    if (hasApiKey) {
-                        TextButton(
-                            onClick = { resultMessage = onTestConnection() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.SettingsInputComponent, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.settings_api_test))
-                        }
-                    }
                 }
             }
 

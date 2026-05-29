@@ -33,7 +33,7 @@ This checklist is not legal advice. Verify current Google Play, Android, and AI 
 
 - [ ] The app explains that AI output may be inaccurate.
 - [ ] The app says suggestions are editable.
-- [ ] The app warns before sending images externally.
+- [x] The app no longer sends images to external AI providers.
 - [ ] The app avoids claiming exact object detection or guaranteed counts.
 
 ## Open Source Safety

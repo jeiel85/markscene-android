@@ -3,7 +3,6 @@ package com.markscene.app.ai.provider
 import android.content.Context
 import android.os.StatFs
 import com.google.mediapipe.tasks.genai.llminference.LlmInference
-import com.markscene.app.data.settings.ApiKeyStore
 import com.markscene.app.data.settings.UserPreferences
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -17,8 +16,7 @@ import java.net.URL
 
 class LocalVisionModelManager(
     private val context: Context,
-    private val userPreferences: UserPreferences,
-    private val apiKeyStore: ApiKeyStore? = null
+    private val userPreferences: UserPreferences
 ) {
     @Volatile
     private var cachedInference: LlmInference? = null

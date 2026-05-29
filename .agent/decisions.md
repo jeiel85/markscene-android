@@ -8,13 +8,13 @@ Reason: If API key setup is mandatory, the initial product experience becomes to
 
 Implication: Local tag suggestions, manual editing, local saving, and local search are MVP requirements.
 
-## D002: BYOK for Advanced AI
+## D002: Local VLM Only for Advanced AI
 
-Decision: Advanced AI analysis uses a Bring Your Own Key model.
+Decision: Advanced AI analysis uses only an app-downloaded local VLM model.
 
-Reason: The repository will be public, and the developer should not embed or pay for a default AI API key in MVP.
+Reason: The product promise is local-first, and the user explicitly chose to remove Gemini/BYOK API Key input and external AI fallback.
 
-Implication: API key storage, warnings, and provider abstraction are required before real advanced AI is enabled.
+Implication: Settings manages local model download/delete and optional model-download tokens only. Record detail must not call external AI providers.
 
 ## D003: Local-First Storage
 
@@ -40,9 +40,9 @@ Reason: Image analysis can be wrong, especially for counts, small objects, or am
 
 Implication: UI must allow editing, deletion, and manual additions.
 
-## D006: Prefer Local VLM Before External BYOK
+## D006: Remove External BYOK Fallback
 
-Decision: Advanced photo analysis should prefer an app-downloaded approved on-device VLM model when available, and use BYOK Gemini only as the external fallback.
+Decision: Advanced photo analysis requires an app-downloaded approved on-device VLM model. BYOK Gemini is not a fallback.
 
 Reason: Local VLM analysis better matches MarkScene's privacy promise and avoids requiring an external API key for richer object/tag suggestions.
 

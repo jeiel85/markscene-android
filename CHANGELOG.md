@@ -11,17 +11,26 @@
 - 라이선스 게이트가 있는 모델의 경우 HuggingFace 모델 페이지를 바로 여는 버튼이 제공됩니다.
 
 ### Changed
+- 고급 AI 분석이 로컬 VLM 전용으로 전환되었습니다. 로컬 모델이 없을 때 Gemini/BYOK로 fallback하지 않고, 설정에서 로컬 모델 다운로드를 안내합니다.
+- 비주얼 Q&A도 Gemini 대신 다운로드된 로컬 VLM 모델만 사용하도록 변경되었습니다.
+- 개인정보 안내, GitHub Pages, README, Play Store 문구를 외부 AI 전송 없음 기준으로 정리했습니다.
 - 로컬 AI 모델 매니저가 청크 단위 스트리밍 다운로드, 디스크 여유 공간 사전 검증, HTTP 401/403/404 등에 대한 명확한 한국어 오류 메시지, 코루틴 취소 지원, 10분 단위로 늘어난 읽기 타임아웃을 지원합니다.
 - 로컬 VLM 추론 인스턴스를 lazy singleton으로 유지해, 매 분석 호출마다 수 GB 모델을 다시 로드하지 않습니다. 모델 삭제 또는 재다운로드 시 자동으로 release 됩니다.
 - 로컬 VLM JSON 파싱 실패 시 사용자에게 의미 있는 fallback 요약을 표시합니다.
+
+### Removed
+- Gemini 고급 분석 provider, Gemini API Key 입력/저장/삭제/연결 테스트 UI, 외부 AI 분석 fallback을 제거했습니다.
+
+### Security
+- 기존에 저장되어 있던 Gemini API Key 값은 앱 시작 시 보안 저장소에서 제거합니다.
 
 ### Build / CI
 - `MARKSCENE_LOCAL_VLM_MODEL_FILENAME`, `MARKSCENE_LOCAL_VLM_MODEL_SIZE_MB`, `MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL` 빌드 설정으로 다른 MediaPipe 호환 모델로 교체할 수 있습니다.
 
 ### Verification
-- 로컬: `./gradlew :app:compileDebugKotlin`, `./gradlew :app:assembleDebug`, `./gradlew :app:testDebugUnitTest`, `./gradlew :app:lintDebug` 모두 성공.
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
 - 로컬: 생성된 `BuildConfig.java`에 `LOCAL_VLM_MODEL_URL`이 Gemma 3n E2B LiteRT-LM URL로 박혀 있는지 직접 확인.
-- 미실시: 실제 기기에서 모델 다운로드 → 추론 end-to-end 검증은 충분한 RAM과 라이선스 수락된 사용자 토큰이 필요해 보류.
+- 미실시: 실제 기기에서 모델 다운로드 → 추론/Q&A end-to-end 검증은 충분한 RAM과 라이선스 수락된 사용자 토큰이 필요해 보류.
 
 ## v2.6.1 - 2026-05-26
 

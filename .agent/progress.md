@@ -1,5 +1,18 @@
 # Agent Progress
 
+## 2026-05-29 (Local VLM Only Conversion)
+
+작업 내용:
+- Gemini/BYOK 고급 분석 provider와 API Key 입력/저장/삭제/테스트 UI를 제거했습니다.
+- 설정 화면은 로컬 모델 다운로드/삭제와 모델 다운로드용 HuggingFace read token만 관리하도록 전환했습니다.
+- 상세 화면의 고급 분석과 비주얼 Q&A가 다운로드된 로컬 VLM 모델만 사용하도록 연결했습니다.
+- 기존 보안 저장소에 남아 있을 수 있는 Gemini API Key는 앱 시작 시 제거하도록 했습니다.
+- README, GitHub Pages, 개인정보 문서, AI 전략 문서, 작업/결정 문서를 로컬 VLM 전용 정책으로 갱신했습니다.
+
+검증:
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
+- 보류: 실제 기기에서 모델 다운로드 → 로컬 분석/Q&A end-to-end 검증은 라이선스 수락된 HuggingFace 토큰과 충분한 RAM이 필요해 보류.
+
 ## 2026-05-26 (Local VLM Auto Download)
 
 작업 내용:

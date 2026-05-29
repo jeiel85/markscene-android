@@ -53,7 +53,6 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.markscene.app.BuildConfig
 import com.markscene.app.R
-import com.markscene.app.ai.provider.GeminiAdvancedVisionProvider
 import com.markscene.app.ai.provider.LocalVisionModelManager
 import com.markscene.app.ai.provider.LocalVlmAdvancedVisionProvider
 import com.markscene.app.ai.provider.MlKitLocalImageTagger
@@ -71,7 +70,7 @@ import com.markscene.app.core.model.TagSource
 import com.markscene.app.data.backup.BackupManager
 import com.markscene.app.data.backup.DataExporter
 import com.markscene.app.data.record.RoomRecordRepository
-import com.markscene.app.data.settings.ApiKeyStore
+import com.markscene.app.data.settings.SecureTokenStore
 import com.markscene.app.data.settings.SecurityStore
 import com.markscene.app.data.settings.UserPreferences
 import com.markscene.app.ui.screen.CompareScreen
@@ -220,8 +219,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
     }
     val localTagger = remember { MlKitLocalImageTagger(context.applicationContext, database.tagCorrectionDao()) }
     val textRecognizer = remember { MlKitTextRecognizer(context.applicationContext) }
-    val geminiProvider = remember { GeminiAdvancedVisionProvider(context.applicationContext) }
-    val apiKeyStore = remember { ApiKeyStore(context.applicationContext) }
+    val secureTokenStore = remember { SecureTokenStore(context.applicationContext) }
     val securityStore = remember { SecurityStore(context.applicationContext) }
     val userPrefs = remember { UserPreferences(context.applicationContext) }
     val localVisionModelManager = remember { LocalVisionModelManager(context.applicationContext, userPrefs) }
@@ -232,13 +230,12 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
 
     var searchQuery by remember { mutableStateOf("") }
     var showOnboarding by remember { mutableStateOf(!userPrefs.isOnboardingCompleted()) }
-    var hasApiKey by remember { mutableStateOf(apiKeyStore.getGeminiApiKey() != null) }
     var localVlmModelName by remember { mutableStateOf(localVisionModelManager.getModelName()) }
     var hasLocalVlmModel by remember { mutableStateOf(localVisionModelManager.getModelPath() != null) }
     var isLocalVlmModelDownloading by remember { mutableStateOf(false) }
     var localVlmDownloadedBytes by remember { mutableStateOf(0L) }
     var localVlmTotalBytes by remember { mutableStateOf(0L) }
-    var hasHuggingFaceToken by remember { mutableStateOf(!apiKeyStore.getHuggingFaceToken().isNullOrBlank()) }
+    var hasHuggingFaceToken by remember { mutableStateOf(!secureTokenStore.getHuggingFaceToken().isNullOrBlank()) }
     var isBiometricLockEnabled by remember {
         mutableStateOf(try { securityStore.isBiometricLockEnabled() } catch (e: Exception) { false })
     }
@@ -255,6 +252,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
     SecureScreenEffect(enabled = isScreenshotBlockEnabled)
 
     LaunchedEffect(Unit) {
+        secureTokenStore.clearLegacyExternalAiCredentials()
         // Startup: clean old temp/cache files in background
         StorageCleaner.cleanup(context)
     }
@@ -523,7 +521,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                     val recordMemoryTypes by (recordId?.let { repository.observeMemoryTypes(it) } ?: flowOf(emptyList())).collectAsState(initial = emptyList())
 
                     if (record != null) {
-                        val useLocalVlm = hasLocalVlmModel
                         RecordDetailScreen(
                             record = record,
                             latestAnalysis = latestAnalysis,
@@ -531,23 +528,17 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             chatMessages = chatMessages,
                             memoryContext = memoryContext,
                             memoryTypes = recordMemoryTypes,
-                            isAdvancedAnalysisAvailable = hasLocalVlmModel || hasApiKey,
-                            advancedAnalysisLabel = stringResource(if (useLocalVlm) R.string.detail_run_local_vlm else R.string.detail_run_gemini),
-                            advancedAnalysisConsent = stringResource(if (useLocalVlm) R.string.detail_local_vlm_consent_desc else R.string.detail_ai_consent_desc),
+                            isAdvancedAnalysisAvailable = hasLocalVlmModel,
+                            advancedAnalysisLabel = stringResource(R.string.detail_run_local_vlm),
+                            advancedAnalysisConsent = stringResource(R.string.detail_local_vlm_consent_desc),
                             onRunAdvancedAnalysis = { targetRecord ->
-                                if (localVisionModelManager.getModelPath() != null) {
-                                    localVlmProvider.analyze(targetRecord).getOrThrow()
-                                } else {
-                                    val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
-                                    if (apiKey.isBlank()) error("로컬 AI 모델 또는 Gemini API Key가 필요합니다.")
-                                    geminiProvider.analyze(targetRecord, apiKey).getOrThrow()
-                                }
+                                localVlmProvider.analyze(targetRecord).getOrThrow()
                             },
                             onApplyAdvancedAnalysis = { result ->
                                 scope.launch {
                                     val now = System.currentTimeMillis()
-                                    val tagSource = if (localVisionModelManager.getModelPath() != null) TagSource.LocalVlm else TagSource.AdvancedAi
-                                    val providerName = if (tagSource == TagSource.LocalVlm) "local_vlm" else "gemini"
+                                    val tagSource = TagSource.LocalVlm
+                                    val providerName = "local_vlm"
                                     val advancedTags = result.suggestedTags.map { tagName ->
                                         PhotoTag(
                                             id = UUID.randomUUID().toString(),
@@ -590,21 +581,20 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                                             )
                                         )
                                         if (result.memoryTypes.isNotEmpty()) {
-                                            repository.saveMemoryTypes(record.id, result.memoryTypes, MemorySource.AdvancedAi, false)
+                                            repository.saveMemoryTypes(record.id, result.memoryTypes, MemorySource.LocalVlm, false)
                                         }
                                     }
                                 }
                             },
                             onSendQuestion = { question ->
                                 scope.launch {
-                                    val apiKey = apiKeyStore.getGeminiApiKey().orEmpty()
-                                    if (apiKey.isNotBlank()) {
+                                    if (localVisionModelManager.getModelPath() != null) {
                                         repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "user", question, System.currentTimeMillis()))
-                                        val response = geminiProvider.askQuestion(record, question, apiKey)
-                                        val assistantContent = response.getOrDefault("AI가 사진 분석 중 오류가 발생했습니다.")
+                                        val response = localVlmProvider.askQuestion(record, question)
+                                        val assistantContent = response.getOrDefault("로컬 AI가 사진 분석 중 오류가 발생했습니다.")
                                         repository.saveChatMessage(ChatMessage(UUID.randomUUID().toString(), record.id, "assistant", assistantContent, System.currentTimeMillis()))
                                     } else {
-                                        backupStatusMessage = "질문을 위해 Gemini API Key 등록이 필요합니다."
+                                        backupStatusMessage = "질문을 하려면 먼저 설정에서 로컬 AI 모델을 다운로드해주세요."
                                     }
                                 }
                             },
@@ -644,8 +634,8 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             if (tagged >= 20) add("🏷 태그 장인 (20+)")
                             val uniqueTags = allRecords.flatMap { it.tags }.map { it.name }.distinct().size
                             if (uniqueTags >= 10) add("🔍 탐험가 (10종+ 태그)")
-                            if (hasApiKey && allRecords.any { it.analysisStatus.name == "AdvancedComplete" }) add("🤖 AI 탐험가")
-                            if (!hasApiKey && allRecords.size >= 20) add("📴 오프라인 마스터")
+                            if (allRecords.any { it.analysisStatus.name == "AdvancedComplete" }) add("🤖 로컬 AI 탐험가")
+                            if (allRecords.size >= 20) add("📴 오프라인 마스터")
                         }
                     }
                     val weeklyTopTags = remember(allRecords) {
@@ -657,7 +647,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             .joinToString(", ") { "#${it.key}(${it.value})" }
                     }
                     SettingsScreen(
-                        hasApiKey = hasApiKey,
                         hasLocalVlmModel = hasLocalVlmModel,
                         localVlmModelName = localVlmModelName,
                         isLocalVlmModelDownloading = isLocalVlmModelDownloading,
@@ -725,26 +714,10 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                                 backupStatusMessage = if (enabled) "백그라운드 전환 시 자동으로 잠깁니다." else "자동 잠금이 비활성화되었습니다."
                             }
                         },
-                        onSaveApiKey = { key ->
-                            val saved = apiKeyStore.saveGeminiApiKey(key)
-                            hasApiKey = saved
-                            backupStatusMessage = if (saved) "API Key를 저장했습니다." else "보안 저장소를 사용할 수 없어 API Key를 저장하지 못했습니다."
-                        },
-                        onDeleteApiKey = {
-                            apiKeyStore.clearGeminiApiKey()
-                            hasApiKey = false
-                        },
-                        onTestConnection = {
-                            if (apiKeyStore.getGeminiApiKey().isNullOrBlank()) {
-                                "API Key가 없어 테스트할 수 없습니다."
-                            } else {
-                                "저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다."
-                            }
-                        },
                         onImportLocalVlmModel = {
                             if (!isLocalVlmModelDownloading) {
                                 val requiresLicense = BuildConfig.LOCAL_VLM_MODEL_URL.contains("huggingface.co", ignoreCase = true)
-                                val token = apiKeyStore.getHuggingFaceToken()
+                                val token = secureTokenStore.getHuggingFaceToken()
                                 if (requiresLicense && token.isNullOrBlank()) {
                                     backupStatusMessage = context.getString(R.string.settings_local_vlm_hf_missing)
                                 } else {
@@ -789,14 +762,14 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             backupStatusMessage = context.getString(R.string.settings_local_vlm_deleted)
                         },
                         onSaveHuggingFaceToken = { token ->
-                            val saved = apiKeyStore.saveHuggingFaceToken(token)
+                            val saved = secureTokenStore.saveHuggingFaceToken(token)
                             hasHuggingFaceToken = saved && token.isNotBlank()
                             if (!saved) {
                                 backupStatusMessage = "보안 저장소를 사용할 수 없어 토큰을 저장하지 못했습니다."
                             }
                         },
                         onDeleteHuggingFaceToken = {
-                            apiKeyStore.clearHuggingFaceToken()
+                            secureTokenStore.clearHuggingFaceToken()
                             hasHuggingFaceToken = false
                         },
                         onOpenModelLicense = {
@@ -840,7 +813,6 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                     PrivacyDashboardScreen(
                         recordCount = allRecords.size,
                         tagCount = tagCount,
-                        hasApiKey = hasApiKey,
                         hasLocalVlmModel = hasLocalVlmModel,
                         isBiometricEnabled = isBiometricLockEnabled,
                         lastBackupDate = null,

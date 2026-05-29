@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-29 — 로컬 VLM 전용 전환 및 Gemini/BYOK 제거
+
+- 작업: 고급 AI 분석과 비주얼 Q&A를 오직 로컬 LLM/VLM 모델만 사용하는 구조로 전환하고, Gemini/BYOK API Key 입력/저장/호출 경로를 제거.
+- 변경 내용:
+  1. `GeminiAdvancedVisionProvider` 삭제. 상세 화면 고급 분석은 `LocalVlmAdvancedVisionProvider`만 호출.
+  2. `ApiKeyStore`를 `SecureTokenStore`로 교체하고 Gemini API Key 저장/조회/삭제 메서드 제거. 앱 시작 시 기존 `gemini_api_key` 값을 보안 저장소에서 삭제.
+  3. `SettingsScreen`에서 Gemini API Key 입력, 저장, 삭제, 연결 테스트 UI 제거. 로컬 모델 다운로드/삭제와 모델 다운로드용 HuggingFace read token UI만 유지.
+  4. `LocalVlmAdvancedVisionProvider.askQuestion()` 추가. 기존 비주얼 Q&A는 Gemini 대신 다운로드된 로컬 VLM 모델로 응답.
+  5. `PrivacyNoticeScreen`, `PrivacyDashboardScreen`, `strings.xml`, README, GitHub Pages, 개인정보 문서, AI 전략 문서를 외부 AI 전송 없음 기준으로 정리.
+  6. 고급 분석 태그/기억 유형 저장은 `local_vlm`/`LocalVlm` 소스를 사용하도록 정리.
+- 검증:
+  - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
+  - 보류: 실제 기기에서 모델 다운로드 → 로컬 분석/Q&A end-to-end 검증은 라이선스 수락된 HuggingFace 토큰과 충분한 RAM이 필요해 보류.
+- 결과: 앱의 사용자-facing 분석 경로는 로컬 VLM 전용이 되었고, 분석용 API Key 입력은 제거됨.
+- 후속 작업:
+  - 실제 기기에서 모델 다운로드 후 로컬 분석/Q&A end-to-end 검증.
+  - 대용량 모델 다운로드 중단/재시도 UX 개선.
+
 ## 2026-05-27 — 로컬 VLM 실제 구동 가능 상태로 완성
 
 - 작업: 코드 경로는 있지만 모델 URL 미주입과 큰 파일 다운로드 미지원으로 실사용 불가였던 로컬 VLM 기능을, 기본 모델 + 토큰 입력 + 진행률 + 추론 인스턴스 재사용까지 모두 갖춰 실제로 동작 가능한 상태로 만듦.

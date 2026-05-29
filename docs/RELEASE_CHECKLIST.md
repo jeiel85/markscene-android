@@ -5,9 +5,9 @@
 - [x] App builds locally (`./gradlew :app:assembleDebug`).
 - [x] App builds in CI if CI exists (`.github/workflows/android-ci.yml`).
 - [x] No secrets committed (`.gitignore` covers `.env`, `secrets.properties`, `local.properties`, `keystore/`, `*.jks`, `*.keystore`).
-- [x] Basic local flow works without API key (mock tags, local storage).
-- [x] Settings screen works (API key save/delete, encrypted storage).
-- [x] API key can be deleted (Settings screen delete action).
+- [x] Basic local flow works without external AI API key (mock tags, local storage).
+- [x] Settings screen works (local model download/delete, model token save/delete).
+- [x] External AI API key input is absent.
 - [x] Records can be deleted (Record List / Detail delete action).
 - [x] App does not request broad media access (Photo Picker only, no `MANAGE_EXTERNAL_STORAGE`).
 - [x] CameraX capture flow implemented.
@@ -20,7 +20,7 @@
 - [x] Data Safety draft complete (covered in PRIVACY_POLICY.md).
 - [ ] Screenshots prepared.
 - [x] Store description avoids overpromising (`README.md` uses cautious wording).
-- [x] External AI warning implemented (analysis warning dialog).
+- [x] Local AI warning implemented (on-device analysis dialog).
 - [x] User-facing copy reviewed (uses "감지된 태그", "제안", "수정 가능" patterns).
 - [x] Error states reviewed (Toast messages, exception handling).
 - [x] LICENSE file added (`MIT License`).
@@ -29,7 +29,7 @@
 
 - [ ] Current Google Play policy checked.
 - [ ] Current Android permission behavior checked.
-- [ ] Current Gemini/API provider terms checked.
+- [ ] Current local model license and Android AI policy checked.
 - [x] Privacy policy URL live (`https://jeiel85.github.io/markscene-android/privacy/` on GitHub Pages).
 - [ ] Contact email works.
 - [x] Release signing configured outside repository (Secrets based automation).
@@ -45,9 +45,9 @@
 | Photo Picker Import | ✅ Implemented |
 | ML Kit Local Tagging | ✅ Implemented (fallback to mock) |
 | Local VLM Advanced Analysis | ✅ Implemented (app-downloaded approved MediaPipe-compatible model) |
-| Gemini BYOK Analysis | ✅ Implemented (external fallback) |
 | Room Database | ✅ Implemented |
-| Encrypted API Key Storage | ✅ Implemented (EncryptedSharedPreferences) |
+| External AI API Key Input | ❌ Removed |
+| Encrypted Model Token Storage | ✅ Implemented (EncryptedSharedPreferences) |
 | Privacy Policy | ✅ Draft Complete |
 | LICENSE | ✅ MIT Added |
 | Unit Tests | ⚠️ Basic tests added (CI runs `testDebugUnitTest`) |

@@ -43,19 +43,18 @@ As a user, I want to take or select a photo, receive automatic tag suggestions, 
 ### R6. Optional Advanced AI
 
 - The app may support local VLM advanced analysis after the app downloads an approved compatible model file.
-- The app may support Gemini-based advanced analysis after API key setup.
-- If a local VLM model is configured, advanced analysis should prefer on-device processing.
+- The app must not support Gemini/BYOK external advanced analysis.
+- Advanced analysis must use the configured local VLM model only.
 - Advanced analysis must be optional.
 - Advanced analysis must require explicit user action.
 - Before local VLM analysis, the app must disclose that processing happens on device, may take time, and remains a suggestion.
-- Before external analysis, the app must disclose that the selected image will be sent to the AI provider.
 
 ### R7. Settings
 
 - The app must include a settings screen.
 - The settings screen must allow downloading or deleting a local VLM model file when local advanced AI is supported.
-- The settings screen must show whether an API key is configured.
-- The user must be able to add, test, and delete an API key.
+- The settings screen must not expose external AI API key setup.
+- If the configured model source requires license-gated download access, the settings screen may store/delete a download-only read token.
 - The user must be able to view privacy-related information.
 
 ## Non-Functional Requirements
@@ -78,7 +77,7 @@ As a user, I want to take or select a photo, receive automatic tag suggestions, 
 
 - Network failure must not break local features.
 - AI provider failure must show a recoverable error.
-- API key absence must show a setup state, not a crash.
+- Missing local model state must show setup guidance, not a crash.
 
 ## Out of Scope for MVP
 

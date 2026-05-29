@@ -53,11 +53,6 @@
 -keep class androidx.camera.** { *; }
 -dontwarn androidx.camera.**
 
-# --- OkHttp ---
--keep class okhttp3.** { *; }
--dontwarn okhttp3.**
--dontwarn okio.**
-
 # --- Coroutines ---
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}

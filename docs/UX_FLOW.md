@@ -17,7 +17,7 @@ Open app
 
 ## First Run
 
-Do not force API key setup.
+Do not force API key setup. The product does not expose external AI API key setup.
 
 Suggested first-run flow:
 
@@ -32,7 +32,7 @@ Suggested copy:
 
 ```text
 Turn photos into searchable visual notes.
-Basic tagging works on your device. Advanced AI analysis is optional.
+Basic tagging works on your device. Advanced AI analysis uses a local model when you download one.
 ```
 
 ## Home Screen
@@ -74,7 +74,7 @@ Advanced AI CTA copy:
 
 ```text
 Want deeper analysis?
-Connect your own AI API key to generate a detailed scene summary and object list.
+Download the local AI model to generate a detailed scene summary and object list on this device.
 ```
 
 ## Tag Editing
@@ -129,20 +129,18 @@ Sections:
 
 Advanced AI section:
 
-- Provider.
-- API key status.
-- Add/update API key.
-- Test connection.
-- Delete API key.
-- External analysis warning toggle if implemented.
+- Local model status.
+- Download or re-download local model.
+- Delete local model.
+- Store or delete a model-download read token when required by the model source.
 
-## External Analysis Warning
+## Local Analysis Warning
 
-Before sending an image to an AI provider:
+Before running local VLM analysis:
 
 ```text
-This image will be sent to your selected AI provider for analysis.
-Do not continue if the image contains sensitive information you do not want to share with that provider.
+This image will be analyzed by the local AI model on this device.
+It will not be sent to an external server, but analysis may take time and the result is only a suggestion.
 ```
 
 Actions:

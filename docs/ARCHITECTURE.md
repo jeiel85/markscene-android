@@ -61,7 +61,7 @@ app/
 
 - Room database.
 - DataStore for non-secret settings.
-- Encrypted storage for API keys.
+- Encrypted storage for model-download tokens when required by a gated model source.
 - Repositories hide persistence details from domain and UI.
 
 ### AI Layer
@@ -70,7 +70,7 @@ app/
 - Advanced AI provider interface.
 - Mock providers for development and testing.
 - Local VLM implementation for app-downloaded, approved MediaPipe-compatible models.
-- Gemini implementation remains an external BYOK fallback.
+- No external AI provider fallback.
 
 ## Core Interfaces
 
@@ -83,10 +83,10 @@ interface AdvancedVisionProvider {
     suspend fun analyzeImage(request: AdvancedAnalysisRequest): Result<AdvancedAnalysis>
 }
 
-interface ApiKeyStore {
-    suspend fun saveApiKey(provider: AiProvider, apiKey: String)
-    suspend fun getApiKey(provider: AiProvider): String?
-    suspend fun clearApiKey(provider: AiProvider)
+interface SecureTokenStore {
+    suspend fun saveModelDownloadToken(token: String)
+    suspend fun getModelDownloadToken(): String?
+    suspend fun clearModelDownloadToken()
 }
 ```
 
@@ -107,11 +107,10 @@ Photo capture/import
 
 ```text
 User taps Advanced AI Analysis
-  -> prefer configured local VLM model
-  -> if local VLM exists, show on-device analysis warning
-  -> otherwise check API key and show external analysis warning
+  -> require configured local VLM model
+  -> show on-device analysis warning
   -> resize/compress selected image
-  -> call selected AI provider
+  -> call local VLM provider
   -> parse structured result
   -> show suggestions as editable data
   -> user confirms or edits
@@ -131,10 +130,9 @@ Avoid:
 
 ## Error Handling Principles
 
-- No API key: show setup prompt.
-- No local model and no API key: show setup prompt.
+- No local model: show model download setup prompt.
 - Local model error: keep local tags and show retry or model re-download guidance.
-- Network error: keep local tags and show retry.
+- Model download network error: keep local tags and show retry.
 - AI parse error: show raw failure state only in debug builds; user-facing message should be simple.
 - Local database error: show non-destructive error and avoid data loss.
 

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
-class ApiKeyStore(context: Context) {
+class SecureTokenStore(context: Context) {
     private val prefs = runCatching {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -20,28 +20,6 @@ class ApiKeyStore(context: Context) {
     }.getOrNull()
 
     fun isAvailable(): Boolean = prefs != null
-
-    fun saveGeminiApiKey(apiKey: String): Boolean {
-        return prefs?.let {
-            runCatching {
-                it.edit().putString(KEY_GEMINI, apiKey).commit()
-            }.getOrDefault(false)
-        } ?: false
-    }
-
-    fun getGeminiApiKey(): String? {
-        return prefs?.let {
-            runCatching { it.getString(KEY_GEMINI, null) }.getOrNull()
-        }
-    }
-
-    fun clearGeminiApiKey(): Boolean {
-        return prefs?.let {
-            runCatching {
-                it.edit().remove(KEY_GEMINI).commit()
-            }.getOrDefault(false)
-        } ?: false
-    }
 
     fun saveHuggingFaceToken(token: String): Boolean {
         return prefs?.let {
@@ -65,8 +43,16 @@ class ApiKeyStore(context: Context) {
         } ?: false
     }
 
+    fun clearLegacyExternalAiCredentials(): Boolean {
+        return prefs?.let {
+            runCatching {
+                it.edit().remove(KEY_LEGACY_GEMINI).commit()
+            }.getOrDefault(false)
+        } ?: false
+    }
+
     companion object {
-        private const val KEY_GEMINI = "gemini_api_key"
         private const val KEY_HF_TOKEN = "huggingface_token"
+        private const val KEY_LEGACY_GEMINI = "gemini_api_key"
     }
 }

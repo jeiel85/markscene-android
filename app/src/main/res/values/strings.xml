@@ -48,7 +48,7 @@
     <string name="onboarding_title_2">스마트 태깅</string>
     <string name="onboarding_desc_2">AI가 사진 속 물체를 자동으로 인식하고 태그를 제안합니다. 수정도 자유롭게!</string>
     <string name="onboarding_title_3">오프라인 우선</string>
-    <string name="onboarding_desc_3">인터넷 없이도 완벽하게 작동합니다. API Key 없이 바로 시작하세요.</string>
+    <string name="onboarding_desc_3">인터넷 없이도 핵심 기능이 동작합니다. 외부 AI API Key 없이 바로 시작하세요.</string>
     <string name="onboarding_title_4">빠른 검색</string>
     <string name="onboarding_desc_4">태그, 제목, 메모, 심지어 사진 속 텍스트까지 검색할 수 있습니다.</string>
 
@@ -66,18 +66,17 @@
     <string name="create_save_failed">이미지 처리 실패</string>
 
     <!-- Detail Screen -->
-    <string name="detail_ai_insights">AI Insights</string>
+    <string name="detail_ai_insights">로컬 AI 분석</string>
     <string name="detail_scene_summary">장면 요약</string>
     <string name="detail_suggested_tags">추천 태그</string>
     <string name="detail_apply_tags">태그 적용하기</string>
     <string name="detail_run_advanced">고급 AI 분석 실행하기</string>
     <string name="detail_run_local_vlm">로컬 AI로 자세히 분석하기</string>
-    <string name="detail_run_gemini">Gemini로 고급 분석하기</string>
-    <string name="detail_ai_unavailable">설정에서 로컬 AI 모델을 다운로드하거나 Gemini API Key를 등록하면 고급 분석을 사용할 수 있습니다.</string>
+    <string name="detail_ai_unavailable">설정에서 로컬 AI 모델을 다운로드하면 고급 분석을 사용할 수 있습니다.</string>
     <string name="detail_location_history">위치 히스토리</string>
     <string name="detail_unassigned_space">미지정 공간</string>
     <string name="detail_ai_consent_title">AI 고급 분석 안내</string>
-    <string name="detail_ai_consent_desc">이 사진을 분석하기 위해 외부 AI 엔진으로 전송합니다. 계속하시겠습니까?</string>
+    <string name="detail_ai_consent_desc">이 사진은 기기 안의 로컬 AI 모델로 분석됩니다. 외부 서버로 전송되지 않지만, 분석에는 시간이 걸리고 결과는 수정 가능한 제안입니다.</string>
     <string name="detail_local_vlm_consent_desc">이 사진은 기기 안의 로컬 AI 모델로 분석됩니다. 외부 서버로 전송되지 않지만, 분석에는 시간이 걸리고 결과는 수정 가능한 제안입니다.</string>
     <string name="detail_ai_start">분석 시작</string>
 
@@ -113,15 +112,8 @@
     <string name="settings_local_vlm_hf_deleted">HuggingFace 토큰을 삭제했습니다.</string>
     <string name="settings_local_vlm_hf_missing">먼저 HuggingFace 토큰을 저장해주세요.</string>
     <string name="settings_local_vlm_device_warning">모델 추론에는 약 4GB의 RAM이 필요합니다. 일부 기기에서는 동작하지 않을 수 있습니다.</string>
-    <string name="settings_api_active">Gemini API Key 활성화됨</string>
-    <string name="settings_api_required">API Key 등록 필요</string>
-    <string name="settings_api_label">Gemini API Key</string>
-    <string name="settings_api_placeholder">키를 입력하세요</string>
-    <string name="settings_api_saved">API Key가 안전하게 저장되었습니다.</string>
-    <string name="settings_api_deleted">API Key가 삭제되었습니다.</string>
-    <string name="settings_api_test">연결 테스트 실행</string>
-    <string name="settings_api_test_ok">저장된 API Key를 확인했습니다. 상세 화면에서 고급분석 실행 시 실제 호출을 시도합니다.</string>
-    <string name="settings_api_test_no">API Key가 없어 테스트할 수 없습니다.</string>
+    <string name="settings_local_vlm_status_ready">로컬 AI 모델 준비됨</string>
+    <string name="settings_local_vlm_status_required">로컬 AI 모델 필요</string>
     
     <string name="settings_tag_dictionary">태그 학습 사전</string>
     <string name="settings_tag_dictionary_desc">사용자가 교정한 태그 습관을 기억하고 있습니다.</string>
@@ -141,7 +133,7 @@
     <string name="settings_lock_desc">앱 실행 시 지문 또는 얼굴 인식 사용</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="settings_privacy_policy_desc">데이터 관리 및 보안 정책 확인</string>
-    <string name="settings_local_first_notice">MarkScene은 로컬 우선으로 동작합니다. 로컬 AI 모델이 있으면 고급 분석도 기기 안에서 처리하고, 외부 AI는 사용자가 API Key를 등록해 명시적으로 실행할 때만 선택한 이미지를 전송합니다.</string>
+    <string name="settings_local_first_notice">MarkScene은 로컬 우선으로 동작합니다. 기본 태깅, OCR, 고급 AI 분석은 기기 안에서 처리되며, 외부 AI 분석용 API Key 입력은 제공하지 않습니다.</string>
 
     <!-- Appearance Settings -->
     <string name="settings_appearance">화면 테마</string>
@@ -213,10 +205,6 @@
     <!-- Local Processing Badge -->
     <string name="badge_local_processing">로컬 처리</string>
     <string name="badge_local_processing_desc">태깅과 OCR이 이 기기에서만 처리됩니다</string>
-
-    <!-- API Key Visibility -->
-    <string name="settings_api_show">API Key 표시</string>
-    <string name="settings_api_hide">API Key 숨김</string>
 
     <!-- Camera Permission Rationale -->
     <string name="camera_rationale_title">카메라 권한이 필요합니다</string>

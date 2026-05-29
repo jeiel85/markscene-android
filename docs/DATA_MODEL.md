@@ -33,13 +33,13 @@ Fields:
 
 ### AdvancedAnalysis
 
-Optional analysis result from local VLM or BYOK AI provider.
+Optional analysis result from the local VLM provider.
 
 Fields:
 
 - `id`: stable unique ID.
 - `recordId`: parent record ID.
-- `provider`: local_vlm, Gemini, or future provider.
+- `provider`: local_vlm.
 - `modelName`: nullable string.
 - `sceneSummary`: nullable string.
 - `createdAt`: timestamp.
@@ -107,8 +107,8 @@ enum class AnalysisStatus {
 
 - Use Room for records and tags.
 - Use DataStore for simple non-secret settings.
-- Use encrypted storage for API keys.
-- Keep API keys out of Room.
+- Use encrypted storage for model-download tokens when required.
+- Keep model-download tokens out of Room.
 - Keep raw AI responses out of storage unless needed for debugging and explicitly sanitized.
 
 ## Deletion Behavior
