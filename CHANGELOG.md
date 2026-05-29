@@ -9,6 +9,7 @@
 - HuggingFace 토큰 발급 페이지 바로가기 버튼을 추가해 모델 다운로드 준비 동선을 줄였습니다.
 - 토큰이 없을 때도 모델 다운로드 버튼을 누를 수 있게 하고, 필요한 토큰 저장 안내를 표시하도록 접근성을 개선했습니다.
 - 설정 화면을 모델 카탈로그 구조로 바꿔 사진 분석 권장 모델, 가벼운 텍스트 모델 후보, 직접 모델 가져오기 후보를 구분해 보여줍니다.
+- Android CI의 에뮬레이터 통합 테스트 전에 부팅 완료와 SDK 레벨을 확인해, 기기가 덜 준비된 상태에서 APK 설치가 시작되는 실패를 줄였습니다.
 
 ### Verification
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `git diff --check` 성공.

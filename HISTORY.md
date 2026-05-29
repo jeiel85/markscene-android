@@ -8,13 +8,15 @@
   2. `SettingsScreen`, `MarkSceneApp`: HuggingFace 토큰 발급 페이지 바로가기 콜백과 버튼 추가.
   3. `SettingsScreen`: 토큰이 없어도 다운로드 버튼을 누를 수 있게 하고, 기존 누락 안내 메시지로 다음 행동을 알려주도록 변경.
   4. `SettingsScreen`: 사진 분석 권장 모델, 가벼운 텍스트 모델 후보, 직접 모델 가져오기 후보를 구분하는 모델 카탈로그 UI 추가.
-  5. `strings.xml`, `CHANGELOG.md`, `.agent/progress.md`, `.agent/tasks.md`, `docs/AI_PROVIDER_STRATEGY.md`, `docs/PRD.md`: 접근성 개선 내용 기록.
+  5. `.github/workflows/android-ci.yml`: emulator 통합 테스트 전 `sys.boot_completed`, `ro.build.version.sdk`, package manager 응답을 확인해 덜 부팅된 기기에서 APK 설치를 시작하지 않도록 보강.
+  6. `strings.xml`, `CHANGELOG.md`, `.agent/progress.md`, `.agent/tasks.md`, `docs/AI_PROVIDER_STRATEGY.md`, `docs/PRD.md`: 접근성 개선 내용 기록.
 - 검증:
   - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
   - 로컬: `./gradlew.bat :app:lintDebug --no-daemon` 성공.
   - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
   - 로컬: `git diff --check` 성공.
   - 참고: `testDebugUnitTest`를 `lintDebug`와 병렬 실행한 첫 시도는 `bundleDebugClassesToCompileJar/classes.jar` 동시 접근으로 실패했고, 테스트 단독 재실행은 성공.
+  - CI 1차: lint/unit/build는 성공했으나 emulator 통합 테스트가 기기 API level을 1로 인식해 APK 설치 전 실패. 부팅 대기 가드를 추가해 재검증 예정.
 - 결과: 외부 AI provider나 개발자 소유 토큰을 추가하지 않고, 사용자가 직접 모델 준비 절차와 사용 가능한 모델 상태를 이해하기 쉬운 화면으로 개선.
 - 후속 작업:
   - 실제 기기에서 라이선스 수락 후 토큰 저장, 다운로드 시작까지의 UX 확인.

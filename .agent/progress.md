@@ -8,6 +8,7 @@
 - 토큰이 없는 상태에서도 다운로드 버튼을 누르면 필요한 토큰 저장 안내가 나오도록 바꿔, 버튼 비활성화로 막힌 느낌을 줄였습니다.
 - 모델 설정을 카탈로그 구조로 바꿔 사진 분석 권장 모델, 가벼운 텍스트 모델 후보, 직접 모델 가져오기 후보를 구분했습니다.
 - 호환성이 확인된 사진 분석 권장 모델에만 다운로드 버튼을 연결하고, 나머지는 준비/검토 상태로 표시했습니다.
+- CI emulator 통합 테스트가 덜 부팅된 기기에서 APK 설치를 시작하지 않도록 부팅 완료와 SDK 레벨 확인을 추가했습니다.
 
 검증:
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
@@ -15,6 +16,7 @@
 - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
 - 로컬: `git diff --check` 성공.
 - 참고: `testDebugUnitTest`를 `lintDebug`와 병렬 실행한 첫 시도는 중간 JAR 동시 접근으로 실패했고, 테스트 단독 재실행은 성공.
+- CI 1차: lint/unit/build는 성공, emulator 통합 테스트는 기기 API level을 1로 인식해 실패. 부팅 대기 가드 추가 후 재검증 예정.
 
 ## 2026-05-29 (v2.6.3 Release - Play versionCode Recovery)
 
