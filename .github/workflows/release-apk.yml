@@ -68,8 +68,17 @@ jobs:
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
 
+      - name: Prepare release notes
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          python3 .github/scripts/extract_release_notes.py "$TAG_NAME" CHANGELOG.md release-notes.md
+          cp app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/MarkScene-${TAG_NAME}.apk"
+        shell: bash
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
-          files: app/build/outputs/apk/release/*.apk
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
+          fail_on_unmatched_files: true
+          files: app/build/outputs/apk/release/MarkScene-${{ github.ref_name }}.apk

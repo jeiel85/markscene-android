@@ -1,5 +1,17 @@
 # HISTORY.md
 
+## 2026-05-29 — 릴리즈 노트 태그 규칙 보정
+
+- 작업: 태그 릴리즈가 GitHub 자동 생성 비교 링크만 게시하던 문제를 수정.
+- 변경 내용:
+  1. `.github/scripts/extract_release_notes.py`: `vX.Y.Z` 태그와 일치하는 `CHANGELOG.md` 릴리즈 섹션만 추출하고, 태그 형식과 본문 길이를 검증하는 스크립트 추가.
+  2. `.github/workflows/release-apk.yml`: `generate_release_notes` 대신 추출한 `release-notes.md`를 `body_path`로 게시하고, APK 파일명에 태그를 포함하도록 변경.
+  3. `CHANGELOG.md`: 릴리즈 노트/태그 규칙 보정 내용을 Unreleased에 기록.
+- 검증:
+  - 로컬: `python .github/scripts/extract_release_notes.py v2.6.2 CHANGELOG.md release-notes.md` 성공.
+  - GitHub Release: `v2.6.2` 본문을 `CHANGELOG.md`의 해당 섹션으로 교체하고 `MarkScene-v2.6.2.apk` 산출물을 추가 업로드.
+  - 보존: 기존 `app-release.apk`는 이미 게시된 원격 릴리즈 산출물이므로 임의 삭제하지 않음.
+
 ## 2026-05-29 — v2.6.2 릴리즈 준비
 
 - 작업: 로컬 VLM 전용 전환과 단위/통합 테스트 자동화가 자체 검증 및 CI에서 통과한 상태를 v2.6.2 정식 릴리즈로 승격.
