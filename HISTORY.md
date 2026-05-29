@@ -18,6 +18,7 @@
   - 로컬: Play Console용 TXT는 `<ko-KR>` 107자, `<en-US>` 220자로 각 500자 이하 확인.
   - CI 1차: lint/unit/debug build는 성공했으나 software emulator의 package service가 `Broken pipe` 이후 사라져 APK 설치 실패. Android test APK 조립을 emulator 시작 전 단계로 분리해 재검증 예정.
   - CI 2차: emulator 단계 부담을 줄인 뒤에도 KVM 없이 software emulation으로 부팅되어 package service가 사라짐. KVM 권한 활성화 단계 추가 후 재검증 예정.
+  - CI 3차: KVM 권한 활성화 후 Android CI에서 lint, unit test, debug build, Android test APK build, emulator instrumentation, launch smoke test 성공.
 - 결과: v2.6.4 릴리즈 준비 커밋, 태그, GitHub Release 확인 진행 중.
 - 후속 작업:
   - v2.6.4 태그 푸시 후 GitHub Release 산출물 확인.
