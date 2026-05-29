@@ -9,7 +9,8 @@
   3. `CHANGELOG.md`, `.agent/progress.md`, `docs/RELEASE_CHECKLIST.md`: 테스트 자동화 상태 반영.
 - 검증:
   - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
-  - 진행 예정: 커밋/푸시 후 GitHub Actions에서 emulator 통합 테스트 확인.
+  - CI 1차: emulator `connectedDebugAndroidTest`는 2개 테스트 모두 성공. 이후 launch smoke에서 테스트 실행 후 앱 APK가 제거되어 `MainActivity`를 찾지 못해 실패.
+  - 수정: 통합 테스트 후 debug APK를 다시 설치한 뒤 launch smoke를 실행하도록 워크플로 보정.
 
 ## 2026-05-29 — 로컬 VLM 전용 전환 및 Gemini/BYOK 제거
 

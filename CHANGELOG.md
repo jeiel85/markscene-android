@@ -34,6 +34,7 @@
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
 - 로컬: 통합 테스트 자동화 변경 후 `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 재확인 성공.
 - CI 예정: emulator `connectedDebugAndroidTest`와 launch smoke test 확인.
+- CI 1차: emulator `connectedDebugAndroidTest`는 성공했으며, launch smoke 전 debug APK 재설치가 필요해 워크플로를 보정했습니다.
 - 로컬: 생성된 `BuildConfig.java`에 `LOCAL_VLM_MODEL_URL`이 Gemma 3n E2B LiteRT-LM URL로 박혀 있는지 직접 확인.
 - 미실시: 실제 기기에서 모델 다운로드 → 추론/Q&A end-to-end 검증은 충분한 RAM과 라이선스 수락된 사용자 토큰이 필요해 보류.
 
