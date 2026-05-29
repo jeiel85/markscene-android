@@ -10,7 +10,8 @@
   4. `SettingsScreen`: 사진 분석 권장 모델, 가벼운 텍스트 모델 후보, 직접 모델 가져오기 후보를 구분하는 모델 카탈로그 UI 추가.
   5. `.github/workflows/android-ci.yml`: emulator 통합 테스트 전 `sys.boot_completed`, `ro.build.version.sdk`, package manager 응답을 확인해 덜 부팅된 기기에서 APK 설치를 시작하지 않도록 보강.
   6. `.github/workflows/android-ci.yml`: Gradle `connectedDebugAndroidTest`의 ddmlib 설치 경로가 emulator API level을 1로 읽는 문제를 피하기 위해 debug/test APK를 직접 설치하고 `am instrument`로 실행하도록 전환.
-  7. `strings.xml`, `CHANGELOG.md`, `.agent/progress.md`, `.agent/tasks.md`, `docs/AI_PROVIDER_STRATEGY.md`, `docs/PRD.md`: 접근성 개선 내용 기록.
+  7. `.github/scripts/run_emulator_checks.sh`: emulator 검증을 별도 bash 스크립트로 분리하고, APK 설치 재시도를 추가해 package service `Broken pipe` 일시 오류에 대응.
+  8. `strings.xml`, `CHANGELOG.md`, `.agent/progress.md`, `.agent/tasks.md`, `docs/AI_PROVIDER_STRATEGY.md`, `docs/PRD.md`: 접근성 개선 내용 기록.
 - 검증:
   - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
   - 로컬: `./gradlew.bat :app:lintDebug --no-daemon` 성공.
@@ -21,6 +22,7 @@
   - CI 1차: lint/unit/build는 성공했으나 emulator 통합 테스트가 기기 API level을 1로 인식해 APK 설치 전 실패. 부팅 대기 가드를 추가해 재검증 예정.
   - CI 2차: `android-emulator-runner`가 `script`를 줄 단위로 실행해 다중 행 `while` 문법이 깨짐. 부팅 대기 가드를 한 줄 `sh -c` 명령으로 보정 후 재검증 예정.
   - CI 3차: 부팅 가드는 통과했으나 `connectedDebugAndroidTest`의 ddmlib 설치 단계가 emulator API level을 1로 읽어 실패. 직접 APK 설치 + `am instrument` 경로로 보정 후 재검증 예정.
+  - CI 4차: test APK 조립은 성공했으나 `adb install` 중 package service가 `Broken pipe`를 반환. 별도 bash 스크립트와 설치 재시도로 보정 후 재검증 예정.
 - 결과: 외부 AI provider나 개발자 소유 토큰을 추가하지 않고, 사용자가 직접 모델 준비 절차와 사용 가능한 모델 상태를 이해하기 쉬운 화면으로 개선.
 - 후속 작업:
   - 실제 기기에서 라이선스 수락 후 토큰 저장, 다운로드 시작까지의 UX 확인.

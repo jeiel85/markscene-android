@@ -11,6 +11,7 @@
 - 설정 화면을 모델 카탈로그 구조로 바꿔 사진 분석 권장 모델, 가벼운 텍스트 모델 후보, 직접 모델 가져오기 후보를 구분해 보여줍니다.
 - Android CI의 에뮬레이터 통합 테스트 전에 부팅 완료와 SDK 레벨을 확인해, 기기가 덜 준비된 상태에서 APK 설치가 시작되는 실패를 줄였습니다.
 - Android CI의 통합 테스트를 Gradle `connectedDebugAndroidTest` 설치 경로 대신 직접 APK 설치와 `am instrument` 실행 경로로 바꿔 에뮬레이터 속성 조회 불안정성을 줄였습니다.
+- 에뮬레이터 검증 스크립트를 별도 bash 파일로 분리하고 APK 설치 재시도를 추가해 CI의 package service 일시 오류에 대응합니다.
 
 ### Verification
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `./gradlew.bat :app:assembleDebugAndroidTest --no-daemon --stacktrace`, `git diff --check` 성공.

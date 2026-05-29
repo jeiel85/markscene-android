@@ -10,6 +10,7 @@
 - 호환성이 확인된 사진 분석 권장 모델에만 다운로드 버튼을 연결하고, 나머지는 준비/검토 상태로 표시했습니다.
 - CI emulator 통합 테스트가 덜 부팅된 기기에서 APK 설치를 시작하지 않도록 부팅 완료와 SDK 레벨 확인을 추가했습니다.
 - Gradle `connectedDebugAndroidTest` 설치 경로 대신 debug/test APK 직접 설치와 `am instrument` 실행 경로로 CI 통합 테스트를 전환했습니다.
+- 에뮬레이터 검증을 별도 bash 스크립트로 분리하고, `adb install` package service 일시 오류에 대비해 APK 설치 재시도를 추가했습니다.
 
 검증:
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
@@ -21,6 +22,7 @@
 - CI 1차: lint/unit/build는 성공, emulator 통합 테스트는 기기 API level을 1로 인식해 실패. 부팅 대기 가드 추가 후 재검증 예정.
 - CI 2차: emulator runner가 script를 줄 단위로 실행해 다중 행 while 문법이 깨짐. 한 줄 `sh -c` 부팅 대기 명령으로 보정 후 재검증 예정.
 - CI 3차: 부팅 가드는 통과했지만 `connectedDebugAndroidTest` 설치 단계가 emulator API level을 1로 읽어 실패. 직접 설치 + `am instrument` 경로로 보정 후 재검증 예정.
+- CI 4차: debugAndroidTest 조립은 성공했지만 `adb install` 중 package service가 `Broken pipe`를 반환. 별도 스크립트와 설치 재시도로 보정 후 재검증 예정.
 
 ## 2026-05-29 (v2.6.3 Release - Play versionCode Recovery)
 
