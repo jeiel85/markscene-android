@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-29 — v2.6.4 릴리즈 준비
+
+- 날짜: 2026-05-29
+- 작업: 로컬 모델 다운로드 접근성 개선과 모델 카탈로그, CI emulator 안정화 변경을 Play Store 업로드용 새 버전으로 묶어 v2.6.4 릴리즈 준비.
+- 변경 파일:
+  1. `gradle/libs.versions.toml`: 앱 버전을 `2.6.4 / 264`로 상향.
+  2. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전을 v2.6.4로 갱신.
+  3. `CHANGELOG.md`, `.agent/progress.md`: v2.6.4 릴리즈 변경 사항과 검증 계획 기록.
+- 검증:
+  - CI: `1afd81f` 기준 Android CI에서 lint, unit test, debug build, emulator instrumentation, launch smoke test 성공.
+  - 로컬: `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace` 성공.
+  - 로컬: `app/build/intermediates/bundle_manifest/release/processApplicationManifestReleaseForBundle/AndroidManifest.xml`에서 `versionCode=264`, `versionName=2.6.4` 확인.
+  - 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.4-vc264.aab`와 `MarkScene-v2.6.4-vc264-release-notes.txt` 내보내기 성공.
+  - 로컬: Play Console용 TXT는 `<ko-KR>` 107자, `<en-US>` 220자로 각 500자 이하 확인.
+- 결과: v2.6.4 릴리즈 준비 커밋, 태그, GitHub Release 확인 진행 중.
+- 후속 작업:
+  - v2.6.4 태그 푸시 후 GitHub Release 산출물 확인.
+
 ## 2026-05-29 — 로컬 모델 다운로드 접근성 개선
 
 - 작업: HuggingFace 라이선스/토큰 절차 때문에 로컬 고급 AI 모델을 받기 어렵던 설정 화면의 안내와 바로가기를 개선하고, 로컬 AI 모델 카탈로그 구조를 추가.

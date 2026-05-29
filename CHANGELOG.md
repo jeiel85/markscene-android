@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## v2.6.4 - 2026-05-29
+
 ### Changed
 - 로컬 고급 AI 모델 설정 화면에 라이선스 수락, HuggingFace read 토큰 생성, 토큰 저장 후 다운로드 순서를 단계별로 안내합니다.
 - HuggingFace 토큰 발급 페이지 바로가기 버튼을 추가해 모델 다운로드 준비 동선을 줄였습니다.
@@ -13,8 +15,14 @@
 - Android CI의 통합 테스트를 Gradle `connectedDebugAndroidTest` 설치 경로 대신 직접 APK 설치와 `am instrument` 실행 경로로 바꿔 에뮬레이터 속성 조회 불안정성을 줄였습니다.
 - 에뮬레이터 검증 스크립트를 별도 bash 파일로 분리하고 APK 설치 재시도를 추가해 CI의 package service 일시 오류에 대응합니다.
 
+### Build / CI
+- Play Store 업로드용 새 산출물을 만들기 위해 앱 버전을 `2.6.4` / `264`로 올렸습니다.
+
 ### Verification
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `./gradlew.bat :app:assembleDebugAndroidTest --no-daemon --stacktrace`, `git diff --check` 성공.
+- 로컬: `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace` 성공. 생성된 AAB manifest에서 `versionCode=264`, `versionName=2.6.4` 확인.
+- 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.4-vc264.aab`와 Play Console용 `MarkScene-v2.6.4-vc264-release-notes.txt` 내보내기 성공. TXT는 `<ko-KR>` 107자, `<en-US>` 220자로 각 500자 이하 확인.
+- CI: Android CI에서 `lintDebug`, `testDebugUnitTest`, `assembleDebug`, emulator instrumentation, launch smoke test 성공.
 
 ## v2.6.3 - 2026-05-29
 
