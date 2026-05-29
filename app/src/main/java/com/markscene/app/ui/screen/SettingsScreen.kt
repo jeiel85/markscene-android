@@ -226,6 +226,60 @@ fun SettingsScreen(
                                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                             }
 
+                            Text(
+                                text = stringResource(R.string.settings_model_catalog_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_model_catalog_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            ModelCatalogItem(
+                                title = stringResource(R.string.settings_model_catalog_recommended_title),
+                                badge = stringResource(R.string.settings_model_catalog_badge_recommended),
+                                description = stringResource(R.string.settings_model_catalog_recommended_desc),
+                                meta = stringResource(
+                                    R.string.settings_model_catalog_recommended_meta,
+                                    localVlmDefaultModelName.ifBlank { "Gemma 3n E2B" },
+                                    localVlmDefaultModelSizeMb
+                                ),
+                                isSelected = hasLocalVlmModel,
+                                enabled = !isLocalVlmModelDownloading,
+                                actionLabel = stringResource(
+                                    when {
+                                        isLocalVlmModelDownloading -> R.string.settings_local_vlm_downloading_short
+                                        hasLocalVlmModel -> R.string.settings_local_vlm_redownload
+                                        else -> R.string.settings_model_catalog_download_recommended
+                                    }
+                                ),
+                                onClick = onImportLocalVlmModel
+                            )
+
+                            ModelCatalogItem(
+                                title = stringResource(R.string.settings_model_catalog_light_title),
+                                badge = stringResource(R.string.settings_model_catalog_badge_planned),
+                                description = stringResource(R.string.settings_model_catalog_light_desc),
+                                meta = stringResource(R.string.settings_model_catalog_light_meta),
+                                isSelected = false,
+                                enabled = false,
+                                actionLabel = stringResource(R.string.settings_model_catalog_coming_soon),
+                                onClick = {}
+                            )
+
+                            ModelCatalogItem(
+                                title = stringResource(R.string.settings_model_catalog_custom_title),
+                                badge = stringResource(R.string.settings_model_catalog_badge_review),
+                                description = stringResource(R.string.settings_model_catalog_custom_desc),
+                                meta = stringResource(R.string.settings_model_catalog_custom_meta),
+                                isSelected = false,
+                                enabled = false,
+                                actionLabel = stringResource(R.string.settings_model_catalog_compatibility_check),
+                                onClick = {}
+                            )
+
                             if (localVlmRequiresLicense && !hasHuggingFaceToken) {
                                 Surface(
                                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
@@ -341,37 +395,14 @@ fun SettingsScreen(
                                 }
                             }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
+                            if (hasLocalVlmModel) {
                                 OutlinedButton(
-                                    onClick = onImportLocalVlmModel,
-                                    enabled = !isLocalVlmModelDownloading,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp)
+                                    onClick = onDeleteLocalVlmModel,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(
-                                        stringResource(
-                                            when {
-                                                isLocalVlmModelDownloading -> R.string.settings_local_vlm_downloading_short
-                                                hasLocalVlmModel -> R.string.settings_local_vlm_redownload
-                                                else -> R.string.settings_local_vlm_download
-                                            }
-                                        )
-                                    )
-                                }
-                                if (hasLocalVlmModel) {
-                                    OutlinedButton(
-                                        onClick = onDeleteLocalVlmModel,
-                                        modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                                    ) {
-                                        Text(stringResource(R.string.delete))
-                                    }
+                                    Text(stringResource(R.string.settings_model_catalog_delete_current))
                                 }
                             }
 
@@ -720,6 +751,80 @@ fun SettingsScreen(
                         resultMessage = null
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ModelCatalogItem(
+    title: String,
+    badge: String,
+    description: String,
+    meta: String,
+    isSelected: Boolean,
+    enabled: Boolean,
+    actionLabel: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = if (isSelected) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    Icons.Default.Memory,
+                    contentDescription = null,
+                    tint = if (isSelected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
+                )
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(badge) },
+                            enabled = false
+                        )
+                    }
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = meta,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            OutlinedButton(
+                onClick = onClick,
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(actionLabel)
             }
         }
     }

@@ -53,6 +53,7 @@ As a user, I want to take or select a photo, receive automatic tag suggestions, 
 
 - The app must include a settings screen.
 - The settings screen must allow downloading or deleting a local VLM model file when local advanced AI is supported.
+- The settings screen should present local AI models as a catalog, clearly separating ready-to-download photo analysis models from planned or compatibility-check models.
 - The settings screen must not expose external AI API key setup.
 - If the configured model source requires license-gated download access, the settings screen may store/delete a download-only read token.
 - If license-gated access is required, the settings screen should guide the user through license acceptance, read-token creation, token storage, and download in a clear sequence.
