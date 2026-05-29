@@ -51,7 +51,8 @@
 | Privacy Policy | ✅ Draft Complete |
 | LICENSE | ✅ MIT Added |
 | Unit Tests | ⚠️ Basic tests added (CI runs `testDebugUnitTest`) |
-| CI Pipeline | ✅ lint + test + assembleDebug + release APK automation |
+| Integration Tests | ✅ Emulator `connectedDebugAndroidTest` automation |
+| CI Pipeline | ✅ lint + unit test + assembleDebug + emulator integration/smoke + release APK automation |
 
 ## Notes
 

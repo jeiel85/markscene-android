@@ -13,6 +13,17 @@
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon`, `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
 - 보류: 실제 기기에서 모델 다운로드 → 로컬 분석/Q&A end-to-end 검증은 라이선스 수락된 HuggingFace 토큰과 충분한 RAM이 필요해 보류.
 
+## 2026-05-29 (Unit + Integration Test Automation)
+
+작업 내용:
+- Android CI의 emulator 단계에서 `connectedDebugAndroidTest`를 실행하도록 바꿔 instrumentation 통합 테스트를 자동화했습니다.
+- 기존 adb 앱 실행 smoke test는 유지해 테스트 후 실제 MainActivity 실행까지 확인합니다.
+- Room 기반 기록 저장/태그 검색/OCR 검색/삭제 cascade를 검증하는 `RecordDaoIntegrationTest`를 추가했습니다.
+
+검증:
+- 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
+- 진행 예정: 커밋/푸시 후 GitHub Actions에서 emulator integration test 결과 확인.
+
 ## 2026-05-26 (Local VLM Auto Download)
 
 작업 내용:

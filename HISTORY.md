@@ -1,5 +1,16 @@
 # HISTORY.md
 
+## 2026-05-29 — 단위/통합 테스트 자동화
+
+- 작업: 단위 테스트와 emulator 기반 통합 테스트가 CI에서 자동으로 실행되도록 Android CI를 강화.
+- 변경 내용:
+  1. `.github/workflows/android-ci.yml`: emulator 단계에서 `./gradlew :app:connectedDebugAndroidTest --stacktrace` 실행 후 기존 MainActivity launch smoke test를 이어서 수행하도록 변경.
+  2. `RecordDaoIntegrationTest`: in-memory Room DB에서 기록 저장, 태그 검색, OCR 텍스트 검색, record 삭제 후 tag cascade 삭제를 검증하는 instrumentation 통합 테스트 추가.
+  3. `CHANGELOG.md`, `.agent/progress.md`, `docs/RELEASE_CHECKLIST.md`: 테스트 자동화 상태 반영.
+- 검증:
+  - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon`, `./gradlew.bat :app:lintDebug --no-daemon`, `./gradlew.bat :app:assembleDebug --no-daemon` 성공.
+  - 진행 예정: 커밋/푸시 후 GitHub Actions에서 emulator 통합 테스트 확인.
+
 ## 2026-05-29 — 로컬 VLM 전용 전환 및 Gemini/BYOK 제거
 
 - 작업: 고급 AI 분석과 비주얼 Q&A를 오직 로컬 LLM/VLM 모델만 사용하는 구조로 전환하고, Gemini/BYOK API Key 입력/저장/호출 경로를 제거.
