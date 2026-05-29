@@ -17,6 +17,7 @@
 - 로컬: `git diff --check` 성공.
 - 참고: `testDebugUnitTest`를 `lintDebug`와 병렬 실행한 첫 시도는 중간 JAR 동시 접근으로 실패했고, 테스트 단독 재실행은 성공.
 - CI 1차: lint/unit/build는 성공, emulator 통합 테스트는 기기 API level을 1로 인식해 실패. 부팅 대기 가드 추가 후 재검증 예정.
+- CI 2차: emulator runner가 script를 줄 단위로 실행해 다중 행 while 문법이 깨짐. 한 줄 `sh -c` 부팅 대기 명령으로 보정 후 재검증 예정.
 
 ## 2026-05-29 (v2.6.3 Release - Play versionCode Recovery)
 

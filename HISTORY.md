@@ -17,6 +17,7 @@
   - 로컬: `git diff --check` 성공.
   - 참고: `testDebugUnitTest`를 `lintDebug`와 병렬 실행한 첫 시도는 `bundleDebugClassesToCompileJar/classes.jar` 동시 접근으로 실패했고, 테스트 단독 재실행은 성공.
   - CI 1차: lint/unit/build는 성공했으나 emulator 통합 테스트가 기기 API level을 1로 인식해 APK 설치 전 실패. 부팅 대기 가드를 추가해 재검증 예정.
+  - CI 2차: `android-emulator-runner`가 `script`를 줄 단위로 실행해 다중 행 `while` 문법이 깨짐. 부팅 대기 가드를 한 줄 `sh -c` 명령으로 보정 후 재검증 예정.
 - 결과: 외부 AI provider나 개발자 소유 토큰을 추가하지 않고, 사용자가 직접 모델 준비 절차와 사용 가능한 모델 상태를 이해하기 쉬운 화면으로 개선.
 - 후속 작업:
   - 실제 기기에서 라이선스 수락 후 토큰 저장, 다운로드 시작까지의 UX 확인.
