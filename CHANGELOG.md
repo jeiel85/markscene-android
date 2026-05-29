@@ -15,6 +15,7 @@
 - Android CI의 통합 테스트를 Gradle `connectedDebugAndroidTest` 설치 경로 대신 직접 APK 설치와 `am instrument` 실행 경로로 바꿔 에뮬레이터 속성 조회 불안정성을 줄였습니다.
 - 에뮬레이터 검증 스크립트를 별도 bash 파일로 분리하고 APK 설치 재시도를 추가해 CI의 package service 일시 오류에 대응합니다.
 - CI 에뮬레이터 단계에서는 APK 설치와 테스트 실행만 수행하도록, Android test APK 조립을 에뮬레이터 시작 전 단계로 분리했습니다.
+- GitHub-hosted Ubuntu runner에서 emulator가 KVM 가속을 사용할 수 있도록 CI에 KVM 권한 활성화 단계를 추가했습니다.
 
 ### Build / CI
 - Play Store 업로드용 새 산출물을 만들기 위해 앱 버전을 `2.6.4` / `264`로 올렸습니다.

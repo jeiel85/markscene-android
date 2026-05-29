@@ -7,6 +7,7 @@
 - 로컬 모델 다운로드 접근성 개선, 모델 카탈로그, CI emulator 안정화 변경을 v2.6.4 릴리즈 기준으로 정리했습니다.
 - README, GitHub Pages, Play Store listing 문서, release checklist, CHANGELOG를 v2.6.4 기준으로 갱신했습니다.
 - CI emulator 안정성을 위해 Android test APK 조립을 emulator 시작 전 단계로 분리했습니다.
+- GitHub-hosted Ubuntu runner에서 emulator가 KVM 가속을 사용할 수 있도록 CI에 KVM 권한 활성화 단계를 추가했습니다.
 
 검증:
 - CI: `1afd81f` 기준 Android CI에서 lint, unit test, debug build, emulator instrumentation, launch smoke test 성공.
@@ -15,6 +16,7 @@
 - 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.4-vc264.aab`와 `MarkScene-v2.6.4-vc264-release-notes.txt` 내보내기 성공.
 - 로컬: Play Console용 TXT는 `<ko-KR>` 107자, `<en-US>` 220자로 각 500자 이하 확인.
 - CI 1차: lint/unit/debug build는 성공했으나 software emulator package service가 `Broken pipe` 이후 사라져 APK 설치 실패. Android test APK 조립을 emulator 시작 전 단계로 분리해 재검증 예정.
+- CI 2차: emulator 단계 부담을 줄인 뒤에도 KVM 없이 software emulation으로 부팅되어 package service가 사라짐. KVM 권한 활성화 단계 추가 후 재검증 예정.
 - 진행 중: v2.6.4 태그/Release APK 워크플로 확인.
 
 ## 2026-05-29 (Local Model Download Accessibility)

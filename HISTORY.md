@@ -8,7 +8,8 @@
   1. `gradle/libs.versions.toml`: 앱 버전을 `2.6.4 / 264`로 상향.
   2. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전을 v2.6.4로 갱신.
   3. `.github/workflows/android-ci.yml`, `.github/scripts/run_emulator_checks.sh`: emulator 시작 전 Android test APK를 먼저 조립하고, emulator 단계는 설치/실행만 하도록 분리.
-  4. `CHANGELOG.md`, `.agent/progress.md`: v2.6.4 릴리즈 변경 사항과 검증 계획 기록.
+  4. `.github/workflows/android-ci.yml`: GitHub-hosted Ubuntu runner에서 emulator가 KVM 가속을 사용할 수 있도록 KVM 권한 활성화 단계 추가.
+  5. `CHANGELOG.md`, `.agent/progress.md`: v2.6.4 릴리즈 변경 사항과 검증 계획 기록.
 - 검증:
   - CI: `1afd81f` 기준 Android CI에서 lint, unit test, debug build, emulator instrumentation, launch smoke test 성공.
   - 로컬: `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace` 성공.
@@ -16,6 +17,7 @@
   - 로컬: `C:\Users\jeiel\OneDrive\바탕 화면\Build`에 `MarkScene-v2.6.4-vc264.aab`와 `MarkScene-v2.6.4-vc264-release-notes.txt` 내보내기 성공.
   - 로컬: Play Console용 TXT는 `<ko-KR>` 107자, `<en-US>` 220자로 각 500자 이하 확인.
   - CI 1차: lint/unit/debug build는 성공했으나 software emulator의 package service가 `Broken pipe` 이후 사라져 APK 설치 실패. Android test APK 조립을 emulator 시작 전 단계로 분리해 재검증 예정.
+  - CI 2차: emulator 단계 부담을 줄인 뒤에도 KVM 없이 software emulation으로 부팅되어 package service가 사라짐. KVM 권한 활성화 단계 추가 후 재검증 예정.
 - 결과: v2.6.4 릴리즈 준비 커밋, 태그, GitHub Release 확인 진행 중.
 - 후속 작업:
   - v2.6.4 태그 푸시 후 GitHub Release 산출물 확인.
