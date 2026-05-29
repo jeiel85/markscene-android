@@ -57,7 +57,9 @@ jobs:
           script: |
             adb wait-for-device
             sh -c 'i=0; while [ "$i" -lt 60 ]; do BOOT_COMPLETED="$(adb shell getprop sys.boot_completed | tr -d "\r")"; SDK_LEVEL="$(adb shell getprop ro.build.version.sdk | tr -d "\r")"; case "$SDK_LEVEL" in ""|*[!0-9]*) ;; *) if [ "$BOOT_COMPLETED" = "1" ] && [ "$SDK_LEVEL" -ge 21 ]; then break; fi ;; esac; i=$((i + 1)); sleep 5; done; case "$SDK_LEVEL" in ""|*[!0-9]*) echo "Emulator SDK level is not ready: $SDK_LEVEL"; adb devices -l; exit 1 ;; esac; if [ "$BOOT_COMPLETED" != "1" ] || [ "$SDK_LEVEL" -lt 21 ]; then echo "Emulator is not ready: boot=$BOOT_COMPLETED sdk=$SDK_LEVEL"; adb devices -l; exit 1; fi; adb shell cmd package list packages >/dev/null'
-            ./gradlew :app:connectedDebugAndroidTest --stacktrace
+            ./gradlew :app:assembleDebugAndroidTest --stacktrace
             adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell am instrument -w com.markscene.app.test/androidx.test.runner.AndroidJUnitRunner
             adb shell am start -W -n com.markscene.app/.MainActivity
             adb shell pidof com.markscene.app
