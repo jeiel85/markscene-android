@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -43,10 +44,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(
-    onComplete: () -> Unit
+    onComplete: (openModelSettings: Boolean) -> Unit
 ) {
     val context = LocalContext.current
-    val pagerState = rememberPagerState(pageCount = { 4 })
+    val pagerState = rememberPagerState(pageCount = { 5 })
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     
@@ -70,9 +71,15 @@ fun OnboardingScreen(
             gradientColors = listOf(Color(0xFF4facfe), Color(0xFF00f2fe))
         ),
         OnboardingPage(
-            icon = Icons.Default.Search,
+            icon = Icons.Default.Download,
             title = stringResource(R.string.onboarding_title_4),
             description = stringResource(R.string.onboarding_desc_4),
+            gradientColors = listOf(Color(0xFF11998e), Color(0xFF38ef7d))
+        ),
+        OnboardingPage(
+            icon = Icons.Default.Search,
+            title = stringResource(R.string.onboarding_title_5),
+            description = stringResource(R.string.onboarding_desc_5),
             gradientColors = listOf(Color(0xFF43e97b), Color(0xFF38f9d7))
         )
     )
@@ -103,7 +110,7 @@ fun OnboardingScreen(
                 TextButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onComplete()
+                        onComplete(false)
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White.copy(alpha = 0.8f)
@@ -164,7 +171,7 @@ fun OnboardingScreen(
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         } else {
-                            onComplete()
+                            onComplete(false)
                         }
                     },
                     modifier = Modifier
@@ -192,6 +199,24 @@ fun OnboardingScreen(
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                         )
+                    }
+                }
+
+                AnimatedVisibility(visible = pagerState.currentPage == 3) {
+                    TextButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onComplete(true)
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(stringResource(R.string.onboarding_model_settings))
                     }
                 }
 

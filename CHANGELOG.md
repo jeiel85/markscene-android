@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+### Changed
+- 온보딩에서 로컬 고급 AI 모델은 앱 설치 파일에 포함하지 않고, 필요한 경우 WiFi에서 선택 다운로드하도록 안내합니다.
+- 온보딩의 모델 안내 페이지에서 바로 설정의 모델 다운로드 안내 화면으로 이동할 수 있게 했습니다.
+
+### Verification
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon --stacktrace`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `git diff --check` 성공.
+
 ## v2.6.4 - 2026-05-29
 
 ### Changed

@@ -1,5 +1,20 @@
 # Agent Progress
 
+## 2026-05-30 (Onboarding Optional Model Download)
+
+작업 내용:
+- 온보딩에 "모델은 선택 다운로드" 페이지를 추가했습니다.
+- 사용자가 고급 사진 분석을 바로 준비하고 싶을 때 온보딩에서 설정의 모델 다운로드 안내로 이동할 수 있게 했습니다.
+- 앱 번들에 대용량 로컬 AI 모델을 포함하지 않는 정책을 PRD, AI 전략, UX 흐름 문서에 반영했습니다.
+
+검증:
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
+- 로컬: `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
+- 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
+- 로컬: `git diff --check` 성공.
+- 로컬: 앱 리소스/asset 안에 대용량 모델 파일(`.task`, `.litertlm`, `.bin`, `.gguf`, `.tflite`)이 포함되어 있지 않음을 확인.
+- 진행 중: v2.6.5 릴리즈 준비 및 CI/Release 확인.
+
 ## 2026-05-29 (v2.6.4 Release - Model Download Accessibility)
 
 작업 내용:

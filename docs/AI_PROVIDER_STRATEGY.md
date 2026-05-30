@@ -20,6 +20,7 @@ Current implementation:
 - License-gated model downloads may require a HuggingFace read token; this token is for model download only, not for analysis.
 - If a license-gated model is configured, Settings should show a guided setup path with direct links for model-license acceptance and read-token creation.
 - Settings presents a small model catalog. Only models verified for MediaPipe compatibility and the required modality should expose a download action; text-only or unverified models remain marked as planned or compatibility-check items.
+- Onboarding explains that the app does not bundle a multi-GB local model; users can keep the base app light and download the recommended model later from Settings.
 - Record detail advanced analysis uses the local VLM model only.
 - Local VLM analysis uses image + prompt input and asks for cautious structured JSON.
 - Suggested objects and tags are saved as editable suggestions with `LocalVlm` tag source.

@@ -35,6 +35,12 @@ Turn photos into searchable visual notes.
 Basic tagging works on your device. Advanced AI analysis uses a local model when you download one.
 ```
 
+### Onboarding Local Model Guidance
+
+- Explain that the base app install remains lightweight because large local AI models are not bundled.
+- Tell users that advanced photo analysis is optional and can be enabled later by downloading a recommended model over WiFi.
+- Provide a direct action from the model guidance page to Settings so motivated users can review the license/token/download steps immediately.
+
 ## Home Screen
 
 Primary actions:

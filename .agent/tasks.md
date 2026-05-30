@@ -66,6 +66,7 @@ v2.4.0(2026-05-20)에서 우선순위 10종(이미지 파이프라인 OOM 방어
 - [x] Add model-download token delete action.
 - [x] Improve model download setup guidance and token-page access.
 - [x] Add local AI model catalog with recommended, planned, and compatibility-check states.
+- [x] Add onboarding guidance that local AI models are optional downloads instead of bundled app assets.
 - [x] Add mock advanced AI provider.
 - [x] Add local analysis warning.
 - [x] Remove Gemini provider and external fallback.

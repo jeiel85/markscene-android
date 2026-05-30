@@ -230,6 +230,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
 
     var searchQuery by remember { mutableStateOf("") }
     var showOnboarding by remember { mutableStateOf(!userPrefs.isOnboardingCompleted()) }
+    var openSettingsAfterOnboarding by remember { mutableStateOf(false) }
     var localVlmModelName by remember { mutableStateOf(localVisionModelManager.getModelName()) }
     var hasLocalVlmModel by remember { mutableStateOf(localVisionModelManager.getModelPath() != null) }
     var isLocalVlmModelDownloading by remember { mutableStateOf(false) }
@@ -360,8 +361,9 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
 
     if (showOnboarding) {
         OnboardingScreen(
-            onComplete = {
+            onComplete = { openModelSettings ->
                 userPrefs.setOnboardingCompleted(true)
+                openSettingsAfterOnboarding = openModelSettings
                 showOnboarding = false
             }
         )
@@ -446,6 +448,16 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                 }
             }
         ) { paddingValues ->
+            LaunchedEffect(openSettingsAfterOnboarding) {
+                if (openSettingsAfterOnboarding) {
+                    navController.navigate(SETTINGS_ROUTE) {
+                        popUpTo(TODAY_ROUTE) { saveState = true }
+                        launchSingleTop = true
+                    }
+                    openSettingsAfterOnboarding = false
+                }
+            }
+
             NavHost(
                 navController = navController,
                 startDestination = TODAY_ROUTE,

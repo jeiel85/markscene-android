@@ -49,8 +49,11 @@
     <string name="onboarding_desc_2">AI가 사진 속 물체를 자동으로 인식하고 태그를 제안합니다. 수정도 자유롭게!</string>
     <string name="onboarding_title_3">오프라인 우선</string>
     <string name="onboarding_desc_3">인터넷 없이도 핵심 기능이 동작합니다. 외부 AI API Key 없이 바로 시작하세요.</string>
-    <string name="onboarding_title_4">빠른 검색</string>
-    <string name="onboarding_desc_4">태그, 제목, 메모, 심지어 사진 속 텍스트까지 검색할 수 있습니다.</string>
+    <string name="onboarding_title_4">모델은 선택 다운로드</string>
+    <string name="onboarding_desc_4">앱 설치 파일에는 큰 로컬 AI 모델을 넣지 않습니다. 고급 사진 분석이 필요할 때 WiFi에서 권장 모델을 다운로드하세요.</string>
+    <string name="onboarding_title_5">빠른 검색</string>
+    <string name="onboarding_desc_5">태그, 제목, 메모, 심지어 사진 속 텍스트까지 검색할 수 있습니다.</string>
+    <string name="onboarding_model_settings">모델 다운로드 안내 보기</string>
 
     <!-- Create Screen -->
     <string name="create_title">새 메모 기록</string>

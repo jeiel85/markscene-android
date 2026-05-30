@@ -1,5 +1,24 @@
 # HISTORY.md
 
+## 2026-05-30 — 온보딩 모델 선택 다운로드 안내
+
+- 날짜: 2026-05-30
+- 작업: 앱 번들에 대용량 로컬 AI 모델을 포함하지 않고, 첫 실행 온보딩에서 필요한 사용자만 모델을 다운로드하도록 안내.
+- 변경 파일:
+  1. `OnboardingScreen`: 온보딩 페이지를 5단계로 확장하고 "모델은 선택 다운로드" 페이지 추가.
+  2. `MarkSceneApp`: 온보딩 모델 안내 페이지에서 설정 화면으로 이동하는 완료 경로 추가.
+  3. `strings.xml`: 온보딩 모델 다운로드 안내 문구 추가.
+  4. `docs/PRD.md`, `docs/AI_PROVIDER_STRATEGY.md`, `docs/UX_FLOW.md`, `.agent/tasks.md`, `CHANGELOG.md`, `.agent/progress.md`: 선택 다운로드 정책과 검증 기록 반영.
+- 검증:
+  - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
+  - 로컬: `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
+  - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
+  - 로컬: `git diff --check` 성공.
+  - 로컬: 앱 리소스/asset 안에 대용량 모델 파일(`.task`, `.litertlm`, `.bin`, `.gguf`, `.tflite`)이 포함되어 있지 않음을 확인.
+- 결과: 진행 중.
+- 후속 작업:
+  - v2.6.5 릴리즈 준비 및 CI/Release 확인.
+
 ## 2026-05-29 — v2.6.4 릴리즈 준비
 
 - 날짜: 2026-05-29
