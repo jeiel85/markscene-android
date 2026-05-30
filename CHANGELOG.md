@@ -4,12 +4,19 @@
 
 ## Unreleased
 
+## v2.6.6 - 2026-05-30
+
 ### Fixed
 - 하드웨어 뒤로가기와 상단 뒤로가기 버튼이 현재 화면 깊이를 먼저 되돌리고, 스택이 얕은 최상위 탭에서는 Today 화면으로 복귀하도록 보완했습니다.
 - 검색 목록의 다중 선택 모드에서 하드웨어 뒤로가기를 누르면 앱을 나가지 않고 선택 모드를 먼저 해제하도록 수정했습니다.
 
+### Build / CI
+- Play Store 업로드용 새 산출물을 만들기 위해 앱 버전을 `2.6.6` / `266`으로 올렸습니다.
+
 ### Verification
-- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon --stacktrace`, `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace`, `git diff --check` 성공.
+- 산출물: release bundle manifest에서 `versionCode=266`, `versionName=2.6.6` 확인. Play Console용 AAB와 `ko-KR`/`en-US` 릴리즈 노트 TXT를 바탕화면 `Build` 폴더로 내보냈습니다.
+- CI: Android CI에서 `lintDebug`, `testDebugUnitTest`, `assembleDebug`, Android test APK build, emulator instrumentation, launch smoke test 성공.
 
 ## v2.6.5 - 2026-05-30
 

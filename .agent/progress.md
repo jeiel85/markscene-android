@@ -1,5 +1,20 @@
 # Agent Progress
 
+## 2026-05-30 (v2.6.6 Release - Back Navigation Depth)
+
+작업 내용:
+- 앱 버전을 `2.6.6 / 266`으로 올렸습니다.
+- 뒤로가기 depth 보완을 v2.6.6 릴리즈 기준으로 정리했습니다.
+- README, GitHub Pages, Play Store listing 문서, release checklist, CHANGELOG를 v2.6.6 기준으로 갱신했습니다.
+
+검증:
+- CI: `34eaa22` 기준 Android CI에서 lint, unit test, debug build, Android test APK build, emulator instrumentation, launch smoke test 성공.
+- 로컬: `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace` 성공.
+- Manifest: release bundle manifest에서 `versionCode=266`, `versionName=2.6.6` 확인.
+- 산출물: 바탕화면 `Build` 폴더에 `MarkScene-v2.6.6-vc266.aab`와 `MarkScene-v2.6.6-vc266-release-notes.txt` 내보내기 완료.
+- 릴리즈 노트 길이: `ko-KR` 129자, `en-US` 275자.
+- 진행 중: v2.6.6 tag release workflow 확인.
+
 ## 2026-05-30 (Back Navigation Depth)
 
 작업 내용:
@@ -11,7 +26,7 @@
 - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
 - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
 - 로컬: `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
-- 진행 중: 새 버전 릴리즈 준비 및 CI/Release 확인.
+- CI: `34eaa22` 기준 Android CI에서 lint, unit test, debug build, Android test APK build, emulator instrumentation, launch smoke test 성공.
 
 ## 2026-05-30 (v2.6.5 Release - Optional Model Onboarding)
 
