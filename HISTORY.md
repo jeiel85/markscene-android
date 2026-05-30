@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-30 — v2.6.5 릴리즈 준비
+
+- 날짜: 2026-05-30
+- 작업: 온보딩 모델 선택 다운로드 안내를 Play Store 업로드용 새 버전으로 묶어 v2.6.5 릴리즈 준비.
+- 변경 파일:
+  1. `gradle/libs.versions.toml`: 앱 버전을 `2.6.5 / 265`로 상향.
+  2. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전을 v2.6.5로 갱신.
+  3. `CHANGELOG.md`, `.agent/progress.md`: v2.6.5 릴리즈 변경 사항과 검증 계획 기록.
+- 검증:
+  - CI: `1051418` 기준 Android CI에서 lint, unit test, debug build, Android test APK build, emulator instrumentation, launch smoke test 성공.
+  - 로컬: `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace` 성공.
+  - Manifest: release bundle manifest에서 `versionCode=265`, `versionName=2.6.5` 확인.
+  - 산출물: `C:\Users\jeiel\OneDrive\바탕 화면\Build\MarkScene-v2.6.5-vc265.aab`와 `MarkScene-v2.6.5-vc265-release-notes.txt` 생성 확인.
+  - 릴리즈 노트 길이: `ko-KR` 129자, `en-US` 265자.
+- 결과: v2.6.5 버전 커밋 준비와 Play Console용 로컬 산출물 생성 완료.
+- 후속 작업:
+  - v2.6.5 태그 푸시 후 GitHub Release 산출물 확인.
+
 ## 2026-05-30 — 온보딩 모델 선택 다운로드 안내
 
 - 날짜: 2026-05-30
@@ -15,7 +33,7 @@
   - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
   - 로컬: `git diff --check` 성공.
   - 로컬: 앱 리소스/asset 안에 대용량 모델 파일(`.task`, `.litertlm`, `.bin`, `.gguf`, `.tflite`)이 포함되어 있지 않음을 확인.
-- 결과: 진행 중.
+- 결과: 온보딩 모델 선택 다운로드 안내 구현 커밋과 Android CI 검증 완료.
 - 후속 작업:
   - v2.6.5 릴리즈 준비 및 CI/Release 확인.
 

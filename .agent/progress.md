@@ -1,5 +1,20 @@
 # Agent Progress
 
+## 2026-05-30 (v2.6.5 Release - Optional Model Onboarding)
+
+작업 내용:
+- 앱 버전을 `2.6.5 / 265`로 올렸습니다.
+- 온보딩 모델 선택 다운로드 안내를 v2.6.5 릴리즈 기준으로 정리했습니다.
+- README, GitHub Pages, Play Store listing 문서, release checklist, CHANGELOG를 v2.6.5 기준으로 갱신했습니다.
+
+검증:
+- CI: `1051418` 기준 Android CI에서 lint, unit test, debug build, Android test APK build, emulator instrumentation, launch smoke test 성공.
+- 로컬: `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace` 성공.
+- Manifest: release bundle manifest에서 `versionCode=265`, `versionName=2.6.5` 확인.
+- 산출물: 바탕화면 `Build` 폴더에 `MarkScene-v2.6.5-vc265.aab`와 `MarkScene-v2.6.5-vc265-release-notes.txt` 내보내기 완료.
+- 릴리즈 노트 길이: `ko-KR` 129자, `en-US` 265자.
+- 진행 중: v2.6.5 tag release workflow 확인.
+
 ## 2026-05-30 (Onboarding Optional Model Download)
 
 작업 내용:
@@ -13,7 +28,7 @@
 - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
 - 로컬: `git diff --check` 성공.
 - 로컬: 앱 리소스/asset 안에 대용량 모델 파일(`.task`, `.litertlm`, `.bin`, `.gguf`, `.tflite`)이 포함되어 있지 않음을 확인.
-- 진행 중: v2.6.5 릴리즈 준비 및 CI/Release 확인.
+- CI: `1051418` 기준 Android CI에서 lint, unit test, debug build, Android test APK build, emulator instrumentation, launch smoke test 성공.
 
 ## 2026-05-29 (v2.6.4 Release - Model Download Accessibility)
 

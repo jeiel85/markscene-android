@@ -4,12 +4,19 @@
 
 ## Unreleased
 
+## v2.6.5 - 2026-05-30
+
 ### Changed
 - 온보딩에서 로컬 고급 AI 모델은 앱 설치 파일에 포함하지 않고, 필요한 경우 WiFi에서 선택 다운로드하도록 안내합니다.
 - 온보딩의 모델 안내 페이지에서 바로 설정의 모델 다운로드 안내 화면으로 이동할 수 있게 했습니다.
 
+### Build / CI
+- Play Store 업로드용 새 산출물을 만들기 위해 앱 버전을 `2.6.5` / `265`로 올렸습니다.
+
 ### Verification
-- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon --stacktrace`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `git diff --check` 성공.
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon --stacktrace`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `./gradlew.bat :app:bundleRelease --no-daemon --stacktrace`, `git diff --check` 성공.
+- 산출물: release bundle manifest에서 `versionCode=265`, `versionName=2.6.5` 확인. Play Console용 AAB와 `ko-KR`/`en-US` 릴리즈 노트 TXT를 바탕화면 `Build` 폴더로 내보냈습니다.
+- CI: Android CI에서 `lintDebug`, `testDebugUnitTest`, `assembleDebug`, Android test APK build, emulator instrumentation, launch smoke test 성공.
 
 ## v2.6.4 - 2026-05-29
 
