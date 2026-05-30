@@ -2,6 +2,7 @@ package com.markscene.app.ui
 
 import android.net.Uri
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -119,6 +120,15 @@ private const val SOURCE_IMPORT = "import"
 private val BOTTOM_NAV_ROUTES = setOf(TODAY_ROUTE, SEARCH_ROUTE, RECALL_ROUTE, SETTINGS_ROUTE)
 
 private val RECALL_KEYWORDS = listOf("나중에", "확인", "만들기", "사야 함", "정리", "TODO")
+
+internal fun fallbackRouteAfterBackPop(currentRoute: String?): String? {
+    return when {
+        currentRoute == null -> TODAY_ROUTE
+        currentRoute == TODAY_ROUTE -> null
+        currentRoute in BOTTOM_NAV_ROUTES -> TODAY_ROUTE
+        else -> TODAY_ROUTE
+    }
+}
 
 private fun computeRecallRecords(allRecords: List<PhotoRecord>): List<PhotoRecord> {
     val keywordLower = RECALL_KEYWORDS.map { it.lowercase() }
@@ -346,6 +356,31 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    fun navigateToTopLevel(route: String) {
+        navController.navigate(route) {
+            popUpTo(TODAY_ROUTE) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateBackByDepth() {
+        val routeBeforePop = navController.currentBackStackEntry?.destination?.route
+        val hasPreviousDepth = navController.previousBackStackEntry != null
+        if (hasPreviousDepth) {
+            navController.popBackStack()
+        } else {
+            val fallbackRoute = fallbackRouteAfterBackPop(routeBeforePop)
+            if (fallbackRoute != null) {
+                navController.navigate(fallbackRoute) {
+                    popUpTo(TODAY_ROUTE) { inclusive = false }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            } else {
+                activity?.finish()
+            }
+        }
+    }
     val showBottomNav = when {
         currentRoute == null -> true
         currentRoute.startsWith("create_record") -> false
@@ -384,6 +419,10 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
             }
         }
     } else {
+        BackHandler {
+            navigateBackByDepth()
+        }
+
         Scaffold(
             containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
             bottomBar = {
@@ -395,10 +434,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             selected = currentRoute == TODAY_ROUTE,
                             onClick = {
                                 if (currentRoute != TODAY_ROUTE) {
-                                    navController.navigate(TODAY_ROUTE) {
-                                        popUpTo(TODAY_ROUTE) { inclusive = true }
-                                        launchSingleTop = true
-                                    }
+                                    navigateToTopLevel(TODAY_ROUTE)
                                 }
                             }
                         )
@@ -408,11 +444,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             selected = currentRoute == SEARCH_ROUTE,
                             onClick = {
                                 if (currentRoute != SEARCH_ROUTE) {
-                                    navController.navigate(SEARCH_ROUTE) {
-                                        popUpTo(TODAY_ROUTE) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                                    navigateToTopLevel(SEARCH_ROUTE)
                                 }
                             }
                         )
@@ -422,11 +454,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             selected = currentRoute == RECALL_ROUTE,
                             onClick = {
                                 if (currentRoute != RECALL_ROUTE) {
-                                    navController.navigate(RECALL_ROUTE) {
-                                        popUpTo(TODAY_ROUTE) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                                    navigateToTopLevel(RECALL_ROUTE)
                                 }
                             }
                         )
@@ -436,11 +464,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             selected = currentRoute == SETTINGS_ROUTE,
                             onClick = {
                                 if (currentRoute != SETTINGS_ROUTE) {
-                                    navController.navigate(SETTINGS_ROUTE) {
-                                        popUpTo(TODAY_ROUTE) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                                    navigateToTopLevel(SETTINGS_ROUTE)
                                 }
                             }
                         )
@@ -450,10 +474,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
         ) { paddingValues ->
             LaunchedEffect(openSettingsAfterOnboarding) {
                 if (openSettingsAfterOnboarding) {
-                    navController.navigate(SETTINGS_ROUTE) {
-                        popUpTo(TODAY_ROUTE) { saveState = true }
-                        launchSingleTop = true
-                    }
+                    navigateToTopLevel(SETTINGS_ROUTE)
                     openSettingsAfterOnboarding = false
                 }
             }
@@ -479,7 +500,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                 ) { backStackEntry ->
                     val source = backStackEntry.arguments?.getString(CREATE_RECORD_SOURCE_ARG).orEmpty()
                     val initialUri = backStackEntry.arguments?.getString(DETAIL_ID_ARG)?.let { Uri.parse(it) }
-                    CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navController.navigate(SEARCH_ROUTE) { popUpTo(TODAY_ROUTE) } } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onSaveMemoryTypes = { recordId, memoryTypes, isWorthRecalling -> scope.launch { val now = System.currentTimeMillis(); val primaryType = memoryTypes.firstOrNull(); repository.saveMemoryContext(MemoryContext(id = UUID.randomUUID().toString(), recordId = recordId, primaryMemoryType = primaryType, mood = null, energy = null, contextType = null, isWorthRecalling = isWorthRecalling, recallReason = if (isWorthRecalling) "사용자 지정" else null, createdAt = now, updatedAt = now)); repository.saveMemoryTypes(recordId, memoryTypes, MemorySource.User, true) } }, onBack = { navController.popBackStack() })
+                    CreateRecordScreen(source = source, initialImageUri = initialUri, localImageTagger = localTagger, textRecognizer = textRecognizer, onSave = { record -> scope.launch { repository.saveRecord(record); navigateToTopLevel(SEARCH_ROUTE) } }, onLearnTagCorrection = { original, corrected -> scope.launch { val dao = database.tagCorrectionDao(); val existing = dao.getCorrection(original); if (existing != null) { dao.upsert(existing.copy(correctedName = corrected, usageCount = existing.usageCount + 1, updatedAt = System.currentTimeMillis())) } else { dao.upsert(TagCorrectionEntity(original, corrected)) } } }, onSaveMemoryTypes = { recordId, memoryTypes, isWorthRecalling -> scope.launch { val now = System.currentTimeMillis(); val primaryType = memoryTypes.firstOrNull(); repository.saveMemoryContext(MemoryContext(id = UUID.randomUUID().toString(), recordId = recordId, primaryMemoryType = primaryType, mood = null, energy = null, contextType = null, isWorthRecalling = isWorthRecalling, recallReason = if (isWorthRecalling) "사용자 지정" else null, createdAt = now, updatedAt = now)); repository.saveMemoryTypes(recordId, memoryTypes, MemorySource.User, true) } }, onBack = { navigateBackByDepth() })
                 }
                 composable(SEARCH_ROUTE) {
                     val allTags = remember(visibleRecords) {
@@ -505,7 +526,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                         onDeleteRecords = { ids -> scope.launch { repository.deleteRecords(ids) } },
                         onMoveToSpace = { ids, space -> scope.launch { repository.updateRecordsSpace(ids, space) } },
                         onOpenDetail = { recordId -> navController.navigate("$DETAIL_ROUTE/$recordId") },
-                        onBack = { navController.popBackStack() },
+                        onBack = { navigateBackByDepth() },
                         onClearRecentSearches = { userPrefs.clearRecentSearches() },
                         onLayoutChange = { layout ->
                             userPrefs.setPreferredLayout(layout.name)
@@ -610,23 +631,23 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                                     }
                                 }
                             },
-                            onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navController.popBackStack() } },
+                            onDeleteRecord = { id -> scope.launch { repository.deleteRecord(id); navigateBackByDepth() } },
                             onOpenOtherRecord = { targetId -> navController.navigate("$DETAIL_ROUTE/$targetId") },
-                            onBack = { navController.popBackStack() }
+                            onBack = { navigateBackByDepth() }
                         )
                     }
                 }
                 composable(route = "$SPACE_TIMELINE_ROUTE/{$SPACE_NAME_ARG}", arguments = listOf(navArgument(SPACE_NAME_ARG) { type = NavType.StringType })) { backStackEntry ->
                     val spaceName = backStackEntry.arguments?.getString(SPACE_NAME_ARG).orEmpty()
                     val spaceRecords = allRecords.filter { it.space == spaceName }
-                    SpaceTimelineScreen(spaceName = spaceName, records = spaceRecords, onOpenDetail = { id -> navController.navigate("$DETAIL_ROUTE/$id") }, onCompare = { id1, id2 -> navController.navigate("$COMPARE_ROUTE/$id1/$id2") }, onBack = { navController.popBackStack() })
+                    SpaceTimelineScreen(spaceName = spaceName, records = spaceRecords, onOpenDetail = { id -> navController.navigate("$DETAIL_ROUTE/$id") }, onCompare = { id1, id2 -> navController.navigate("$COMPARE_ROUTE/$id1/$id2") }, onBack = { navigateBackByDepth() })
                 }
                 composable(route = "$COMPARE_ROUTE/{$COMPARE_ID1_ARG}/{$COMPARE_ID2_ARG}", arguments = listOf(navArgument(COMPARE_ID1_ARG) { type = NavType.StringType }, navArgument(COMPARE_ID2_ARG) { type = NavType.StringType })) { backStackEntry ->
                     val id1 = backStackEntry.arguments?.getString(COMPARE_ID1_ARG)
                     val id2 = backStackEntry.arguments?.getString(COMPARE_ID2_ARG)
                     val record1 = allRecords.firstOrNull { it.id == id1 }
                     val record2 = allRecords.firstOrNull { it.id == id2 }
-                    if (record1 != null && record2 != null) { CompareScreen(record1 = record1, record2 = record2, onBack = { navController.popBackStack() }) }
+                    if (record1 != null && record2 != null) { CompareScreen(record1 = record1, record2 = record2, onBack = { navigateBackByDepth() }) }
                 }
                 composable(SETTINGS_ROUTE) {
                     val corrections by database.tagCorrectionDao().getAllCorrections().collectAsState(initial = emptyList())
@@ -823,11 +844,11 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                             val intent = Intent(Intent.ACTION_VIEW, tutorialUri)
                             context.startActivity(intent)
                         },
-                        onBack = { navController.popBackStack() }
+                        onBack = { navigateBackByDepth() }
                     )
                 }
                 composable(PRIVACY_ROUTE) {
-                    PrivacyNoticeScreen(onBack = { navController.popBackStack() })
+                    PrivacyNoticeScreen(onBack = { navigateBackByDepth() })
                 }
                 composable(PRIVACY_DASHBOARD_ROUTE) {
                     val tagCount = remember(allRecords) {
@@ -839,7 +860,7 @@ fun MarkSceneApp(sharedImageUri: Uri? = null, appBackgrounded: Boolean = false) 
                         hasLocalVlmModel = hasLocalVlmModel,
                         isBiometricEnabled = isBiometricLockEnabled,
                         lastBackupDate = null,
-                        onBack = { navController.popBackStack() }
+                        onBack = { navigateBackByDepth() }
                     )
                 }
             }

@@ -57,6 +57,7 @@ v2.4.0(2026-05-20)에서 우선순위 10종(이미지 파이프라인 OOM 방어
 - [x] Add record list screen.
 - [x] Add search screen.
 - [x] Search by tag/title/memo.
+- [x] Make hardware back respect navigation depth and selection mode before exiting the app.
 
 ### Settings and Local AI
 

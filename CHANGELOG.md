@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+### Fixed
+- 하드웨어 뒤로가기와 상단 뒤로가기 버튼이 현재 화면 깊이를 먼저 되돌리고, 스택이 얕은 최상위 탭에서는 Today 화면으로 복귀하도록 보완했습니다.
+- 검색 목록의 다중 선택 모드에서 하드웨어 뒤로가기를 누르면 앱을 나가지 않고 선택 모드를 먼저 해제하도록 수정했습니다.
+
+### Verification
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace`, `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace`, `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
+
 ## v2.6.5 - 2026-05-30
 
 ### Changed

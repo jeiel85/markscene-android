@@ -1,5 +1,22 @@
 # HISTORY.md
 
+## 2026-05-30 — 뒤로가기 깊이 보완
+
+- 날짜: 2026-05-30
+- 작업: 뒤로가기가 화면 깊이를 건너뛰고 앱 종료로 이어질 수 있는 내비게이션 흐름 보완.
+- 변경 파일:
+  1. `app/src/main/java/com/markscene/app/ui/MarkSceneApp.kt`: 공통 뒤로가기 정책을 추가해 이전 스택이 있으면 먼저 pop, 스택이 얕은 하위/탭 화면은 Today로 복귀, Today 루트에서만 앱 종료.
+  2. `app/src/main/java/com/markscene/app/ui/screen/RecordListScreen.kt`: 다중 선택 모드의 하드웨어 뒤로가기를 선택 해제로 처리.
+  3. `app/src/test/java/com/markscene/app/ui/NavigationDepthPolicyTest.kt`: 얕은 스택에서 최상위/하위 route가 Today로 fallback되는 정책 검증 추가.
+  4. `CHANGELOG.md`, `.agent/tasks.md`, `.agent/progress.md`: 변경 및 검증 기록 반영.
+- 검증:
+  - 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
+  - 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
+  - 로컬: `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
+- 결과: 구현 및 로컬 검증 완료, 새 버전 릴리즈 준비 예정.
+- 후속 작업:
+  - 버전 상향 후 CI와 GitHub Release 산출물 확인.
+
 ## 2026-05-30 — v2.6.5 릴리즈 준비
 
 - 날짜: 2026-05-30

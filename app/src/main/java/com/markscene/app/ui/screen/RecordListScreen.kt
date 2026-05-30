@@ -1,5 +1,6 @@
 package com.markscene.app.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,6 +66,10 @@ fun RecordListScreen(
     val selectedIds = remember { mutableStateListOf<String>() }
     val isSelectMode = selectedIds.isNotEmpty()
     var showMoveSpaceDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = isSelectMode) {
+        selectedIds.clear()
+    }
 
     val spaces = remember(records) {
         (records.mapNotNull { it.space } + listOf("책상", "주방", "창고", "아이방", "사무실", "거실")).distinct()

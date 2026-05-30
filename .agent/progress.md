@@ -1,5 +1,18 @@
 # Agent Progress
 
+## 2026-05-30 (Back Navigation Depth)
+
+작업 내용:
+- 앱 공통 뒤로가기 정책을 추가해 현재 화면의 이전 depth를 먼저 따르고, 스택이 얕은 하위/탭 화면은 Today로 복귀하도록 했습니다.
+- 검색 목록 다중 선택 모드에서는 하드웨어 뒤로가기가 앱 종료나 화면 이동 대신 선택 해제를 먼저 수행하도록 했습니다.
+- 뒤로가기 fallback 정책 단위 테스트를 추가했습니다.
+
+검증:
+- 로컬: `./gradlew.bat :app:compileDebugKotlin --no-daemon --stacktrace` 성공.
+- 로컬: `./gradlew.bat :app:testDebugUnitTest --no-daemon --stacktrace` 성공.
+- 로컬: `./gradlew.bat :app:lintDebug --no-daemon --stacktrace` 성공.
+- 진행 중: 새 버전 릴리즈 준비 및 CI/Release 확인.
+
 ## 2026-05-30 (v2.6.5 Release - Optional Model Onboarding)
 
 작업 내용:
