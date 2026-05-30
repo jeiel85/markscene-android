@@ -106,10 +106,10 @@ fun SettingsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(scrollState)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
@@ -723,12 +723,15 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
 
-            // Message Display
+            // Message Display — 스크롤 위치와 무관하게 항상 화면 하단에 떠 있도록 Box 오버레이로 표시한다.
             val messageToShow = externalMessage ?: resultMessage
             messageToShow?.let {
                 Snackbar(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
@@ -736,20 +739,19 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(it)
-                        TextButton(onClick = { 
-                            if (externalMessage != null) onMessageShown() else resultMessage = null 
+                        Text(it, modifier = Modifier.weight(1f))
+                        TextButton(onClick = {
+                            if (externalMessage != null) onMessageShown() else resultMessage = null
                         }) {
                             Text(stringResource(R.string.confirm), color = MaterialTheme.colorScheme.inversePrimary)
                         }
                     }
                 }
-                
-                if (externalMessage == null) {
-                    LaunchedEffect(it) {
-                        kotlinx.coroutines.delay(5000)
-                        resultMessage = null
-                    }
+
+                // 메시지가 화면에 멈춰 있지 않도록 일정 시간 후 자동으로 정리한다.
+                LaunchedEffect(it) {
+                    kotlinx.coroutines.delay(5000)
+                    if (externalMessage != null) onMessageShown() else resultMessage = null
                 }
             }
         }

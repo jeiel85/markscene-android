@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-30 — 설정 안내 메시지 화면 밖 표시 수정 + v2.6.8 릴리즈 준비
+
+- 날짜: 2026-05-30
+- 작업: "권장 모델 받기를 눌러도 아무 반응이 없다"는 보고의 진짜 원인을 실기기에서 재현·확정하고 수정.
+- 진단(실기기 재현):
+  - 기본 모델 Gemma 3n E2B 는 gated 모델이라 토큰이 없으면 다운로드를 시작하지 않고 안내 메시지만 설정한다.
+  - 그런데 그 안내 스낵바가 `SettingsScreen` 의 `verticalScroll` Column 안 **마지막 자식**으로 렌더되어, 긴 설정 페이지의 최하단(테마 설정 아래)에 그려졌다.
+  - 다운로드 버튼은 페이지 상단에 있으므로, 버튼을 눌러 생성된 메시지는 화면 밖(스크롤 한참 아래)에 나타나 사용자에게는 "무반응"으로 보였다. (실기기 UI 덤프로 메시지가 최하단에 존재함을 확인.)
+- 변경 파일:
+  1. `app/src/main/java/com/markscene/app/ui/screen/SettingsScreen.kt`: 본문 Column 을 `Box` 로 감싸고, 상태 메시지 Snackbar 를 스크롤 콘텐츠 밖으로 빼 `Alignment.BottomCenter` 로 항상 화면 하단에 띄움. 5초 후 자동 정리 추가.
+  2. `gradle/libs.versions.toml`: 앱 버전을 `2.6.8 / 268`로 상향.
+  3. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전 v2.6.8 갱신.
+  4. `CHANGELOG.md`: v2.6.8 변경/검증 기록.
+- 검증:
+  - 로컬: `./gradlew :app:compileDebugKotlin`, `./gradlew :app:assembleDebug` 성공.
+  - 기기: 토큰 없이 "권장 모델 받기" 탭 → 안내 스낵바 "먼저 HuggingFace 토큰을 저장해주세요."가 버튼 바로 아래(y≈1215, 화면 안)에 "확인"과 함께 표시됨을 UI 덤프로 확인. 수정 전에는 동일 메시지가 페이지 최하단에만 존재.
+- 메모: 기본 Gemma 모델은 gated이므로 실제 다운로드에는 여전히 HuggingFace 라이선스 수락 + read 토큰이 필요하다. 이번 수정은 "왜 아무 일도 안 일어나는지"를 사용자에게 보이게 한 것. 토큰 없이도 받을 수 있는 비-gated 기본 모델로의 전환은 별도 제품 결정으로 남김.
+
 ## 2026-05-30 — 로컬 모델 다운로드 cross-host 리다이렉트 수정 + v2.6.7 릴리즈 준비
 
 - 날짜: 2026-05-30
