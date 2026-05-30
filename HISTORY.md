@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-31 — 단위/통합 테스트 검증 + v2.6.10 안정화 릴리즈
+
+- 날짜: 2026-05-31
+- 작업: v2.6.7~v2.6.9의 수정(모델 다운로드 redirect 견고화, 설정 안내 메시지 화면 밖 표시, 오늘 탭 가로모드 스크롤)을 단위 + 실기기 통합 테스트로 검증하고 하나의 안정화 버전 v2.6.10으로 정리.
+- 검증:
+  - 단위: `./gradlew :app:testDebugUnitTest` 성공.
+  - 통합/계측: `ANDROID_SERIAL=192.168.45.31:5555 ./gradlew :app:connectedDebugAndroidTest` → 태블릿(TB320FC, Android 15)에서 `AppLaunchSmokeTest`, `RecordDaoIntegrationTest` 2개 통과.
+  - 릴리즈: `./gradlew :app:bundleRelease` 성공, manifest `versionCode=270`/`versionName=2.6.10` 확인.
+- 변경 파일:
+  1. `gradle/libs.versions.toml`: `2.6.10 / 270`.
+  2. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전 갱신.
+  3. `CHANGELOG.md`: v2.6.10 정리.
+- 메모: 코드 동작은 v2.6.9와 동일하며, 이 버전은 전체 테스트 통과를 보증하는 검증 릴리즈다.
+
 ## 2026-05-31 — 오늘 탭 빈 화면 가로모드 스크롤 수정 + v2.6.9 릴리즈 준비
 
 - 날짜: 2026-05-31

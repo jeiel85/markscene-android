@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+## v2.6.10 - 2026-05-31
+
+### Changed
+- 최근 수정 사항(모델 다운로드 안정화, 설정 안내 메시지 표시, 가로모드 화면 잘림)을 단위 테스트와 실기기 통합 테스트로 검증해 하나의 안정화 버전으로 정리했습니다.
+
+### Build / CI
+- Play Store 업로드용 새 산출물을 만들기 위해 앱 버전을 `2.6.10` / `270`으로 올렸습니다.
+
+### Verification
+- 로컬 단위 테스트: `./gradlew :app:testDebugUnitTest` 성공.
+- 실기기 통합/계측 테스트: 무선 연결한 Android 15 태블릿(TB320FC)에서 `./gradlew :app:connectedDebugAndroidTest` 2개 테스트(앱 실행 스모크, Room DAO 통합) 모두 통과.
+- 릴리즈 번들: `./gradlew :app:bundleRelease` 성공, manifest `versionCode=270`/`versionName=2.6.10` 확인.
+
 ## v2.6.9 - 2026-05-31
 
 ### Fixed
