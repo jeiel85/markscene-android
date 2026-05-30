@@ -12,7 +12,7 @@
 | 항목 | 값 |
 | --- | --- |
 | 앱 이름 | MarkScene |
-| 최신 문서 기준 | v2.6.8 |
+| 최신 문서 기준 | v2.6.9 |
 | Android Application ID | `com.markscene.app` |
 | 루트 패키지 | `com.markscene.app` |
 | 저장소 | <https://github.com/jeiel85/markscene-android> |

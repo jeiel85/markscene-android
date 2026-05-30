@@ -1,6 +1,6 @@
 # MarkScene Play Store Listing (KO)
 
-문서 기준: v2.6.8
+문서 기준: v2.6.9
 
 ## 앱 이름 제안
 - MarkScene - 사진 비주얼 메모

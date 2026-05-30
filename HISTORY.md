@@ -1,5 +1,21 @@
 # HISTORY.md
 
+## 2026-05-31 — 오늘 탭 빈 화면 가로모드 스크롤 수정 + v2.6.9 릴리즈 준비
+
+- 날짜: 2026-05-31
+- 작업: "태블릿 가로모드에서 오늘 탭이 스크롤 안 돼 안 된다"는 보고를 실기기에서 재현·수정.
+- 진단(실기기 재현):
+  - 오늘 탭의 빈 상태는 `EmptyStateView`(component) 인데, 루트가 `Column` + `fillMaxSize` + `Arrangement.Center` 로 **스크롤이 없었다.**
+  - 콘텐츠 높이(200dp 아이콘 + 제목 + 설명 + 56dp 버튼 2개 ≈ 520dp+)가 가로모드 가용 높이(~496dp)를 초과 → 하단 "지금 촬영하기"·"사진 가져오기" 버튼이 화면 밖으로 잘리고 스크롤로 못 내려감. (기기 UI 덤프에서 빈 상태에 버튼 노드가 없음을 확인.)
+- 변경 파일:
+  1. `app/src/main/java/com/markscene/app/ui/component/EmptyStateView.kt`: 루트 Column 에 `verticalScroll(rememberScrollState())` 추가. 내용이 화면보다 작으면 Center 정렬, 넘치면 스크롤. (검색 화면 첫 사용 빈 상태도 같은 컴포넌트라 함께 해결.)
+  2. `gradle/libs.versions.toml`: 앱 버전 `2.6.9 / 269`.
+  3. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전 갱신.
+  4. `CHANGELOG.md`: v2.6.9 변경/검증 기록.
+- 검증:
+  - 로컬: `./gradlew :app:assembleDebug` 성공.
+  - 기기: 가로모드 오늘 탭 빈 화면이 ScrollView(scrollable=true)로 바뀌고, 스크롤 후 "지금 촬영하기"(y≈1011)·"사진 가져오기"(y≈1181) 버튼에 도달함을 UI 덤프로 확인.
+
 ## 2026-05-30 — 설정 안내 메시지 화면 밖 표시 수정 + v2.6.8 릴리즈 준비
 
 - 날짜: 2026-05-30
