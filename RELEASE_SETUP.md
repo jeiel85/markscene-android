@@ -19,10 +19,10 @@ $lines = Get-Content ".keystore\base64.txt"
 $dataLines = $lines[2..($lines.Count-1)]
 $base64 = ($dataLines -join '') -replace '\s',''
 $bytes = [Convert]::FromBase64String($base64)
-[IO.File]::WriteAllBytes("keystore\release.keystore", $bytes)
+[IO.File]::WriteAllBytes(".keystore\release.keystore", $bytes)
 ```
 
-- 키스토어 위치: `keystore/release.keystore`
+- 키스토어 위치: `.keystore/release.keystore`
 - 이 디렉터리는 `.gitignore`에 포함되어 있어 저장소에 커밋되지 않습니다.
 
 ### 2. `local.properties` 설정
@@ -31,14 +31,14 @@ $bytes = [Convert]::FromBase64String($base64)
 
 ```properties
 # 릴리즈 서명 설정 (경로는 app 모듈 기준 상대 경로)
-RELEASE_STORE_FILE=../keystore/release.keystore
+RELEASE_STORE_FILE=../.keystore/release.keystore
 RELEASE_STORE_PASSWORD=<.keystore/markscene.txt 참고>
 RELEASE_KEY_ALIAS=markscene
 RELEASE_KEY_PASSWORD=<.keystore/markscene.txt 참고>
 ```
 
 > **주의**: `local.properties`는 `.gitignore`에 포함되어 있어 저장소에 커밋되지 않습니다.
-> **경로 주의**: `build.gradle.kts`의 `file()` 함수는 `app` 모듈 기준 상대 경로를 사용하므로 `../keystore/`로 지정합니다.
+> **경로 주의**: `build.gradle.kts`의 `file()` 함수는 `app` 모듈 기준 상대 경로를 사용하므로 `../.keystore/`로 지정합니다.
 
 ### 3. 릴리즈 빌드
 
@@ -135,11 +135,10 @@ MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL=https://...license-page (선택)
 
 ## 현재 설정 상태
 
-- ✅ `keystore/` 디렉터리 → `.gitignore`에 포함됨
-- ✅ `.keystore/` 백업 디렉터리 → `.gitignore`에 포함됨
+- ✅ `.keystore/` 디렉터리 → `.gitignore`에 포함됨 (릴리즈 키 + base64 백업 + 자격증명 메타 통합)
 - ✅ `local.properties` → `.gitignore`에 포함됨
 - ✅ `build.gradle.kts`에 서명 설정 추가됨
-- ✅ `keystore/release.keystore` 복원 완료
+- ✅ `.keystore/release.keystore` 복원 완료
 - ✅ `local.properties` 설정 완료
 
 ## 문제 해결
@@ -147,7 +146,7 @@ MARKSCENE_LOCAL_VLM_MODEL_LICENSE_URL=https://...license-page (선택)
 ### "Keystore file not found" 에러
 
 1. **경로가 틀린 경우**
-   - `local.properties`의 `RELEASE_STORE_FILE`이 `../keystore/release.keystore`인지 확인하세요.
+   - `local.properties`의 `RELEASE_STORE_FILE`이 `../.keystore/release.keystore`인지 확인하세요.
    - `build.gradle.kts`의 `file()` 함수는 `app` 모듈 기준 상대 경로를 사용합니다.
 
 2. **비밀번호가 틀린 경우**
