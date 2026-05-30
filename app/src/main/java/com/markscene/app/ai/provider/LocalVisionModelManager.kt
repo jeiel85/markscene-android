@@ -61,7 +61,7 @@ class LocalVisionModelManager(
                 )
             }
 
-            val connection = openConnection(parsedUrl, authToken)
+            val connection = openConnectionFollowingRedirects(parsedUrl, authToken)
             try {
                 val responseCode = connection.responseCode
                 when (responseCode) {
@@ -180,19 +180,47 @@ class LocalVisionModelManager(
         cachedInferenceModelPath = null
     }
 
-    private fun openConnection(url: URL, authToken: String?): HttpURLConnection {
-        val connection = (url.openConnection() as HttpURLConnection).apply {
-            connectTimeout = 30_000
-            readTimeout = 10 * 60_000 // 10분: 대용량 모델 다운로드용
-            instanceFollowRedirects = true
-            requestMethod = "GET"
-            setRequestProperty("User-Agent", "MarkScene-Android/1.0 (+local-vlm)")
-        }
+    /**
+     * 모델 다운로드 연결을 열고 리다이렉트를 직접 따라간다.
+     *
+     * HuggingFace 의 `resolve` URL 은 실제 파일을 서명된 CDN 주소(cas-bridge, cdn-lfs 등)로
+     * 302/307 리다이렉트한다. 이때 HttpURLConnection 의 자동 리다이렉트(`instanceFollowRedirects=true`)는
+     * Authorization 헤더를 다른 호스트인 CDN 까지 그대로 전달한다. 일부 CDN(cdn-lfs.huggingface.co 등)은
+     * 이미 서명된 URL 에 Authorization 헤더가 함께 오면 HTTP 400 으로 거부하므로, 라이선스 게이트 모델
+     * 다운로드가 환경에 따라 실패한다. (huggingface_hub 도 같은 이유로 cross-host 리다이렉트에서 토큰을 떼낸다.)
+     *
+     * 따라서 토큰은 최초 인증 호스트(huggingface.co)로 가는 요청에만 첨부하고, 다른 호스트로의
+     * 리다이렉트에는 전달하지 않는다. CDN 주소는 서명 쿼리 파라미터로 자체 인증되므로 토큰이 필요 없다.
+     */
+    private fun openConnectionFollowingRedirects(initialUrl: URL, authToken: String?): HttpURLConnection {
+        val authHost = initialUrl.host
         val trimmedToken = authToken?.trim().orEmpty()
-        if (trimmedToken.isNotEmpty()) {
-            connection.setRequestProperty("Authorization", "Bearer $trimmedToken")
+        var currentUrl = initialUrl
+        var redirectCount = 0
+        while (true) {
+            val connection = (currentUrl.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 30_000
+                readTimeout = 10 * 60_000 // 10분: 대용량 모델 다운로드용
+                instanceFollowRedirects = false
+                requestMethod = "GET"
+                setRequestProperty("User-Agent", "MarkScene-Android/1.0 (+local-vlm)")
+            }
+            if (trimmedToken.isNotEmpty() && currentUrl.host.equals(authHost, ignoreCase = true)) {
+                connection.setRequestProperty("Authorization", "Bearer $trimmedToken")
+            }
+            val responseCode = connection.responseCode
+            if (responseCode in 300..399 && responseCode != HttpURLConnection.HTTP_NOT_MODIFIED) {
+                val location = connection.getHeaderField("Location")
+                connection.disconnect()
+                require(!location.isNullOrBlank()) { "리다이렉트 응답에 Location 헤더가 없습니다 (HTTP $responseCode)." }
+                require(redirectCount++ < MAX_REDIRECTS) { "모델 다운로드 리다이렉트가 너무 많습니다." }
+                // 상대 경로 Location 도 현재 URL 기준으로 안전하게 해석한다.
+                currentUrl = URL(currentUrl, location)
+                require(currentUrl.protocol == "https") { "로컬 AI 모델은 HTTPS 주소에서만 다운로드할 수 있습니다." }
+                continue
+            }
+            return connection
         }
-        return connection
     }
 
     private companion object {
@@ -202,5 +230,6 @@ class LocalVisionModelManager(
         const val PROGRESS_REPORT_BYTES = 2L * 1024L * 1024L // 2MB마다 progress 보고
         const val RESERVE_BYTES = 256L * 1024L * 1024L // 256MB 여유 공간
         const val DEFAULT_MAX_TOKENS = 1024
+        const val MAX_REDIRECTS = 5
     }
 }

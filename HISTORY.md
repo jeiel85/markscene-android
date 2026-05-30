@@ -1,5 +1,24 @@
 # HISTORY.md
 
+## 2026-05-30 — 로컬 모델 다운로드 cross-host 리다이렉트 수정 + v2.6.7 릴리즈 준비
+
+- 날짜: 2026-05-30
+- 작업: 로컬 고급 AI 모델 다운로드가 동작하지 않는다는 보고를 확인·수정하고, 실기기 검증 후 Play Store 업로드용 v2.6.7로 묶음.
+- 진단:
+  - HuggingFace `resolve` URL은 실제 파일을 서명된 CDN(cas-bridge.xethub.hf.co, cdn-lfs.huggingface.co 등)으로 302/307 리다이렉트한다.
+  - 기존 `LocalVisionModelManager`는 `instanceFollowRedirects=true`로 자동 리다이렉트했는데, 이때 Authorization 헤더가 다른 호스트인 CDN까지 그대로 전달된다.
+  - 일부 CDN(cdn-lfs)은 이미 서명된 URL에 Authorization 헤더가 함께 오면 HTTP 400으로 거부 → 라이선스 게이트 모델 다운로드가 환경에 따라 실패한다.
+- 변경 파일:
+  1. `app/src/main/java/com/markscene/app/ai/provider/LocalVisionModelManager.kt`: `openConnection`을 `openConnectionFollowingRedirects`로 교체. 리다이렉트를 직접 따라가며, 토큰은 최초 인증 호스트(huggingface.co)로 가는 요청에만 첨부하고 cross-host 리다이렉트에는 전달하지 않음(상대 경로 Location 안전 처리, 최대 5회).
+  2. `gradle/libs.versions.toml`: 앱 버전을 `2.6.7 / 267`로 상향.
+  3. `README.md`, `docs/index.html`, `docs/STORE_LISTING_KO.md`, `docs/RELEASE_CHECKLIST.md`: 문서 기준 버전을 v2.6.7로 갱신.
+  4. `CHANGELOG.md`: v2.6.7 변경 사항/검증 기록.
+- 검증:
+  - 로컬: `./gradlew :app:testDebugUnitTest`, `./gradlew :app:assembleDebug` 성공.
+  - 기기: 무선 연결한 Android 15 태블릿(TB320FC, RAM 11.4GB)에 디버그 빌드 설치 후, gated 경로 메커니즘을 재현하기 위해 공개 HF 파일(tiny-random-gpt2)을 모델 URL로 주입하고 더미 토큰 저장 → 다운로드 실행. HuggingFace → cas-bridge CDN cross-host 리다이렉트를 따라 파일이 byte 단위까지 정확히(3,561,811 bytes, curl 결과와 동일) 저장됨을 확인. 수정 후 동일 byte로 재현되어 회귀 없음 확인.
+  - 참고: 기본 Gemma 3n 모델은 gated이므로 다운로드하려면 HuggingFace에서 라이선스 수락 + 유효한 read 토큰이 필요하다. "다운로드가 안 된다"의 상당수는 이 자격 조건 미충족이며, 이번 수정은 자격이 갖춰진 뒤에도 CDN 환경에 따라 실패하던 경로를 견고화한 것.
+- 후속 작업: 실제 Gemma 모델(3.66GB) 다운로드 + 온디바이스 추론 end-to-end는 사용자 토큰/네트워크 필요로 별도 검증 권장.
+
 ## 2026-05-30 — v2.6.6 릴리즈 준비
 
 - 날짜: 2026-05-30
