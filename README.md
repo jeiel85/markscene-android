@@ -117,7 +117,7 @@ GitHub Actions가 최종 Android CI와 GitHub Pages 배포 검증을 담당합�
 `gradle/libs.versions.toml`의 버전과 `CHANGELOG.md`의 `## vX.Y.Z` 항목을 맞춘 커밋에 태그 `vX.Y.Z`를 올리면 두 워크플로가 함께 돕니다.
 
 - `release-apk.yml`: GitHub 릴리스와 APK를 만듭니다(저장소 Secrets `RELEASE_*`).
-- `play-release.yml`: 단위 시험 → Play용 AAB 빌드 → 업로드 키 지문 확인 → Play 비공개 테스트(`alpha`) 업로드 → 트랙 확인. GitHub 환경 `play`에서 돌고, jeiel85가 Actions 화면에서 승인해야 시작됩니다. 출시 노트는 CHANGELOG의 Added·Changed·Fixed 항목(ko-KR, 500자까지)입니다.
+- `play-release.yml`: 단위 시험 → Play용 AAB 빌드 → 업로드 키 지문 확인 → Play 비공개 테스트(`alpha`) 업로드 → 트랙 확인. GitHub 환경 `play`(main 브랜치·`v*` 태그만)에서 돌고, 승인 없이 바로 시작됩니다. 출시 노트는 CHANGELOG의 Added·Changed·Fixed 항목(ko-KR, 500자까지)입니다.
 
 Play 업로드는 이 워크플로로만 합니다. 로컬에서 AAB를 만들어 Play Console에 손으로 올리지 않습니다(같은 versionCode를 두 번 올리면 거부됩니다). 올리지 않고 확인만 하려면 Actions → Play release → Run workflow에서 `dry_run`을 켭니다. 자세한 설정은 [RELEASE_SETUP.md](RELEASE_SETUP.md)를 봅니다.
 
