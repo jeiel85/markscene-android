@@ -85,6 +85,30 @@ RELEASE_KEY_PASSWORD    -> key 비밀번호
 RELEASE_STORE_FILE      -> release.jks (app 모듈 기준 상대 경로)
 ```
 
+## 방법 3: Google Play 업로드 (`play-release.yml`)
+
+Play 비공개 테스트(`alpha`) 업로드는 `.github/workflows/play-release.yml`이 합니다. 로컬에서 AAB를 만들어 Play Console에 손으로 올리지 않습니다.
+
+- 실행: 태그 `vX.Y.Z` push(GitHub 릴리스와 같은 태그) 또는 Actions → Play release → Run workflow(`version`, `dry_run`).
+- 승인: GitHub 환경 `play`(필수 승인자 jeiel85, `main` 브랜치·`v*` 태그만). 승인 전에는 비밀값에 접근하지 않습니다.
+- 순서: 버전 확인(태그 = `projectVersionName`, CHANGELOG 항목) → 단위 시험 → `:app:bundleRelease` → 출시 노트 → 트랙 조회 → `tools/play-publish.ps1`로 업로드(서명 SHA-256이 워크플로의 `UPLOAD_CERT_SHA256`과 다르면 올리기 전에 멈춤) → 트랙 조회 → 키 파일 삭제.
+- 트랙: 워크플로의 `TRACKS`(지금은 `alpha`). 여러 개면 첫 트랙에만 번들을 올리고 나머지에는 같은 versionCode를 붙입니다. 프로덕션은 넣지 않습니다.
+- `tools/play-publish.ps1`은 전역 스킬 `play-publish`의 복사본입니다(리눅스용 keytool 경로만 다름). 고칠 때 원본과 함께 맞춥니다.
+
+환경 `play`의 Secrets(저장소 Secrets와 별개):
+
+| 이름 | 값 |
+|------|-----|
+| PLAY_UPLOAD_KEYSTORE_B64 | Play 업로드 키스토어(base64) |
+| PLAY_UPLOAD_STORE_PASSWORD | 키스토어 비밀번호 |
+| PLAY_UPLOAD_KEY_ALIAS | 키 별칭 |
+| PLAY_UPLOAD_KEY_PASSWORD | 키 비밀번호 |
+| PLAY_SERVICE_ACCOUNT_JSON | Play API 서비스 계정 키(JSON 전체) |
+
+값은 파일이나 stdin으로 넣습니다(예: `gh secret set PLAY_SERVICE_ACCOUNT_JSON --env play < play-service-account.json`). 명령줄 인자나 로그에 값을 남기지 않습니다.
+
+> GitHub APK(`release-apk.yml`)와 Play AAB는 서로 다른 키로 서명될 수 있습니다. 서명이 다르면 GitHub APK를 설치한 기기에 Play 버전을 덮어 설치할 수 없습니다(지우고 다시 설치).
+
 ## 로컬 VLM 모델 설정
 
 MarkScene은 기본적으로 Google Gemma 3n E2B INT4 LiteRT-LM 모델(약 3.66GB)을 로컬 고급 AI로 사용합니다.

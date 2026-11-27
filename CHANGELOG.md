@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+### Build / CI
+- Play 비공개 테스트 업로드를 GitHub Actions(`play-release.yml`)로 옮겼습니다. 릴리스 태그를 올리면 승인 후 시험·AAB 빌드·서명 확인·업로드가 이어서 진행됩니다.
+
 ## v2.6.10 - 2026-05-31
 
 ### Changed

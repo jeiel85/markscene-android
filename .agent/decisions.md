@@ -59,3 +59,17 @@ Decision:
 Reason:
 - The name communicates the core product idea: marking and remembering scenes from photos.
 - It fits the local-first visual memo concept while leaving room for object tagging, scene records, and optional AI analysis.
+
+## 2026-11-27 - Play Upload Key Pinned in CI
+
+Decision:
+- Play 업로드 키는 로컬 `.keystore/release.keystore`(별칭 markscene, 인증서 SHA-256 `83:1F:8B:D9:6E:BB:5F:D0:8B:BF:3E:64:30:24:AA:CD:22:BA:54:30:03:9B:2B:D9:C2:A7:77:5D:17:5F:C3:3A`)입니다. Play Console 앱 무결성의 업로드 키와 같다는 것을 사용자가 확인했습니다(2026-11-28).
+- `play-release.yml`은 이 지문을 `UPLOAD_CERT_SHA256`으로 고정하고, 다른 키로 서명된 번들은 올리기 전에 멈춥니다. 키는 GitHub 환경 `play`의 Secrets에만 둡니다.
+
+Reason:
+- GitHub 릴리스 APK(`release-apk.yml`, 저장소 Secrets `RELEASE_*`)는 다른 키(`22:30:C7:84:…:E9:A1:C7`)로 서명됩니다. 키를 섞으면 Play가 업로드를 거부합니다.
+
+Implication:
+- GitHub APK와 Play 버전은 서로 덮어 설치할 수 없습니다(지우고 다시 설치).
+- 업로드 키를 바꾸면(Play Console 업로드 키 재설정) 워크플로 지문과 환경 Secrets를 함께 바꿉니다.
+

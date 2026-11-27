@@ -1,0 +1,170 @@
+# Play용 AAB를 CI에서 빌드해 Play 비공개 테스트(alpha) 트랙에 올립니다(RELEASE_SETUP.md "Google Play 업로드").
+#
+# - 릴리스 태그 vX.Y.Z가 올라오면(release-apk.yml이 GitHub 릴리스를 낼 때와 같은 태그) 그 버전을 올립니다.
+# - Actions 화면에서 손으로 돌릴 수도 있습니다(version 입력). dry_run을 켜면 시험·빌드·서명 확인·트랙 조회까지만 하고 올리지 않습니다.
+# 비밀값은 GitHub 환경 'play'에만 있고, 그 환경은 jeiel85의 승인을 받아야 실행됩니다(main 브랜치·v* 태그만).
+name: Play release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '버전 (x.y.z, CHANGELOG.md에 "## vX.Y.Z" 항목이 있어야 함)'
+        required: true
+      dry_run:
+        description: '올리지 않고 시험·빌드·서명 확인·트랙 조회만'
+        type: boolean
+        default: false
+
+concurrency:
+  group: play-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    environment: play
+    timeout-minutes: 60
+    env:
+      PACKAGE: com.markscene.app
+      # Play 업로드 키 인증서 SHA-256(.agent/decisions.md). 다른 키로 서명된 번들은 올리기 전에 멈춥니다.
+      UPLOAD_CERT_SHA256: '83:1F:8B:D9:6E:BB:5F:D0:8B:BF:3E:64:30:24:AA:CD:22:BA:54:30:03:9B:2B:D9:C2:A7:77:5D:17:5F:C3:3A'
+      # 지금 쓰는 테스트 트랙. 첫 트랙에 번들을 올리고, 나머지 트랙에는 같은 versionCode를 붙입니다.
+      TRACKS: 'alpha'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 버전 정하기
+        id: ver
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then VER="${GITHUB_REF_NAME#v}"; else VER="$INPUT_VERSION"; fi
+          [[ "$VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::버전은 x.y.z여야 합니다: $VER"; exit 1; }
+          grep -Eq "^## v${VER//./\\.}( |$)" CHANGELOG.md || { echo "::error::CHANGELOG.md에 v$VER 항목이 없습니다"; exit 1; }
+          NAME=$(sed -nE 's/^projectVersionName *= *"([^"]+)".*/\1/p' gradle/libs.versions.toml)
+          CODE=$(sed -nE 's/^projectVersionCode *= *"([0-9]+)".*/\1/p' gradle/libs.versions.toml)
+          [ "$NAME" = "$VER" ] || { echo "::error::gradle/libs.versions.toml의 버전($NAME)이 $VER와 다릅니다"; exit 1; }
+          [ -n "$CODE" ] || { echo "::error::projectVersionCode를 읽지 못했습니다"; exit 1; }
+          [ -n "$UPLOAD_CERT_SHA256" ] || { echo "::error::UPLOAD_CERT_SHA256(Play 업로드 키 지문)이 비어 있습니다"; exit 1; }
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "dry=${DRY:-false}" >> "$GITHUB_OUTPUT"
+          echo "v$VER → versionCode $CODE, dry_run=${DRY:-false}"
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/wrapper-validation@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: 업로드 키 놓기
+        env:
+          KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
+        run: |
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/play-upload.jks"
+          [ -s "$RUNNER_TEMP/play-upload.jks" ] || { echo "::error::PLAY_UPLOAD_KEYSTORE_B64가 비어 있습니다"; exit 1; }
+
+      - name: 단위 시험
+        run: ./gradlew :app:testDebugUnitTest
+
+      - name: AAB 빌드
+        env:
+          RELEASE_STORE_FILE: ${{ runner.temp }}/play-upload.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+          VER: ${{ steps.ver.outputs.version }}
+          CODE: ${{ steps.ver.outputs.code }}
+        run: |
+          ./gradlew :app:bundleRelease
+          mkdir -p dist
+          AAB="dist/MarkScene-v$VER-vc$CODE.aab"
+          cp app/build/outputs/bundle/release/app-release.aab "$AAB"
+          echo "AAB=$AAB" >> "$GITHUB_ENV"
+
+      - name: 출시 노트(CHANGELOG의 Added·Changed·Fixed, 500자까지)
+        env:
+          VER: ${{ steps.ver.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          ver = os.environ["VER"]
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          m = re.search(rf"^## v{re.escape(ver)}(?: .*)?$", text, re.M)
+          body = text[m.end():]
+          nxt = re.search(r"^## ", body, re.M)
+          body = body[: nxt.start()] if nxt else body
+          keep, lines = False, []
+          for line in body.splitlines():
+              h = re.match(r"^### (.+)", line)
+              if h:
+                  keep = h.group(1).strip() in ("Added", "Changed", "Fixed", "Security", "Performance")
+                  continue
+              if keep and line.startswith("- "):
+                  lines.append("• " + line[2:].replace("`", ""))
+          s = "\n".join(lines).strip()
+          if not s:
+              raise SystemExit(f"::error::CHANGELOG v{ver}에 사용자용 항목(Added/Changed/Fixed)이 없습니다")
+          if len(s) > 500:
+              cut = s[:499]
+              s = (cut.rsplit("\n", 1)[0] if "\n" in cut else cut).rstrip() + "…"
+          open("dist/notes-ko.txt", "w", encoding="utf-8").write(s)
+          print(f"{len(s)}자")
+          PY
+          cat dist/notes-ko.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: markscene-play-${{ steps.ver.outputs.version }}
+          path: |
+            ${{ env.AAB }}
+            dist/notes-ko.txt
+          retention-days: 30
+
+      - name: Play 트랙 상태(올리기 전)
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: pwsh -NoProfile -File tools/play-publish.ps1 -PackageName "$PACKAGE" -ShowTracks
+
+      - name: 테스트 트랙에 올리기
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          VER: ${{ steps.ver.outputs.version }}
+          CODE: ${{ steps.ver.outputs.code }}
+          DRY: ${{ steps.ver.outputs.dry }}
+        run: |
+          DRYFLAG=(); [ "$DRY" = true ] && DRYFLAG=(-DryRun)
+          FIRST=1
+          for TRACK in $TRACKS; do
+            if [ $FIRST = 1 ]; then
+              pwsh -NoProfile -File tools/play-publish.ps1 -PackageName "$PACKAGE" -Track "$TRACK" -AabPath "$AAB" \
+                -ExpectedUploadCertSha256 "$UPLOAD_CERT_SHA256" -VersionName "$VER" -NotesKoFile dist/notes-ko.txt "${DRYFLAG[@]}"
+              FIRST=0
+            else
+              pwsh -NoProfile -File tools/play-publish.ps1 -PackageName "$PACKAGE" -Track "$TRACK" -ExpectedVersionCode "$CODE" \
+                -VersionName "$VER" -NotesKoFile dist/notes-ko.txt "${DRYFLAG[@]}"
+            fi
+          done
+
+      - name: Play 트랙 상태(올린 뒤)
+        if: steps.ver.outputs.dry != 'true'
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: pwsh -NoProfile -File tools/play-publish.ps1 -PackageName "$PACKAGE" -ShowTracks
+
+      - name: 키 지우기
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play-upload.jks"
