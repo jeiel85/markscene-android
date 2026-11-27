@@ -8,7 +8,8 @@
 - Gradle: release signingConfig가 이미 `RELEASE_*` 환경 변수를 읽으므로 수정하지 않음.
 - 확인한 사실: 로컬 `.keystore/release.keystore`(= G: 백업, = base64.txt) 인증서 SHA-256 `83:1F:8B:D9:…:5F:C3:3A`, GitHub 릴리스 v2.6.10 APK 서명 SHA-256 `22:30:C7:84:…:E9:A1:C7` — 서로 다른 키. Play 트랙: alpha 270(2.6.10)만 사용.
 - 검증: 출시 노트 추출 스크립트를 v2.6.10·v2.6.7 CHANGELOG로 로컬 실행 확인. 워크플로 실행은 머지 뒤 dry_run으로 확인 예정.
-- 후속 작업: Play 업로드 키 지문 확정 후 `UPLOAD_CERT_SHA256`과 환경 Secrets 등록.
+- 업로드 키: 사용자가 Play Console에서 로컬 키(83:1F:8B…)가 업로드 키임을 확인(2026-11-28) → `UPLOAD_CERT_SHA256` 고정, 환경 `play`에 업로드 키 Secrets 4개 등록(값은 파일 stdin으로 전달). `.agent/decisions.md` 기록.
+- 후속 작업: 머지 뒤 dry_run.
 
 ## 2026-05-31 — 단위/통합 테스트 검증 + v2.6.10 안정화 릴리즈
 

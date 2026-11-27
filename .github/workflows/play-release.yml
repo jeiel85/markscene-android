@@ -36,7 +36,7 @@ jobs:
     env:
       PACKAGE: com.markscene.app
       # Play 업로드 키 인증서 SHA-256(.agent/decisions.md). 다른 키로 서명된 번들은 올리기 전에 멈춥니다.
-      UPLOAD_CERT_SHA256: ''
+      UPLOAD_CERT_SHA256: '83:1F:8B:D9:6E:BB:5F:D0:8B:BF:3E:64:30:24:AA:CD:22:BA:54:30:03:9B:2B:D9:C2:A7:77:5D:17:5F:C3:3A'
       # 지금 쓰는 테스트 트랙. 첫 트랙에 번들을 올리고, 나머지 트랙에는 같은 versionCode를 붙입니다.
       TRACKS: 'alpha'
     steps:
