@@ -1,5 +1,15 @@
 # HISTORY.md
 
+## 2026-11-27 — Play 업로드 CI 워크플로 추가
+
+- 날짜: 2026-11-27
+- 작업: Play용 AAB를 GitHub Actions에서 빌드해 Play 비공개 테스트(alpha)에 올리는 `play-release.yml` 추가(둥지 저장소 방식: 승인 환경 `play`, 업로드 키 지문 고정).
+- 변경 파일: `.github/workflows/play-release.yml`, `tools/play-publish.ps1`(전역 스킬 복사본), `README.md`(릴리스 절), `RELEASE_SETUP.md`(방법 3), `CHANGELOG.md`, `gradlew`(100755).
+- Gradle: release signingConfig가 이미 `RELEASE_*` 환경 변수를 읽으므로 수정하지 않음.
+- 확인한 사실: 로컬 `.keystore/release.keystore`(= G: 백업, = base64.txt) 인증서 SHA-256 `83:1F:8B:D9:…:5F:C3:3A`, GitHub 릴리스 v2.6.10 APK 서명 SHA-256 `22:30:C7:84:…:E9:A1:C7` — 서로 다른 키. Play 트랙: alpha 270(2.6.10)만 사용.
+- 검증: 출시 노트 추출 스크립트를 v2.6.10·v2.6.7 CHANGELOG로 로컬 실행 확인. 워크플로 실행은 머지 뒤 dry_run으로 확인 예정.
+- 후속 작업: Play 업로드 키 지문 확정 후 `UPLOAD_CERT_SHA256`과 환경 Secrets 등록.
+
 ## 2026-05-31 — 단위/통합 테스트 검증 + v2.6.10 안정화 릴리즈
 
 - 날짜: 2026-05-31
